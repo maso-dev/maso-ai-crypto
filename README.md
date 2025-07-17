@@ -1,11 +1,17 @@
-# Maso AI Crypto FastAPI Starter
+# Maso AI Crypto FastAPI Starter (Binance Edition)
 
-This is a simple FastAPI application to serve as the foundation for a crypto trading agent. It demonstrates how to:
+This is a simple FastAPI application to serve as the foundation for a crypto trading agent, now using the Binance API.
+
+The self validation process from Coinbase sucks bad.
+
+## Features
+
 - Set up a FastAPI app
-- Load Coinbase API credentials from a local file
-- Provide basic endpoints for testing
+- Load Binance API credentials from a local file
+- Provide endpoints for testing and retrieving Binance account info
 
 ## Requirements
+
 - Python 3.8+
 - [pip](https://pip.pypa.io/en/stable/)
 
@@ -24,15 +30,14 @@ cd maso-ai-crypto
 pip install -r requirements.txt
 ```
 
-3. **Add your Coinbase API credentials**
+3. **Add your Binance API credentials**
 
-Create a file named `cdp_api_key.json` in the project root with your Coinbase API credentials. Example format:
+Create a file named `cdp_api_key.json` in the project root with your Binance API credentials. Example format:
 
 ```json
 {
-  "apiKey": "YOUR_COINBASE_API_KEY",
-  "apiSecret": "YOUR_COINBASE_API_SECRET",
-  "passphrase": "YOUR_COINBASE_API_PASSPHRASE"
+  "apiKey": "YOUR_BINANCE_API_KEY",
+  "secretKey": "YOUR_BINANCE_API_SECRET"
 }
 ```
 
@@ -54,16 +59,28 @@ uvicorn main:app --reload
   Returns a simple hello world message.
 
 - `GET /credentials`  
-  Loads and returns (masked) Coinbase API credentials from `cdp_api_key.json`. For testing only—do not use in production.
+  Loads and returns (masked) Binance API credentials from `cdp_api_key.json`. For testing only—do not use in production.
 
-## Next Steps
-- Integrate with the Coinbase API for real account and trading functionality.
-- Implement agent logic for portfolio management and trading.
+- `GET /binance/account`  
+  Returns your Binance account information (requires valid API credentials).
 
 ## Security
+
 - Keep your `cdp_api_key.json` file safe and never commit it to version control.
 - Remove or secure the `/credentials` endpoint before deploying to production.
 
 ---
 
-*This project is a proof of concept and not intended for production use without further security and error handling improvements.* 
+*This project is a proof of concept and not intended for production use without further security and error handling improvements.*
+
+---
+
+## Dependencies
+
+- fastapi
+- uvicorn
+- python-binance
+
+See [FastAPI documentation](https://fastapi.tiangolo.com/) for more on models, middleware, and route patterns.
+
+See [python-binance documentation](https://python-binance.readthedocs.io/en/latest/) for Binance API usage. 
