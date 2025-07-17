@@ -11,7 +11,7 @@ async def get_root_message() -> dict:
 
 @app.get("/credentials")
 async def get_credentials() -> dict:
-    key_path = Path("cdp_api_key.json")
+    key_path = Path(".venv/cdp_api_key.json")
     if not key_path.exists():
         raise HTTPException(status_code=404, detail="cdp_api_key.json not found")
     with open(key_path) as f:
