@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Analyzer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body class="crypto-theme">
+    <header>
+        <h1>🚀 Portfolio Analyzer</h1>
+        <p>Track your crypto portfolio in real time</p>
+    </header>
+    <main>
+        <section id="portfolio-summary">
+            <h2>Portfolio Summary</h2>
+            <div id="portfolio-content" class="placeholder">Loading portfolio data...</div>
+        </section>
+        <section id="assets">
+            <h2>Your Assets</h2>
+            <div id="assets-content" class="placeholder">Loading assets...</div>
+        </section>
+    </main>
+    <footer>
+        <p>Made with FastAPI & Jinja2 | <span class="crypto">₿</span> <span class="crypto">Ξ</span> <span
+                class="crypto">◎</span></p>
+    </footer>
+    <script>
+        async function loadPortfolio() {
+            const portfolioDiv = document.getElementById('portfolio-content');
+            const assetsDiv = document.getElementById('assets-content');
+            try {
+                const res = await fetch('/api/portfolio');
+                const data = await res.json();
+                const now = new Date().toLocaleString();
+                if (!data.assets || data.assets.length === 0) {
+                    portfolioDiv.innerHTML = `<b>Add money, man!</b><br><small>No assets found as of ${now}</small>`;
+                    assetsDiv.innerHTML = `<b>No assets to display.</b>`;
+                } else {
+                    portfolioDiv.innerHTML = `<b>Total assets:</b> ${data.assets.length} <br><small>Last updated: ${now}</small>`;
+                    assetsDiv.innerHTML = data.assets.map(a =>
+                        `<div class="asset-card">
+                        <b>${a.asset}</b>: ${a.free} free, ${a.locked} locked
+                    </div>`
+                    ).join('');
+                }
+            } catch (e) {
+                portfolioDiv.innerHTML = `<b>Error loading portfolio.</b>`;
+                assetsDiv.innerHTML = '';
+            }
+        }
+        window.onload = loadPortfolio;
+    </script>
+</body>
+
+</html>
