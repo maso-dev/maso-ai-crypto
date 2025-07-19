@@ -1,6 +1,6 @@
 import os
 import httpx
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 
 MILVUS_URI = os.getenv("MILVUS_URI", "https://in03-9f01d93b384a0f7.serverless.gcp-us-west1.cloud.zilliz.com")
 MILVUS_TOKEN = os.getenv("MILVUS_TOKEN")
@@ -83,3 +83,33 @@ async def insert_news_chunks(chunks: List[Dict]) -> Tuple[int, int, List[str]]:
     print(f"=== Milvus Insertion Complete ===")
     print(f"Inserted: {inserted}, Updated: {updated}, Errors: {errors}")
     return inserted, updated, errors 
+
+async def query_news_for_symbols(symbols: List[str], limit: int = 20) -> List[Dict]:
+    """
+    Query Milvus for the latest news where crypto_topic matches any of the given symbols.
+    Returns a list of news dicts sorted by published_at descending.
+    """
+    if not symbols:
+        return []
+    headers = {"Content-Type": "application/json"}
+    if MILVUS_TOKEN:
+        headers["Authorization"] = f"Bearer {MILVUS_TOKEN}"
+
+    # Build filter for crypto_topic in symbols
+    filter_expr = " or ".join([f"crypto_topic == '{symbol}'" for symbol in symbols])
+    query_data = {
+        "collectionName": MILVUS_COLLECTION_NAME,
+        "limit": limit,
+        "outputFields": ["chunk_text", "crypto_topic", "title", "source_url", "published_at"],
+        "filter": filter_expr,
+        "sort": [{"field": "published_at", "order": "desc"}]
+    }
+    url = f"{MILVUS_URI}/v1/vector/search"
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url, json=query_data, headers=headers)
+        if resp.status_code == 200:
+            result = resp.json()
+            return result.get("data", [])
+        else:
+            print(f"Milvus query error: {resp.status_code} {resp.text}")
+            return [] 

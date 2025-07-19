@@ -6,12 +6,14 @@ from typing import Dict, Any
 from binance_client import get_binance_client
 from binance.client import Client
 from routers.crypto_news_rag import router as crypto_news_rag_router
+from routers.portfolio import router as portfolio_router
 
 app = FastAPI(title="Portfolio Analyzer API")
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(crypto_news_rag_router)
+app.include_router(portfolio_router)
 
 @app.get("/")
 def dashboard(request: Request):
