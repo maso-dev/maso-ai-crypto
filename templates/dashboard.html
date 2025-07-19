@@ -22,12 +22,25 @@
             <h2>Your Assets</h2>
             <div id="assets-content" class="placeholder">Loading assets...</div>
         </section>
+        <section id="etf-comparison">
+            <h2>ETF Comparison</h2>
+            <div id="etf-content" class="placeholder">Loading ETF data...</div>
+        </section>
+        <section id="trends">
+            <h2>Trends (Coming Soon)</h2>
+            <div class="placeholder">Trend graphs for each asset will appear here.</div>
+        </section>
     </main>
     <footer>
         <p>Made with FastAPI & Jinja2 | <span class="crypto">₿</span> <span class="crypto">Ξ</span> <span
                 class="crypto">◎</span></p>
     </footer>
     <script>
+        function formatROI(roi) {
+            if (roi === null || roi === undefined) return '-';
+            const val = Number(roi).toFixed(2);
+            return (roi > 0 ? '+' : '') + val + '%';
+        }
         async function loadPortfolio() {
             const portfolioDiv = document.getElementById('portfolio-content');
             const assetsDiv = document.getElementById('assets-content');
@@ -40,18 +53,85 @@
                     assetsDiv.innerHTML = `<b>No assets to display.</b>`;
                 } else {
                     portfolioDiv.innerHTML = `<b>Total assets:</b> ${data.assets.length} <br><small>Last updated: ${now}</small>`;
-                    assetsDiv.innerHTML = data.assets.map(a =>
-                        `<div class="asset-card">
-                        <b>${a.asset}</b>: ${a.free} free, ${a.locked} locked
-                    </div>`
-                    ).join('');
+                    let table = `<table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Free</th>
+                                <th>Locked</th>
+                                <th>Current Price</th>
+                                <th>Cost Basis</th>
+                                <th>ROI 24h</th>
+                                <th>ROI 7d</th>
+                                <th>ROI 28d</th>
+                                <th>ROI 90d</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    for (const a of data.assets) {
+                        table += `<tr>
+                            <td>${a.asset}</td>
+                            <td>${a.free}</td>
+                            <td>${a.locked}</td>
+                            <td>${a.current_price !== undefined ? a.current_price.toFixed(4) : '-'}</td>
+                            <td>${a.average_cost_basis !== undefined ? a.average_cost_basis.toFixed(4) : '-'}</td>
+                            <td>${formatROI(a.roi && a.roi['24h'])}</td>
+                            <td>${formatROI(a.roi && a.roi['7d'])}</td>
+                            <td>${formatROI(a.roi && a.roi['28d'])}</td>
+                            <td>${formatROI(a.roi && a.roi['90d'])}</td>
+                        </tr>`;
+                    }
+                    table += `</tbody></table>`;
+                    assetsDiv.innerHTML = table;
                 }
             } catch (e) {
                 portfolioDiv.innerHTML = `<b>Error loading portfolio.</b>`;
                 assetsDiv.innerHTML = '';
             }
         }
-        window.onload = loadPortfolio;
+        async function loadETF() {
+            const etfDiv = document.getElementById('etf-content');
+            try {
+                const res = await fetch('/api/etf-comparison');
+                const data = await res.json();
+                let html = `<b>ETF Allocation:</b> <br>`;
+                html += Object.entries(data.etf_allocation).map(([k, v]) => `${k}: ${(v * 100).toFixed(1)}%`).join(' | ');
+                html += `<br><b>ETF Value Now:</b> $${data.etf_value_now.toFixed(2)} (Initial: $${data.initial_investment})`;
+                html += `<br><b>ETF ROI:</b> 24h: ${formatROI(data.etf_roi['24h'])} | 7d: ${formatROI(data.etf_roi['7d'])} | 28d: ${formatROI(data.etf_roi['28d'])} | 90d: ${formatROI(data.etf_roi['90d'])}`;
+                html += `<br><br><table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Weight</th>
+                            <th>Current Price</th>
+                            <th>ROI 24h</th>
+                            <th>ROI 7d</th>
+                            <th>ROI 28d</th>
+                            <th>ROI 90d</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                for (const a of data.assets) {
+                    html += `<tr>
+                        <td>${a.asset}</td>
+                        <td>${(a.weight * 100).toFixed(1)}%</td>
+                        <td>${a.current_price !== undefined ? a.current_price.toFixed(4) : '-'}</td>
+                        <td>${formatROI(a.roi && a.roi['24h'])}</td>
+                        <td>${formatROI(a.roi && a.roi['7d'])}</td>
+                        <td>${formatROI(a.roi && a.roi['28d'])}</td>
+                        <td>${formatROI(a.roi && a.roi['90d'])}</td>
+                    </tr>`;
+                }
+                html += `</tbody></table>`;
+                etfDiv.innerHTML = html;
+            } catch (e) {
+                etfDiv.innerHTML = `<b>Error loading ETF data.</b>`;
+            }
+        }
+        window.onload = function () {
+            loadPortfolio();
+            loadETF();
+        };
     </script>
 </body>
 

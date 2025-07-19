@@ -84,3 +84,33 @@ uvicorn main:app --reload
 See [FastAPI documentation](https://fastapi.tiangolo.com/) for more on models, middleware, and route patterns.
 
 See [python-binance documentation](https://python-binance.readthedocs.io/en/latest/) for Binance API usage. 
+
+## New Endpoint: /populate_crypto_news_rag
+
+**POST /populate_crypto_news_rag**
+
+Populate the Milvus collection `crypto_news_rag` with news data from NewsAPI, chunked and embedded using OpenAI (1536-dim). Supports both dense and sparse vectors.
+
+### Request Body
+- `terms`: List of crypto topics/terms to search for (e.g., `["bitcoin", "ethereum"]`)
+- `chunking`: Chunking technique or parameters (e.g., chunk size, overlap, or method)
+- `newsapi_key`: (optional, else use env var)
+
+### Environment Variables
+- `NEWSAPI_KEY`: Your NewsAPI key (can be passed in request or exported)
+- `OPENAI_API_KEY`: Your OpenAI API key (for embeddings)
+- `MILVUS_ENDPOINT`: Milvus REST endpoint (default: `https://in03-9f01d93b384a0f7.serverless.gcp-us-west1.cloud.zilliz.com`)
+
+### Example Usage
+```json
+{
+  "terms": ["bitcoin", "ethereum"],
+  "chunking": {"method": "sentence", "chunk_size": 200, "overlap": 50}
+}
+```
+
+### Notes
+- Both dense and sparse vectors are supported.
+- Chunking config is flexible and can be a list or object.
+- Deduplication is performed using `source_url`.
+- Partitioning is by `crypto_topic`. 

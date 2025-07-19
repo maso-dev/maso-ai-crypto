@@ -80,3 +80,23 @@ Phase 3: The "Autonomous Agent" 🤖 (The Stretch Goal)
 Once you trust the agent's logic after running it in the first two phases, you can add a flag in your config.json like "autonomous_mode": true.
 
 When this is on, the agent executes trades automatically without asking.
+
+
+The Plan: An "AI News Analyst" Module
+Instead of just a simple "sentiment score" (which can be a bit one-dimensional), let's build a module that provides an AI-generated summary of the current market outlook for a specific asset. This is a perfect job for an LLM augmented by RAG.
+
+Here is how the LLM and RAG components will work together:
+
+The Knowledge Base (The "R" in RAG): We can't just ask an LLM "what's the news on Bitcoin?" because it won't have real-time information. So, we will first Retrieve up-to-date information.
+
+Our script will fetch the latest 5-10 news articles about Bitcoin from a news API.
+
+We will store the content of these articles in a local "knowledge base." For our POC, this can be a simple vector store using a library like FAISS. This database of fresh news is the context we'll give our LLM.
+
+The LLM Query (The "AG" in RAG): Now, we ask our LLM a question, but we provide it with the articles we just retrieved. This is the Augmented Generation part.
+
+Our agent will ask: "Based only on the following articles, what is the market outlook for Bitcoin? Summarize any major positive or negative news in 3 bullet points."
+
+The LLM then acts like a skilled analyst, reading the specific, timely information we provided and giving us a nuanced summary, not just a generic answer from its old training data.
+
+This approach clearly separates the Retrieval and Generation steps, making it a textbook example of RAG.
