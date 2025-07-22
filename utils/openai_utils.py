@@ -3,6 +3,7 @@ import openai
 from typing import List, Dict, Tuple
 import time
 import hashlib
+import json
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = openai.AsyncOpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
@@ -61,4 +62,56 @@ Recommended Actions:
             summary = content.strip()
     # Store in cache
     _summary_cache[cache_key] = (now, (summary, actions))
-    return summary, actions 
+    return summary, actions
+
+async def enrich_news_metadata(article: dict) -> dict:
+    if not client:
+        return {}
+    system_content = (
+        "You are a crypto news analyst. Only return a JSON object, no markdown or extra text."
+    )
+    user_prompt = (
+        f"Given the following crypto news article, extract the following fields:\n"
+        f"Title: {article.get('title', '')}\n"
+        f"Content: {article.get('content', '')}\n"
+        f"Source: {article.get('source_name', '')}\n"
+        "Return only the JSON object."
+    )
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.4,
+            functions=[{
+                'name': "createNewsEnrichmentObject",
+                'parameters': {
+                    'type': "object",
+                    'properties': {
+                        'sentiment': {'type': 'number'},
+                        'trust': {'type': 'number'},
+                        'categories': {'type': 'array', 'items': {'type': 'string'}},
+                        'macro_category': {'type': 'string'},
+                        'summary': {'type': 'string'}
+                    },
+                    'required': ["sentiment", "trust", "categories", "macro_category", "summary"]
+                }
+            }],
+            function_call={'name': "createNewsEnrichmentObject"},
+            max_tokens=300
+        )
+        func_call = getattr(response.choices[0].message, 'function_call', None)
+        if not func_call or not hasattr(func_call, 'arguments'):
+            print(f"[enrich_news_metadata] No function_call or arguments in response: {response.choices[0].message}")
+            return {}
+        arguments = func_call.arguments
+        print(f"[enrich_news_metadata] Function call arguments: {arguments}")
+        if not isinstance(arguments, str):
+            return {}
+        meta = json.loads(arguments)
+        return meta
+    except Exception as e:
+        print(f"[enrich_news_metadata] OpenAI function call error: {e}")
+        return {} 

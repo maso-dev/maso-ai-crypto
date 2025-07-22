@@ -9,6 +9,7 @@ router = APIRouter()
 class MarketSummaryRequest(BaseModel):
     symbols: List[str] = Field(..., description="Portfolio coin symbols, e.g. ['BTC', 'ETH', 'BITO']")
     limit: int = Field(10, description="Number of news items to return")
+    always_include_base_coins: bool = Field(True, description="Always include BTC and ETH in the query")
 
 class NewsItem(BaseModel):
     title: str
@@ -25,7 +26,11 @@ class MarketSummaryResponse(BaseModel):
 @router.post("/portfolio/market_summary", response_model=MarketSummaryResponse)
 async def portfolio_market_summary(req: MarketSummaryRequest = Body(...)) -> MarketSummaryResponse:
     try:
-        news = await query_news_for_symbols(req.symbols, limit=req.limit)
+        symbols = set(req.symbols)
+        if req.always_include_base_coins:
+            symbols.update(["BTC", "ETH"])
+        symbols = list(symbols)
+        news = await query_news_for_symbols(symbols, limit=req.limit)
         news_items = [
             NewsItem(
                 title=item.get("title", ""),
@@ -36,7 +41,7 @@ async def portfolio_market_summary(req: MarketSummaryRequest = Body(...)) -> Mar
             )
             for item in news
         ]
-        summary, actions = await get_market_summary(news, req.symbols)
+        summary, actions = await get_market_summary(news, symbols)
         return MarketSummaryResponse(
             summary=summary,
             recommended_actions=actions,

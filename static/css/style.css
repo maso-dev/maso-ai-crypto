@@ -60,3 +60,99 @@ footer {
     margin-top: 2rem;
     font-size: 0.95rem;
 }
+
+/* Market Summary Card Styles */
+.market-summary-card {
+    background: linear-gradient(135deg, #2a2f4c 0%, #1e2338 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 255, 231, 0.1);
+    border: 1px solid #3a3f58;
+}
+
+.summary-section, .actions-section, .news-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border-left: 3px solid #00ffe7;
+}
+
+.summary-section h3, .actions-section h3, .news-section h3 {
+    color: #00ffe7;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-section p, .actions-section p {
+    margin: 0;
+    line-height: 1.6;
+    color: #e0e6f0;
+}
+
+.news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.news-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #3a3f58;
+    margin-bottom: 0.5rem;
+}
+
+.news-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.news-item strong {
+    color: #00ffe7;
+    font-size: 0.95rem;
+}
+
+.news-item small {
+    color: #a0a6b0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.error {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff4444;
+    color: #ff8888;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Portfolio table styles */
+.portfolio-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: #232946;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.portfolio-table th,
+.portfolio-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #3a3f58;
+}
+
+.portfolio-table th {
+    background: #2a2f4c;
+    color: #00ffe7;
+    font-weight: 600;
+}
+
+.portfolio-table tr:hover {
+    background: rgba(0, 255, 231, 0.05);
+}

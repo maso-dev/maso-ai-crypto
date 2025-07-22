@@ -5,6 +5,7 @@ from datetime import datetime
 from utils.newsapi import fetch_news_articles
 from utils.embedding import embed_chunks, compute_sparse_vectors
 from utils.milvus import insert_news_chunks
+from utils.openai_utils import enrich_news_metadata
 
 router = APIRouter()
 
@@ -73,6 +74,13 @@ async def populate_crypto_news_rag(
                 chunk['title'] = article['title']
                 chunk['vector'] = chunk['dense_vector']
                 chunk['sparse_vector'] = compute_sparse_vectors(chunk['chunk_text'])
+                # Enrich with AI metadata
+                meta = await enrich_news_metadata({
+                    "title": article['title'],
+                    "content": chunk['chunk_text'],
+                    "source_name": article.get('source_name', '')
+                })
+                chunk.update(meta)
                 chunks.append(chunk)
         
         print(f"✓ Total chunks prepared: {len(chunks)}")

@@ -2,6 +2,21 @@
 
 This guide will help you deploy your FastAPI-based crypto AI platform (including crypto news RAG and portfolio management) to Vercel and set it up as a scheduled cron job.
 
+---
+
+## 🧠 News Enrichment (AI Metadata)
+
+**Every news chunk is now enriched with AI-powered metadata before being embedded and stored in Milvus:**
+- `sentiment` (0.01–1.0): How positive/negative is the news for the market?
+- `trust` (0.01–1.0): How trustworthy is the source/article?
+- `categories`: List of fine-grained categories (e.g., DeFi, Regulation, Security, etc.)
+- `macro_category`: Broad class (e.g., Macroeconomics, Geopolitics)
+- `summary`: 1–2 sentence summary of the news
+
+This metadata enables advanced filtering, ranking, and explainable recommendations downstream.
+
+---
+
 ## 📋 Prerequisites
 
 - [Vercel CLI](https://vercel.com/download) installed
@@ -252,17 +267,31 @@ vercel --debug
 
 #### `POST /populate_crypto_news_rag`
 
-**Request Body:**
+**Request Body (Recommended for Best Results):**
 ```json
 {
-  "terms": ["bitcoin", "ethereum"],
+  "terms": ["bitcoin", "ethereum", "crypto"],
   "chunking": {
-    "method": "fixed",
+    "method": "paragraph",
     "chunk_size": 200,
     "overlap": 0
   },
   "newsapi_key": "optional_override_key"
 }
+```
+
+**Example cURL:**
+```bash
+curl -X POST "https://your-vercel-domain.vercel.app/populate_crypto_news_rag" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "terms": ["bitcoin", "ethereum", "crypto"],
+    "chunking": {
+      "method": "paragraph",
+      "chunk_size": 200,
+      "overlap": 0
+    }
+  }'
 ```
 
 **Response:**
@@ -271,6 +300,24 @@ vercel --debug
   "inserted": 10,
   "updated": 0,
   "errors": null
+}
+```
+
+**Each news chunk in Milvus will now include:**
+```json
+{
+  "chunk_text": "...",
+  "crypto_topic": "BTC",
+  "source_url": "...",
+  "published_at": 1710000000,
+  "title": "...",
+  "vector": [ ... ],
+  "sparse_vector": { ... },
+  "sentiment": 0.92,
+  "trust": 0.88,
+  "categories": ["Market Analysis & Trading", "Adoption & Institutional"],
+  "macro_category": "Market Analysis & Trading",
+  "summary": "Bitcoin price increased after ETF inflows hit record highs, suggesting a potential bull run."
 }
 ```
 
