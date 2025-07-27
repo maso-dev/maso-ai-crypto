@@ -9,6 +9,7 @@ from routers.crypto_news_rag import router as crypto_news_rag_router
 from routers.portfolio_user import router as portfolio_router
 from routers.crypto_news import router as crypto_news_router
 from routers.admin import router as admin_router
+from routers.agent import router as agent_router
 
 app = FastAPI(title="Portfolio Analyzer API")
 
@@ -18,6 +19,7 @@ app.include_router(crypto_news_rag_router)
 app.include_router(portfolio_router)
 app.include_router(crypto_news_router)
 app.include_router(admin_router)
+app.include_router(agent_router)
 
 @app.get("/")
 def dashboard(request: Request):

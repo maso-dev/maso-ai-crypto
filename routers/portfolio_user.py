@@ -14,6 +14,7 @@ import json
 # Import portfolio-specific utilities
 from utils.milvus import query_news_for_symbols
 from utils.openai_utils import get_market_summary
+from utils.binance_client import get_portfolio_data, PortfolioData, PortfolioAsset as BinancePortfolioAsset
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
@@ -49,6 +50,25 @@ class ETFComparisonResponse(BaseModel):
     """ETF comparison response model."""
     etfs: List[Dict[str, Any]]
     comparison_date: str
+
+class DetailedPortfolioAsset(BaseModel):
+    """Detailed portfolio asset with cost basis and ROI."""
+    asset: str
+    free: float
+    locked: float
+    total: float
+    usdt_value: float
+    cost_basis: Optional[float] = None
+    roi_percentage: Optional[float] = None
+    avg_buy_price: Optional[float] = None
+
+class DetailedPortfolioResponse(BaseModel):
+    """Detailed portfolio response with cost basis analysis."""
+    total_value_usdt: float
+    total_cost_basis: float
+    total_roi_percentage: float
+    assets: List[DetailedPortfolioAsset]
+    last_updated: str
 
 @router.post("/market_summary", response_model=MarketSummaryResponse)
 async def portfolio_market_summary(request: MarketSummaryRequest) -> MarketSummaryResponse:
@@ -89,42 +109,129 @@ async def portfolio_market_summary(request: MarketSummaryRequest) -> MarketSumma
 async def get_portfolio_assets() -> PortfolioResponse:
     """Get user's portfolio assets from Binance."""
     try:
-        # This would typically integrate with Binance API
-        # For now, return mock data
-        mock_assets = [
-            PortfolioAsset(
-                asset="BTC",
-                free=0.5,
-                locked=0.0,
-                total=0.5,
-                usdt_value=25000.0
-            ),
-            PortfolioAsset(
-                asset="ETH",
-                free=2.0,
-                locked=0.0,
-                total=2.0,
-                usdt_value=8000.0
-            ),
-            PortfolioAsset(
-                asset="ADA",
-                free=1000.0,
-                locked=0.0,
-                total=1000.0,
-                usdt_value=500.0
+        # Try to get real portfolio data from Binance
+        portfolio_data = await get_portfolio_data()
+        
+        if portfolio_data:
+            # Convert Binance portfolio data to our response format
+            assets = [
+                PortfolioAsset(
+                    asset=asset.asset,
+                    free=asset.free,
+                    locked=asset.locked,
+                    total=asset.total,
+                    usdt_value=asset.usdt_value
+                )
+                for asset in portfolio_data.assets
+            ]
+            
+            return PortfolioResponse(
+                total_value_usdt=portfolio_data.total_value_usdt,
+                assets=assets,
+                last_updated=portfolio_data.last_updated.isoformat()
             )
-        ]
-        
-        total_value = sum(asset.usdt_value for asset in mock_assets)
-        
-        return PortfolioResponse(
-            total_value_usdt=total_value,
-            assets=mock_assets,
-            last_updated=datetime.now(timezone.utc).isoformat()
-        )
+        else:
+            # Fallback to mock data if Binance is not configured
+            mock_assets = [
+                PortfolioAsset(
+                    asset="BTC",
+                    free=0.5,
+                    locked=0.0,
+                    total=0.5,
+                    usdt_value=25000.0
+                ),
+                PortfolioAsset(
+                    asset="ETH",
+                    free=2.0,
+                    locked=0.0,
+                    total=2.0,
+                    usdt_value=8000.0
+                ),
+                PortfolioAsset(
+                    asset="ADA",
+                    free=1000.0,
+                    locked=0.0,
+                    total=1000.0,
+                    usdt_value=500.0
+                )
+            ]
+            
+            total_value = sum(asset.usdt_value for asset in mock_assets)
+            
+            return PortfolioResponse(
+                total_value_usdt=total_value,
+                assets=mock_assets,
+                last_updated=datetime.now(timezone.utc).isoformat()
+            )
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving portfolio: {str(e)}")
+
+@router.get("/detailed", response_model=DetailedPortfolioResponse)
+async def get_detailed_portfolio() -> DetailedPortfolioResponse:
+    """Get detailed portfolio data with cost basis and ROI analysis."""
+    try:
+        # Get real portfolio data from Binance
+        portfolio_data = await get_portfolio_data()
+        
+        if portfolio_data:
+            # Convert to detailed response format
+            assets = [
+                DetailedPortfolioAsset(
+                    asset=asset.asset,
+                    free=asset.free,
+                    locked=asset.locked,
+                    total=asset.total,
+                    usdt_value=asset.usdt_value,
+                    cost_basis=asset.cost_basis,
+                    roi_percentage=asset.roi_percentage,
+                    avg_buy_price=asset.avg_buy_price
+                )
+                for asset in portfolio_data.assets
+            ]
+            
+            return DetailedPortfolioResponse(
+                total_value_usdt=portfolio_data.total_value_usdt,
+                total_cost_basis=portfolio_data.total_cost_basis,
+                total_roi_percentage=portfolio_data.total_roi_percentage,
+                assets=assets,
+                last_updated=portfolio_data.last_updated.isoformat()
+            )
+        else:
+            # Fallback with mock data (no cost basis)
+            mock_assets = [
+                DetailedPortfolioAsset(
+                    asset="BTC",
+                    free=0.5,
+                    locked=0.0,
+                    total=0.5,
+                    usdt_value=25000.0,
+                    cost_basis=None,
+                    roi_percentage=None,
+                    avg_buy_price=None
+                ),
+                DetailedPortfolioAsset(
+                    asset="ETH",
+                    free=2.0,
+                    locked=0.0,
+                    total=2.0,
+                    usdt_value=8000.0,
+                    cost_basis=None,
+                    roi_percentage=None,
+                    avg_buy_price=None
+                )
+            ]
+            
+            return DetailedPortfolioResponse(
+                total_value_usdt=33000.0,
+                total_cost_basis=0.0,
+                total_roi_percentage=0.0,
+                assets=mock_assets,
+                last_updated=datetime.now(timezone.utc).isoformat()
+            )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving detailed portfolio: {str(e)}")
 
 @router.get("/etf-comparison", response_model=ETFComparisonResponse)
 async def get_etf_comparison() -> ETFComparisonResponse:
