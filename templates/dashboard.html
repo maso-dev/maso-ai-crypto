@@ -22,6 +22,10 @@
             <h2>🤖 AI Market Summary</h2>
             <div id="market-summary-content" class="placeholder">Loading AI market analysis...</div>
         </section>
+        <section id="agent-intelligence">
+            <h2>🧠 Agent Decision Engine</h2>
+            <div id="agent-intelligence-content" class="placeholder">Loading personalized recommendations...</div>
+        </section>
         <section id="news-insights">
             <h2>📰 News Insights & Analytics</h2>
             <div id="news-insights-content" class="placeholder">Loading news analytics...</div>
@@ -301,6 +305,166 @@
                 case 'medium': return 'medium-impact';
                 case 'low': return 'low-impact';
                 default: return 'medium-impact';
+            }
+        }
+
+        async function loadAgentIntelligence() {
+            const agentDiv = document.getElementById('agent-intelligence-content');
+            try {
+                // Get agent insights
+                const insightsRes = await fetch('/agent/insights');
+                const insightsData = await insightsRes.json();
+
+                // Get recommendations
+                const recommendationsRes = await fetch('/agent/recommendations?limit=5');
+                const recommendationsData = await recommendationsRes.json();
+
+                let html = `<div class="agent-intelligence-card">`;
+
+                // Portfolio Performance Overview
+                html += `<div class="performance-overview">`;
+                html += `<h3>📊 Portfolio Performance</h3>`;
+                html += `<div class="performance-stats">`;
+                html += `<div class="stat-item">`;
+                html += `<span class="stat-number">$${insightsData.portfolio_performance.total_value.toLocaleString()}</span>`;
+                html += `<span class="stat-label">Total Value</span>`;
+                html += `</div>`;
+                html += `<div class="stat-item">`;
+                html += `<span class="stat-number ${insightsData.portfolio_performance.total_roi >= 0 ? 'positive' : 'negative'}">${insightsData.portfolio_performance.total_roi.toFixed(2)}%</span>`;
+                html += `<span class="stat-label">Total ROI</span>`;
+                html += `</div>`;
+                html += `<div class="stat-item">`;
+                html += `<span class="stat-number">${(insightsData.portfolio_performance.risk_score * 100).toFixed(0)}%</span>`;
+                html += `<span class="stat-label">Risk Score</span>`;
+                html += `</div>`;
+                html += `<div class="stat-item">`;
+                html += `<span class="stat-number">${(insightsData.portfolio_performance.diversification_score * 100).toFixed(0)}%</span>`;
+                html += `<span class="stat-label">Diversification</span>`;
+                html += `</div>`;
+                html += `</div>`;
+                html += `</div>`;
+
+                // Market Analysis
+                html += `<div class="market-analysis">`;
+                html += `<h3>🌍 Market Analysis</h3>`;
+                html += `<div class="market-regime ${insightsData.market_analysis.regime.toLowerCase()}">`;
+                html += `<span class="regime-badge">${insightsData.market_analysis.regime} MARKET</span>`;
+                html += `</div>`;
+
+                if (insightsData.market_analysis.top_performers.length > 0) {
+                    html += `<div class="performers">`;
+                    html += `<h4>🏆 Top Performers</h4>`;
+                    html += `<div class="performer-tags">`;
+                    insightsData.market_analysis.top_performers.forEach(asset => {
+                        html += `<span class="performer-tag">${asset}</span>`;
+                    });
+                    html += `</div>`;
+                    html += `</div>`;
+                }
+
+                if (insightsData.market_analysis.underperformers.length > 0) {
+                    html += `<div class="underperformers">`;
+                    html += `<h4>📉 Underperformers</h4>`;
+                    html += `<div class="underperformer-tags">`;
+                    insightsData.market_analysis.underperformers.forEach(asset => {
+                        html += `<span class="underperformer-tag">${asset}</span>`;
+                    });
+                    html += `</div>`;
+                    html += `</div>`;
+                }
+                html += `</div>`;
+
+                // Personalized Recommendations
+                html += `<div class="recommendations-section">`;
+                html += `<h3>💡 Personalized Recommendations</h3>`;
+
+                if (recommendationsData && recommendationsData.length > 0) {
+                    html += `<div class="recommendations-list">`;
+                    recommendationsData.forEach((rec, index) => {
+                        const priorityClass = rec.execution_priority <= 2 ? 'high-priority' :
+                            rec.execution_priority <= 3 ? 'medium-priority' : 'low-priority';
+                        const riskClass = rec.risk_level.toLowerCase();
+
+                        html += `<div class="recommendation-card ${priorityClass}">`;
+                        html += `<div class="recommendation-header">`;
+                        html += `<span class="action-badge ${rec.action_type.toLowerCase()}">${rec.action_type}</span>`;
+                        html += `<span class="asset-name">${rec.asset}</span>`;
+                        html += `<span class="priority-badge">Priority ${rec.execution_priority}</span>`;
+                        html += `</div>`;
+
+                        html += `<div class="recommendation-content">`;
+                        html += `<p class="recommendation-reason">${rec.reason}</p>`;
+
+                        html += `<div class="recommendation-details">`;
+                        html += `<div class="detail-row">`;
+                        html += `<span class="confidence-score">🎯 ${(rec.confidence_score * 100).toFixed(0)}% Confidence</span>`;
+                        html += `<span class="risk-level ${riskClass}">⚠️ ${rec.risk_level} Risk</span>`;
+                        html += `</div>`;
+
+                        if (rec.percentage) {
+                            html += `<div class="detail-row">`;
+                            html += `<span class="action-percentage">📊 ${rec.percentage}% of position</span>`;
+                            html += `</div>`;
+                        }
+                        html += `</div>`;
+
+                        html += `<div class="recommendation-context">`;
+                        html += `<div class="context-section">`;
+                        html += `<h5>👤 Personal Context</h5>`;
+                        html += `<p>${rec.personal_context}</p>`;
+                        html += `</div>`;
+
+                        html += `<div class="context-section">`;
+                        html += `<h5>🌍 Market Context</h5>`;
+                        html += `<p>${rec.market_context}</p>`;
+                        html += `</div>`;
+                        html += `</div>`;
+
+                        html += `<div class="expected-impact">`;
+                        html += `<h5>📈 Expected Impact</h5>`;
+                        html += `<p>${rec.expected_impact}</p>`;
+                        html += `</div>`;
+                        html += `</div>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += `<p>No specific recommendations at this time. Your portfolio appears to be well-positioned.</p>`;
+                }
+                html += `</div>`;
+
+                // Opportunities and Warnings
+                if (insightsData.opportunities.length > 0 || insightsData.warnings.length > 0) {
+                    html += `<div class="insights-summary">`;
+
+                    if (insightsData.opportunities.length > 0) {
+                        html += `<div class="opportunities">`;
+                        html += `<h3>🚀 Opportunities</h3>`;
+                        html += `<ul>`;
+                        insightsData.opportunities.forEach(opp => {
+                            html += `<li>${opp}</li>`;
+                        });
+                        html += `</ul>`;
+                        html += `</div>`;
+                    }
+
+                    if (insightsData.warnings.length > 0) {
+                        html += `<div class="warnings">`;
+                        html += `<h3>⚠️ Warnings</h3>`;
+                        html += `<ul>`;
+                        insightsData.warnings.forEach(warning => {
+                            html += `<li>${warning}</li>`;
+                        });
+                        html += `</ul>`;
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+                agentDiv.innerHTML = html;
+            } catch (e) {
+                agentDiv.innerHTML = `<div class="error">❌ Error loading agent intelligence: ${e.message}</div>`;
             }
         }
 
@@ -649,6 +813,7 @@
             loadPortfolio();
             loadETF();
             loadMarketSummary();
+            loadAgentIntelligence();
             loadNewsInsights();
             loadProcessingStatus();
             loadValidationStatus();
