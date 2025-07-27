@@ -14,8 +14,17 @@
     ],
     "crons": [
         {
-            "path": "/populate_crypto_news_rag",
+            "path": "/crypto_news/populate",
             "schedule": "0 6 * * *"
+        },
+        {
+            "path": "/admin/health",
+            "schedule": "0 */6 * * *"
         }
-    ]
+    ],
+    "functions": {
+        "api/index.py": {
+            "maxDuration": 30
+        }
+    }
 }

@@ -1,116 +1,107 @@
-# Maso AI Crypto FastAPI Starter (Binance Edition)
+# 🚀 Agentic Crypto Broker
 
-This is a simple FastAPI application to serve as the foundation for a crypto trading agent, now using the Binance API.
+An AI-powered cryptocurrency portfolio management system with personalized trading recommendations.
 
-The self validation process from Coinbase sucks bad.
+## 🎯 **Features**
 
-## Features
+- **🤖 Agentic Intelligence**: AI-generated personalized trading recommendations
+- **📊 Portfolio Analytics**: Real-time Binance integration with ROI tracking
+- **📰 News RAG**: Vector-based crypto news search and analysis
+- **💰 Cost Tracking**: API usage monitoring and budget management
+- **🔍 REACT Validation**: Fact-checking and real-time data validation
 
-- Set up a FastAPI app
-- Load Binance API credentials from a local file
-- Provide endpoints for testing and retrieving Binance account info
+## 🚀 **Quick Start**
 
-## Requirements
-
-- Python 3.8+
-- [pip](https://pip.pypa.io/en/stable/)
-
-## Setup
-
-1. **Clone the repository**
-
+### Local Development
 ```bash
-git clone <your-repo-url>
+# Clone and setup
+git clone <your-repo>
 cd maso-ai-crypto
-```
-
-2. **Install dependencies**
-
-```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+
+# Set environment variables
+export OPENAI_API_KEY="your_key"
+export NEWSAPI_API_KEY="your_key"
+export TAVILY_API_KEY="your_key"
+
+# Run
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-3. **Add your Binance API credentials**
+### Vercel Deployment
+1. Connect your GitHub repo to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push
 
-Create a file named `cdp_api_key.json` in the project root with your Binance API credentials. Example format:
+## 📡 **API Endpoints**
 
-```json
-{
-  "apiKey": "YOUR_BINANCE_API_KEY",
-  "secretKey": "YOUR_BINANCE_API_SECRET"
-}
-```
+### Core Endpoints
+- `GET /` - Dashboard
+- `GET /portfolio/assets` - Portfolio data
+- `GET /agent/insights` - AI insights
+- `GET /admin/status` - System status
 
-**Note:** Never share your real API keys publicly.
+### Agent Intelligence
+- `POST /agent/analyze` - Full analysis
+- `GET /agent/recommendations` - Trading recommendations
+- `GET /agent/market-sentiment` - Market sentiment
 
-## Running the App
+### News & RAG
+- `POST /crypto_news/populate` - Populate news database
+- `GET /crypto_news/search` - Search news
 
-Start the FastAPI server with Uvicorn:
+## 🧪 **Testing**
 
 ```bash
-uvicorn main:app --reload
+# Run tests
+pytest tests/
+
+# Run specific tests
+pytest tests/test_agent.py
+pytest tests/test_api.py
 ```
 
-- The app will be available at: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+## 🔧 **Environment Variables**
 
-## Endpoints
+Required for Vercel:
+```env
+OPENAI_API_KEY=your_openai_key
+NEWSAPI_API_KEY=your_newsapi_key
+TAVILY_API_KEY=your_tavily_key
+```
 
-- `GET /`  
-  Returns a simple hello world message.
+Optional:
+```env
+BINANCE_API_KEY=your_binance_key
+BINANCE_SECRET_KEY=your_binance_secret
+MILVUS_URI=your_milvus_uri
+```
 
-- `GET /credentials`  
-  Loads and returns (masked) Binance API credentials from `cdp_api_key.json`. For testing only—do not use in production.
+## 📊 **Current State**
 
-- `GET /binance/account`  
-  Returns your Binance account information (requires valid API credentials).
+✅ **Implemented**:
+- Agent Decision Engine
+- Portfolio integration
+- News RAG system
+- Cost tracking
+- REACT validation
+- Vercel deployment ready
 
-## Security
+🚧 **Next Steps**:
+- Neo4j integration
+- React frontend
+- Advanced analytics
 
-- Keep your `cdp_api_key.json` file safe and never commit it to version control.
-- Remove or secure the `/credentials` endpoint before deploying to production.
+## 🤝 **Contributing**
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Test with `pytest tests/`
+5. Submit PR
 
 ---
 
-*This project is a proof of concept and not intended for production use without further security and error handling improvements.*
-
----
-
-## Dependencies
-
-- fastapi
-- uvicorn
-- python-binance
-
-See [FastAPI documentation](https://fastapi.tiangolo.com/) for more on models, middleware, and route patterns.
-
-See [python-binance documentation](https://python-binance.readthedocs.io/en/latest/) for Binance API usage. 
-
-## New Endpoint: /populate_crypto_news_rag
-
-**POST /populate_crypto_news_rag**
-
-Populate the Milvus collection `crypto_news_rag` with news data from NewsAPI, chunked and embedded using OpenAI (1536-dim). Supports both dense and sparse vectors.
-
-### Request Body
-- `terms`: List of crypto topics/terms to search for (e.g., `["bitcoin", "ethereum"]`)
-- `chunking`: Chunking technique or parameters (e.g., chunk size, overlap, or method)
-- `newsapi_key`: (optional, else use env var)
-
-### Environment Variables
-- `NEWSAPI_KEY`: Your NewsAPI key (can be passed in request or exported)
-- `OPENAI_API_KEY`: Your OpenAI API key (for embeddings)
-- `MILVUS_ENDPOINT`: Milvus REST endpoint (default: `https://in03-9f01d93b384a0f7.serverless.gcp-us-west1.cloud.zilliz.com`)
-
-### Example Usage
-```json
-{
-  "terms": ["bitcoin", "ethereum"],
-  "chunking": {"method": "sentence", "chunk_size": 200, "overlap": 50}
-}
-```
-
-### Notes
-- Both dense and sparse vectors are supported.
-- Chunking config is flexible and can be a list or object.
-- Deduplication is performed using `source_url`.
-- Partitioning is by `crypto_topic`. 
+**Built for Vercel deployment with ❤️** 
