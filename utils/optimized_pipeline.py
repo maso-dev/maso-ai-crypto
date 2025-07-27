@@ -14,6 +14,7 @@ from typing import Dict, List, Any, Optional
 from utils.enrichment import get_enrichment_chain
 from utils.temporal_context import enhance_article_with_temporal_context
 from utils.optimized_embedding import process_article_for_optimized_storage
+from utils.react_validation import validate_news_articles
 import asyncio
 
 class OptimizedNewsPipeline:
@@ -110,7 +111,7 @@ class OptimizedNewsPipeline:
             graph_data.append(article["graph_data"])
         return graph_data
     
-    def get_processing_summary(self, processed_articles: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def get_processing_summary(self, processed_articles: List[Dict[str, Any]], validation_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Generate a summary of the processing results.
         """
@@ -144,7 +145,7 @@ class OptimizedNewsPipeline:
         for category in all_categories:
             category_counts[category] = category_counts.get(category, 0) + 1
         
-        return {
+        summary = {
             "total_processed": total_processed,
             "breaking_news": breaking_news,
             "recent_news": recent_news,
@@ -157,11 +158,21 @@ class OptimizedNewsPipeline:
                 "graph_ready": total_processed
             }
         }
+        
+        # Add validation summary if available
+        if validation_summary:
+            summary["validation_stats"] = validation_summary
+        
+        return summary
 
 # Convenience function for easy pipeline usage
-async def run_optimized_pipeline(articles: List[Dict[str, Any]]) -> Dict[str, Any]:
+async def run_optimized_pipeline(articles: List[Dict[str, Any]], enable_validation: bool = True) -> Dict[str, Any]:
     """
     Run the complete optimized pipeline on a list of articles.
+    
+    Args:
+        articles: List of articles to process
+        enable_validation: Whether to enable REACT validation
     
     Returns:
         Dict containing:
@@ -169,6 +180,7 @@ async def run_optimized_pipeline(articles: List[Dict[str, Any]]) -> Dict[str, An
         - vector_data: Data ready for Milvus insertion
         - graph_data: Data ready for Neo4j insertion
         - summary: Processing statistics
+        - validation_summary: REACT validation statistics (if enabled)
     """
     
     pipeline = OptimizedNewsPipeline()
@@ -176,16 +188,49 @@ async def run_optimized_pipeline(articles: List[Dict[str, Any]]) -> Dict[str, An
     # Process articles
     processed_articles = await pipeline.process_articles_batch(articles)
     
-    # Extract data for different storage systems
+    # REACT validation (optional)
+    validation_summary = None
+    if enable_validation and articles:
+        print("🔍 Starting REACT validation...")
+        try:
+            # Extract original articles for validation
+            original_articles = []
+            for processed in processed_articles:
+                original_articles.append({
+                    "title": processed["metadata"]["title"],
+                    "content": processed["metadata"]["original_content"],
+                    "source_name": processed["metadata"]["source_name"],
+                    "published_at": processed["metadata"]["published_at"]
+                })
+            
+            # Run validation
+            validated_articles, validation_summary = await validate_news_articles(original_articles)
+            
+            # Merge validation data back into processed articles
+            for i, processed in enumerate(processed_articles):
+                if i < len(validated_articles) and "validation" in validated_articles[i]:
+                    processed["metadata"]["validation"] = validated_articles[i]["validation"]
+            
+            print(f"✅ REACT validation completed: {validation_summary.get('total_validated', 0)} articles validated")
+            
+        except Exception as e:
+            print(f"⚠️ REACT validation failed: {e}")
+            validation_summary = {
+                "total_validated": 0,
+                "error": str(e)
+            }
+    
+    # Extract data for storage
     vector_data = pipeline.get_vector_data_batch(processed_articles)
     graph_data = pipeline.get_graph_data_batch(processed_articles)
     
-    # Generate summary
-    summary = pipeline.get_processing_summary(processed_articles)
+    # Generate summary with validation data
+    summary = pipeline.get_processing_summary(processed_articles, validation_summary)
     
     return {
         "processed_articles": processed_articles,
         "vector_data": vector_data,
         "graph_data": graph_data,
-        "summary": summary
+        "summary": summary,
+        "validation_summary": validation_summary
     } 

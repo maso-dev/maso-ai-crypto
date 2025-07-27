@@ -22,6 +22,22 @@
             <h2>🤖 AI Market Summary</h2>
             <div id="market-summary-content" class="placeholder">Loading AI market analysis...</div>
         </section>
+        <section id="news-insights">
+            <h2>📰 News Insights & Analytics</h2>
+            <div id="news-insights-content" class="placeholder">Loading news analytics...</div>
+        </section>
+        <section id="processing-status">
+            <h2>⚙️ System Status</h2>
+            <div id="processing-status-content" class="placeholder">Loading system status...</div>
+        </section>
+        <section id="validation-status">
+            <h2>🔍 REACT Validation Status</h2>
+            <div id="validation-status-content" class="placeholder">Loading validation status...</div>
+        </section>
+        <section id="cost-tracking">
+            <h2>💰 Cost Tracking & Usage</h2>
+            <div id="cost-tracking-content" class="placeholder">Loading cost tracking...</div>
+        </section>
         <section id="assets">
             <h2>Your Assets</h2>
             <div id="assets-content" class="placeholder">Loading assets...</div>
@@ -49,7 +65,7 @@
             const portfolioDiv = document.getElementById('portfolio-content');
             const assetsDiv = document.getElementById('assets-content');
             try {
-                const res = await fetch('/api/portfolio');
+                const res = await fetch('/portfolio/assets');
                 const data = await res.json();
                 const now = new Date().toLocaleString();
                 if (!data.assets || data.assets.length === 0) {
@@ -96,7 +112,7 @@
         async function loadETF() {
             const etfDiv = document.getElementById('etf-content');
             try {
-                const res = await fetch('/api/etf-comparison');
+                const res = await fetch('/portfolio/etf-comparison');
                 const data = await res.json();
                 let html = `<b>ETF Allocation:</b> <br>`;
                 html += Object.entries(data.etf_allocation).map(([k, v]) => `${k}: ${(v * 100).toFixed(1)}%`).join(' | ');
@@ -136,10 +152,10 @@
             const marketSummaryDiv = document.getElementById('market-summary-content');
             try {
                 // Get portfolio symbols from the portfolio data
-                const portfolioRes = await fetch('/api/portfolio');
+                const portfolioRes = await fetch('/portfolio/assets');
                 const portfolioData = await portfolioRes.json();
                 const symbols = portfolioData.assets ? portfolioData.assets.map(a => a.asset) : ['BTC', 'ETH'];
-                
+
                 // Call the market summary endpoint with POST
                 const res = await fetch('/portfolio/market_summary', {
                     method: 'POST',
@@ -148,30 +164,116 @@
                     },
                     body: JSON.stringify({
                         symbols: symbols,
-                        limit: 5
+                        limit: 5,
+                        always_include_base_coins: true
                     })
                 });
                 const data = await res.json();
-                
+
                 let html = `<div class="market-summary-card">`;
                 html += `<div class="summary-section">`;
                 html += `<h3>📊 Market Analysis</h3>`;
                 html += `<p>${data.summary || 'No summary available'}</p>`;
                 html += `</div>`;
-                
+
                 html += `<div class="actions-section">`;
                 html += `<h3>💡 Recommended Actions</h3>`;
                 html += `<p>${data.recommended_actions || 'No recommendations available'}</p>`;
                 html += `</div>`;
-                
+
                 html += `<div class="news-section">`;
                 html += `<h3>📰 Latest News for Your Portfolio</h3>`;
                 if (data.news && data.news.length > 0) {
                     html += `<ul class="news-list">`;
                     data.news.forEach(item => {
-                        html += `<li class="news-item">`;
-                        html += `<strong>${item.title}</strong> (${item.crypto_topic})<br>`;
-                        html += `<small>${item.chunk_text.substring(0, 100)}...</small>`;
+                        // Add temporal indicators and rich metadata
+                        const isBreaking = item.is_breaking || false;
+                        const sentiment = item.sentiment || 0.5;
+                        const marketImpact = item.market_impact || 'medium';
+                        const timeRelevance = item.time_relevance || 'recent';
+                        const categories = item.categories || [];
+
+                        // Add validation indicator
+                        const validation = item.validation || {};
+                        const isVerified = validation.is_verified || false;
+                        const riskLevel = validation.risk_level || 'medium';
+                        const confidence = validation.confidence_score || 0;
+
+                        html += `<li class="news-item ${isBreaking ? 'breaking-news' : ''} ${riskLevel === 'high' ? 'high-risk' : ''}">`;
+
+                        // Validation badge
+                        if (isVerified) {
+                            html += `<span class="validation-badge verified">✅ VERIFIED</span>`;
+                        } else if (riskLevel === 'high') {
+                            html += `<span class="validation-badge high-risk">⚠️ HIGH RISK</span>`;
+                        } else if (riskLevel === 'medium') {
+                            html += `<span class="validation-badge medium-risk">⚠️ MEDIUM RISK</span>`;
+                        } else {
+                            html += `<span class="validation-badge low-risk">✅ LOW RISK</span>`;
+                        }
+
+                        // Temporal indicator
+                        if (isBreaking) {
+                            html += `<span class="temporal-badge breaking">🔥 BREAKING</span>`;
+                        } else if (timeRelevance === 'recent') {
+                            html += `<span class="temporal-badge recent">⚡ RECENT</span>`;
+                        }
+
+                        html += `<div class="news-header">`;
+                        html += `<strong>${item.title}</strong>`;
+                        html += `<span class="crypto-topic">${item.crypto_topic}</span>`;
+                        html += `</div>`;
+
+                        html += `<div class="news-content">`;
+                        html += `<p>${item.chunk_text.substring(0, 150)}...</p>`;
+                        html += `</div>`;
+
+                        // Rich metadata display
+                        html += `<div class="news-metadata">`;
+                        html += `<div class="metadata-row">`;
+                        html += `<span class="sentiment-indicator ${getSentimentClass(sentiment)}">`;
+                        html += `😊 ${(sentiment * 100).toFixed(0)}% Positive`;
+                        html += `</span>`;
+                        html += `<span class="impact-indicator ${getImpactClass(marketImpact)}">`;
+                        html += `📈 ${marketImpact.toUpperCase()} Impact`;
+                        html += `</span>`;
+                        html += `<span class="time-indicator">`;
+                        html += `⏰ ${timeRelevance.charAt(0).toUpperCase() + timeRelevance.slice(1)}`;
+                        html += `</span>`;
+                        html += `</div>`;
+
+                        // Validation metadata
+                        if (validation && Object.keys(validation).length > 0) {
+                            html += `<div class="validation-metadata">`;
+                            html += `<div class="validation-row">`;
+                            html += `<span class="validation-status ${isVerified ? 'verified' : 'unverified'}">`;
+                            html += `${isVerified ? '✅' : '❌'} ${isVerified ? 'Verified' : 'Unverified'}`;
+                            html += `</span>`;
+                            html += `<span class="confidence-score">`;
+                            html += `🎯 ${(confidence * 100).toFixed(0)}% Confidence`;
+                            html += `</span>`;
+                            html += `<span class="risk-level ${riskLevel}">`;
+                            html += `⚠️ ${riskLevel.toUpperCase()} Risk`;
+                            html += `</span>`;
+                            html += `</div>`;
+                            if (validation.verification_summary) {
+                                html += `<div class="verification-summary">`;
+                                html += `<small>🔍 ${validation.verification_summary.substring(0, 150)}...</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div>`;
+                        }
+
+                        if (categories.length > 0) {
+                            html += `<div class="categories">`;
+                            html += `<span class="category-label">🏷️ Categories:</span>`;
+                            categories.forEach(cat => {
+                                html += `<span class="category-tag">${cat}</span>`;
+                            });
+                            html += `</div>`;
+                        }
+                        html += `</div>`;
+
                         html += `</li>`;
                     });
                     html += `</ul>`;
@@ -180,16 +282,377 @@
                 }
                 html += `</div>`;
                 html += `</div>`;
-                
+
                 marketSummaryDiv.innerHTML = html;
             } catch (e) {
                 marketSummaryDiv.innerHTML = `<div class="error">❌ Error loading market summary: ${e.message}</div>`;
             }
         }
+
+        function getSentimentClass(sentiment) {
+            if (sentiment >= 0.7) return 'positive';
+            if (sentiment >= 0.4) return 'neutral';
+            return 'negative';
+        }
+
+        function getImpactClass(impact) {
+            switch (impact.toLowerCase()) {
+                case 'high': return 'high-impact';
+                case 'medium': return 'medium-impact';
+                case 'low': return 'low-impact';
+                default: return 'medium-impact';
+            }
+        }
+
+        async function loadNewsInsights() {
+            const newsInsightsDiv = document.getElementById('news-insights-content');
+            try {
+                // Get portfolio symbols
+                const portfolioRes = await fetch('/api/portfolio');
+                const portfolioData = await portfolioRes.json();
+                const symbols = portfolioData.assets ? portfolioData.assets.map(a => a.asset) : ['BTC', 'ETH'];
+
+                // Call the market summary endpoint to get news data
+                const res = await fetch('/portfolio/market_summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbols: symbols,
+                        limit: 10,
+                        always_include_base_coins: true
+                    })
+                });
+                const data = await res.json();
+
+                if (data.news && data.news.length > 0) {
+                    // Calculate analytics
+                    const totalNews = data.news.length;
+                    const breakingNews = data.news.filter(item => item.is_breaking).length;
+                    const avgSentiment = data.news.reduce((sum, item) => sum + (item.sentiment || 0.5), 0) / totalNews;
+                    const marketImpacts = data.news.reduce((acc, item) => {
+                        const impact = item.market_impact || 'medium';
+                        acc[impact] = (acc[impact] || 0) + 1;
+                        return acc;
+                    }, {});
+
+                    let html = `<div class="insights-card">`;
+
+                    // Analytics summary
+                    html += `<div class="analytics-summary">`;
+                    html += `<h3>📊 News Analytics</h3>`;
+                    html += `<div class="analytics-grid">`;
+                    html += `<div class="analytics-item">`;
+                    html += `<span class="analytics-number">${totalNews}</span>`;
+                    html += `<span class="analytics-label">Total Articles</span>`;
+                    html += `</div>`;
+                    html += `<div class="analytics-item">`;
+                    html += `<span class="analytics-number">${breakingNews}</span>`;
+                    html += `<span class="analytics-label">Breaking News</span>`;
+                    html += `</div>`;
+                    html += `<div class="analytics-item">`;
+                    html += `<span class="analytics-number">${(avgSentiment * 100).toFixed(0)}%</span>`;
+                    html += `<span class="analytics-label">Avg Sentiment</span>`;
+                    html += `</div>`;
+                    html += `<div class="analytics-item">`;
+                    html += `<span class="analytics-number">${marketImpacts.high || 0}</span>`;
+                    html += `<span class="analytics-label">High Impact</span>`;
+                    html += `</div>`;
+                    html += `</div>`;
+                    html += `</div>`;
+
+                    // Market impact breakdown
+                    html += `<div class="impact-breakdown">`;
+                    html += `<h3>📈 Market Impact Distribution</h3>`;
+                    html += `<div class="impact-bars">`;
+                    Object.entries(marketImpacts).forEach(([impact, count]) => {
+                        const percentage = (count / totalNews * 100).toFixed(1);
+                        html += `<div class="impact-bar">`;
+                        html += `<span class="impact-label">${impact.toUpperCase()}</span>`;
+                        html += `<div class="impact-progress">`;
+                        html += `<div class="impact-fill ${getImpactClass(impact)}" style="width: ${percentage}%"></div>`;
+                        html += `</div>`;
+                        html += `<span class="impact-count">${count} (${percentage}%)</span>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                    html += `</div>`;
+
+                    // Sentiment distribution
+                    html += `<div class="sentiment-distribution">`;
+                    html += `<h3>😊 Sentiment Analysis</h3>`;
+                    html += `<div class="sentiment-chart">`;
+                    const positive = data.news.filter(item => (item.sentiment || 0.5) >= 0.7).length;
+                    const neutral = data.news.filter(item => (item.sentiment || 0.5) >= 0.4 && (item.sentiment || 0.5) < 0.7).length;
+                    const negative = data.news.filter(item => (item.sentiment || 0.5) < 0.4).length;
+
+                    html += `<div class="sentiment-item positive">`;
+                    html += `<span class="sentiment-emoji">😊</span>`;
+                    html += `<span class="sentiment-label">Positive</span>`;
+                    html += `<span class="sentiment-count">${positive}</span>`;
+                    html += `</div>`;
+                    html += `<div class="sentiment-item neutral">`;
+                    html += `<span class="sentiment-emoji">😐</span>`;
+                    html += `<span class="sentiment-label">Neutral</span>`;
+                    html += `<span class="sentiment-count">${neutral}</span>`;
+                    html += `</div>`;
+                    html += `<div class="sentiment-item negative">`;
+                    html += `<span class="sentiment-emoji">😞</span>`;
+                    html += `<span class="sentiment-label">Negative</span>`;
+                    html += `<span class="sentiment-count">${negative}</span>`;
+                    html += `</div>`;
+                    html += `</div>`;
+                    html += `</div>`;
+
+                    html += `</div>`;
+
+                    newsInsightsDiv.innerHTML = html;
+                } else {
+                    newsInsightsDiv.innerHTML = `<div class="placeholder">No news data available for analytics.</div>`;
+                }
+            } catch (e) {
+                newsInsightsDiv.innerHTML = `<div class="error">❌ Error loading news insights: ${e.message}</div>`;
+            }
+        }
+
+        async function loadProcessingStatus() {
+            const statusDiv = document.getElementById('processing-status-content');
+            try {
+                let html = `<div class="status-card">`;
+                html += `<h3>⚙️ System Components</h3>`;
+
+                // Check various system components
+                const components = [
+                    { name: 'NewsAPI Integration', status: 'operational', icon: '📰' },
+                    { name: 'AI Enrichment Pipeline', status: 'operational', icon: '🤖' },
+                    { name: 'Temporal Context Processing', status: 'operational', icon: '⏰' },
+                    { name: 'Vector Database (Milvus)', status: 'operational', icon: '🗄️' },
+                    { name: 'Portfolio Data (Binance)', status: 'operational', icon: '📊' },
+                    { name: 'Market Summary Generation', status: 'operational', icon: '📈' },
+                    { name: 'REACT Validation System', status: 'operational', icon: '🔍' }
+                ];
+
+                html += `<div class="components-grid">`;
+                components.forEach(component => {
+                    const statusClass = component.status === 'operational' ? 'operational' : 'error';
+                    const statusIcon = component.status === 'operational' ? '✅' : '❌';
+                    html += `<div class="component-item ${statusClass}">`;
+                    html += `<span class="component-icon">${component.icon}</span>`;
+                    html += `<span class="component-name">${component.name}</span>`;
+                    html += `<span class="component-status">${statusIcon} ${component.status}</span>`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+
+                // Processing pipeline status
+                html += `<div class="pipeline-status">`;
+                html += `<h3>🔄 Processing Pipeline</h3>`;
+                html += `<div class="pipeline-steps">`;
+                const steps = [
+                    { name: 'News Fetching', status: 'active', description: 'Retrieving latest crypto news' },
+                    { name: 'Temporal Enhancement', status: 'active', description: 'Adding time-based context' },
+                    { name: 'AI Enrichment', status: 'active', description: 'Generating metadata & sentiment' },
+                    { name: 'Summary Processing', status: 'active', description: 'Creating searchable summaries' },
+                    { name: 'REACT Validation', status: 'active', description: 'Fact-checking with Tavily search' },
+                    { name: 'Vector Storage', status: 'active', description: 'Storing in Milvus database' }
+                ];
+
+                steps.forEach((step, index) => {
+                    html += `<div class="pipeline-step">`;
+                    html += `<div class="step-number">${index + 1}</div>`;
+                    html += `<div class="step-content">`;
+                    html += `<div class="step-name">${step.name}</div>`;
+                    html += `<div class="step-description">${step.description}</div>`;
+                    html += `</div>`;
+                    html += `<div class="step-status">✅ Active</div>`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+                html += `</div>`;
+
+                html += `</div>`;
+                statusDiv.innerHTML = html;
+            } catch (e) {
+                statusDiv.innerHTML = `<div class="error">❌ Error loading system status: ${e.message}</div>`;
+            }
+        }
+
+        async function loadValidationStatus() {
+            const validationDiv = document.getElementById('validation-status-content');
+            try {
+                // Get portfolio symbols
+                const portfolioRes = await fetch('/portfolio/assets');
+                const portfolioData = await portfolioRes.json();
+                const symbols = portfolioData.assets ? portfolioData.assets.map(a => a.asset) : ['BTC', 'ETH'];
+
+                // Call the market summary endpoint to get validation data
+                const res = await fetch('/portfolio/market_summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbols: symbols,
+                        limit: 10,
+                        always_include_base_coins: true
+                    })
+                });
+                const data = await res.json();
+
+                let html = `<div class="validation-card">`;
+                html += `<h3>🔍 REACT Validation Overview</h3>`;
+
+                if (data.news && data.news.length > 0) {
+                    // Calculate validation statistics
+                    const totalNews = data.news.length;
+                    const validatedNews = data.news.filter(item => item.validation).length;
+                    const verifiedNews = data.news.filter(item => item.validation && item.validation.is_verified).length;
+                    const highRiskNews = data.news.filter(item => item.validation && item.validation.risk_level === 'high').length;
+                    const avgConfidence = data.news.reduce((sum, item) => sum + (item.validation?.confidence_score || 0), 0) / totalNews;
+
+                    html += `<div class="validation-stats">`;
+                    html += `<div class="validation-stat-item">`;
+                    html += `<span class="stat-number">${validatedNews}</span>`;
+                    html += `<span class="stat-label">Validated Articles</span>`;
+                    html += `</div>`;
+                    html += `<div class="validation-stat-item">`;
+                    html += `<span class="stat-number">${verifiedNews}</span>`;
+                    html += `<span class="stat-label">Verified Claims</span>`;
+                    html += `</div>`;
+                    html += `<div class="validation-stat-item">`;
+                    html += `<span class="stat-number">${highRiskNews}</span>`;
+                    html += `<span class="stat-label">High Risk Articles</span>`;
+                    html += `</div>`;
+                    html += `<div class="validation-stat-item">`;
+                    html += `<span class="stat-number">${(avgConfidence * 100).toFixed(0)}%</span>`;
+                    html += `<span class="stat-label">Avg Confidence</span>`;
+                    html += `</div>`;
+                    html += `</div>`;
+
+                    // Validation breakdown
+                    html += `<div class="validation-breakdown">`;
+                    html += `<h4>📊 Validation Breakdown</h4>`;
+                    html += `<div class="validation-bars">`;
+
+                    const riskLevels = ['high', 'medium', 'low'];
+                    riskLevels.forEach(level => {
+                        const count = data.news.filter(item => item.validation && item.validation.risk_level === level).length;
+                        const percentage = (count / totalNews * 100).toFixed(1);
+                        html += `<div class="validation-bar">`;
+                        html += `<span class="validation-label">${level.toUpperCase()} RISK</span>`;
+                        html += `<div class="validation-progress">`;
+                        html += `<div class="validation-fill ${level}-risk" style="width: ${percentage}%"></div>`;
+                        html += `</div>`;
+                        html += `<span class="validation-count">${count} (${percentage}%)</span>`;
+                        html += `</div>`;
+                    });
+
+                    html += `</div>`;
+                    html += `</div>`;
+
+                } else {
+                    html += `<div class="placeholder">No validation data available.</div>`;
+                }
+
+                html += `</div>`;
+                validationDiv.innerHTML = html;
+            } catch (e) {
+                validationDiv.innerHTML = `<div class="error">❌ Error loading validation status: ${e.message}</div>`;
+            }
+        }
+
+        async function loadCostTracking() {
+            const costDiv = document.getElementById('cost-tracking-content');
+            try {
+                // Get current month summary
+                const currentMonthRes = await fetch('/admin/costs/current-month');
+                const currentMonthData = await currentMonthRes.json();
+
+                // Get cost alerts
+                const alertsRes = await fetch('/admin/costs/alerts');
+                const alertsData = await alertsRes.json();
+
+                let html = `<div class="cost-card">`;
+                html += `<h3>💰 API Cost Overview</h3>`;
+
+                // Current month summary
+                const monthly = currentMonthData.monthly;
+                const today = currentMonthData.today;
+                const projected = currentMonthData.projected_monthly;
+
+                html += `<div class="cost-summary">`;
+                html += `<div class="cost-stat-item">`;
+                html += `<span class="cost-number">$${monthly.total_cost.toFixed(2)}</span>`;
+                html += `<span class="cost-label">This Month</span>`;
+                html += `</div>`;
+                html += `<div class="cost-stat-item">`;
+                html += `<span class="cost-number">$${today.total_cost.toFixed(2)}</span>`;
+                html += `<span class="cost-label">Today</span>`;
+                html += `</div>`;
+                html += `<div class="cost-stat-item">`;
+                html += `<span class="cost-number">$${projected.total_cost.toFixed(2)}</span>`;
+                html += `<span class="cost-label">Projected Monthly</span>`;
+                html += `</div>`;
+                html += `<div class="cost-stat-item">`;
+                html += `<span class="cost-number">${monthly.call_count}</span>`;
+                html += `<span class="cost-label">Total API Calls</span>`;
+                html += `</div>`;
+                html += `</div>`;
+
+                // Service breakdown
+                html += `<div class="service-breakdown">`;
+                html += `<h4>📊 Service Breakdown</h4>`;
+                html += `<div class="service-bars">`;
+
+                Object.entries(monthly.service_costs).forEach(([service, cost]) => {
+                    const percentage = (cost / monthly.total_cost * 100).toFixed(1);
+                    html += `<div class="service-bar">`;
+                    html += `<span class="service-label">${service.toUpperCase()}</span>`;
+                    html += `<div class="service-progress">`;
+                    html += `<div class="service-fill" style="width: ${percentage}%"></div>`;
+                    html += `</div>`;
+                    html += `<span class="service-cost">$${cost.toFixed(2)} (${percentage}%)</span>`;
+                    html += `</div>`;
+                });
+
+                html += `</div>`;
+                html += `</div>`;
+
+                // Cost alerts
+                if (alertsData.alerts.length > 0) {
+                    html += `<div class="cost-alerts">`;
+                    html += `<h4>⚠️ Cost Alerts</h4>`;
+                    html += `<div class="alerts-list">`;
+
+                    alertsData.alerts.forEach(alert => {
+                        const alertClass = alert.severity === 'critical' ? 'critical' :
+                            alert.severity === 'high' ? 'high' : 'medium';
+                        html += `<div class="alert-item ${alertClass}">`;
+                        html += `<span class="alert-icon">${alert.type === 'warning' ? '⚠️' : 'ℹ️'}</span>`;
+                        html += `<span class="alert-message">${alert.message}</span>`;
+                        html += `</div>`;
+                    });
+
+                    html += `</div>`;
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+                costDiv.innerHTML = html;
+            } catch (e) {
+                costDiv.innerHTML = `<div class="error">❌ Error loading cost tracking: ${e.message}</div>`;
+            }
+        }
+
         window.onload = function () {
             loadPortfolio();
             loadETF();
             loadMarketSummary();
+            loadNewsInsights();
+            loadProcessingStatus();
+            loadValidationStatus();
+            loadCostTracking();
         };
     </script>
 </body>

@@ -1,9 +1,10 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 from typing import Dict, Any, List
 import os
+from utils.cost_tracker import track_openai_call
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -51,10 +52,9 @@ def get_enrichment_chain():
     Output: NewsEnrichment object with structured metadata including temporal context.
     """
     llm = ChatOpenAI(
-        openai_api_key=OPENAI_API_KEY,
+        api_key=SecretStr(OPENAI_API_KEY) if OPENAI_API_KEY else None,
         model="gpt-4-turbo",
-        temperature=0.4,
-        max_tokens=300
+        temperature=0.4
     )
     
     parser = JsonOutputParser(pydantic_object=NewsEnrichment)

@@ -6,7 +6,7 @@ MILVUS_URI = os.getenv("MILVUS_URI", "https://in03-9f01d93b384a0f7.serverless.gc
 MILVUS_TOKEN = os.getenv("MILVUS_TOKEN")
 MILVUS_CLUSTER_NAME = os.getenv("MILVUS_CLUSTER_NAME", "elmaso-free")
 MILVUS_COLLECTION_NAME = os.getenv("MILVUS_COLLECTION_NAME", "crypto_news_rag")
-# FULL_COLLECTION_NAME = f"{MILVUS_CLUSTER_NAME}.{MILVUS_COLLECTION_NAME}"
+
 
 async def insert_news_chunks(chunks: List[Dict]) -> Tuple[int, int, List[str]]:
     print(f"=== Milvus Insertion Debug ===")
