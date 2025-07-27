@@ -3,9 +3,8 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from utils.newsapi import fetch_news_articles
-from utils.embedding import embed_chunks, compute_sparse_vectors
 from utils.milvus import insert_news_chunks
-from utils.openai_utils import enrich_news_metadata
+from utils.optimized_pipeline import run_optimized_pipeline
 
 router = APIRouter()
 
@@ -42,46 +41,31 @@ async def populate_crypto_news_rag(
             print("⚠️ No articles fetched, returning early")
             return PopulateResponse(inserted=0, updated=0, errors=["No articles found"])
         
-        # Step 2: Process articles into chunks
-        print(f"Step 2: Processing articles into chunks...")
+        # Step 2: Process articles with optimized pipeline
+        print(f"Step 2: Processing articles with optimized pipeline...")
         chunks = []
-        for i, article in enumerate(articles):
-            print(f"  Processing article {i+1}/{len(articles)}: {article['title'][:50]}...")
+        
+        # Process all articles through the optimized pipeline
+        processed_data = await run_optimized_pipeline(articles)
+        vector_data = processed_data["vector_data"]
+        summary = processed_data["summary"]
+        
+        print(f"✓ Optimized pipeline summary:")
+        print(f"   Total processed: {summary['total_processed']}")
+        print(f"   Breaking news: {summary['breaking_news']}")
+        print(f"   Recent news: {summary['recent_news']}")
+        print(f"   Avg sentiment: {summary['avg_sentiment']}")
+        
+        # Prepare chunks for Milvus insertion
+        for chunk in vector_data:
+            # The optimized pipeline already handles temporal context and enrichment
+            # Just ensure we have the required fields for Milvus
+            if 'vector' not in chunk:
+                chunk['vector'] = chunk.get('dense_vector', [])
+            if 'sparse_vector' not in chunk:
+                chunk['sparse_vector'] = chunk.get('sparse_vector', {})
             
-            # Check if article has content
-            if not article.get('content'):
-                print(f"    ⚠️ Article {i+1} has no content, skipping")
-                continue
-                
-            article_chunks = await embed_chunks(article, req.chunking.model_dump())
-            print(f"    ✓ Created {len(article_chunks)} chunks")
-            
-            for chunk in article_chunks:
-                # Convert published_at from ISO string to Unix timestamp
-                try:
-                    if isinstance(article['published_at'], str):
-                        dt = datetime.fromisoformat(article['published_at'].replace('Z', '+00:00'))
-                        published_timestamp = int(dt.timestamp())
-                    else:
-                        published_timestamp = article['published_at']
-                except (ValueError, TypeError):
-                    # Fallback to current timestamp if parsing fails
-                    published_timestamp = int(datetime.now().timestamp())
-                
-                chunk['crypto_topic'] = article['crypto_topic']
-                chunk['source_url'] = article['source_url']
-                chunk['published_at'] = published_timestamp
-                chunk['title'] = article['title']
-                chunk['vector'] = chunk['dense_vector']
-                chunk['sparse_vector'] = compute_sparse_vectors(chunk['chunk_text'])
-                # Enrich with AI metadata
-                meta = await enrich_news_metadata({
-                    "title": article['title'],
-                    "content": chunk['chunk_text'],
-                    "source_name": article.get('source_name', '')
-                })
-                chunk.update(meta)
-                chunks.append(chunk)
+            chunks.append(chunk)
         
         print(f"✓ Total chunks prepared: {len(chunks)}")
         
