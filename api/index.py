@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Vercel serverless function entry point
+Vercel serverless function entry point for FastAPI
 """
 import sys
 import os
@@ -12,5 +12,5 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Import the FastAPI app from main.py
 from main import app
 
-# Export the app for Vercel
+# Export the app for Vercel (FastAPI is ASGI compatible)
 handler = app 
