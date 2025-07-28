@@ -20,11 +20,7 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY) if TAVILY_API_KEY else None
 
 # Initialize OpenAI client for validation
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(
-    api_key=SecretStr(OPENAI_API_KEY) if OPENAI_API_KEY else None,
-    model="gpt-4-turbo",
-    temperature=0.1
-) if OPENAI_API_KEY else None
+llm = None  # Will be initialized in __init__ if API key is available
 
 class ValidationResult(BaseModel):
     """Result of news article validation."""
@@ -72,7 +68,18 @@ Be thorough and objective in your analysis.
 """)
         
         self.parser = JsonOutputParser(pydantic_object=ValidationResult)
-        self.validation_chain = self.validation_prompt | llm | self.parser if llm else None
+        
+        # Initialize LLM and chain if API key is available
+        if OPENAI_API_KEY:
+            self.llm = ChatOpenAI(
+                api_key=SecretStr(OPENAI_API_KEY),
+                model="gpt-4-turbo",
+                temperature=0.1
+            )
+            self.validation_chain = self.validation_prompt | self.llm | self.parser
+        else:
+            self.llm = None
+            self.validation_chain = None
     
     async def search_for_validation(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
         """Search for information to validate news claims."""
