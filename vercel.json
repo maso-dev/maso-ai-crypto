@@ -1,11 +1,5 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "api/index.py",
-            "use": "@vercel/python"
-        }
-    ],
     "routes": [
         {
             "src": "/static/(.*)",
@@ -30,8 +24,5 @@
         "api/index.py": {
             "maxDuration": 30
         }
-    },
-    "env": {
-        "PYTHONPATH": "."
     }
 }
