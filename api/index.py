@@ -12,5 +12,8 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Import the FastAPI app from main.py
 from main import app
 
-# Export the app for Vercel (FastAPI is ASGI compatible)
-handler = app 
+# For Vercel serverless deployment - use mangum adapter
+from mangum import Adapter
+
+# Create ASGI adapter for AWS Lambda/Vercel
+handler = Adapter(app) 
