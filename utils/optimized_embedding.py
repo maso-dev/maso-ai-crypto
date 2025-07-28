@@ -8,9 +8,10 @@ This module focuses on summary-based chunking and rich metadata for:
 """
 
 import os
+import re
 from typing import Dict, List, Any, Optional
 import openai
-from sklearn.feature_extraction.text import TfidfVectorizer
+from collections import Counter
 from datetime import datetime
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -108,11 +109,23 @@ async def embed_summary_focused_chunk(chunk_data: Dict[str, Any]) -> Dict[str, A
         return chunk_data
 
 def compute_sparse_vectors(text: str) -> Dict[str, float]:
-    """Compute TF-IDF sparse vectors for the searchable text."""
-    vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
-    X = vectorizer.fit_transform([text])
-    tfidf = X.toarray()[0]  # type: ignore
-    return {str(i): float(tfidf[i]) for i in range(len(tfidf)) if tfidf[i] > 0}
+    """Simple word frequency-based sparse vector (replaces TF-IDF for Vercel size optimization)"""
+    # Clean and tokenize text
+    words = re.findall(r'\b\w+\b', text.lower())
+    
+    # Remove common stop words
+    stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'his', 'hers', 'ours', 'theirs'}
+    words = [word for word in words if word not in stop_words and len(word) > 2]
+    
+    # Count word frequencies
+    word_counts = Counter(words)
+    
+    # Create sparse vector (word -> frequency)
+    sparse_vector = {}
+    for word, count in word_counts.most_common(100):  # Limit to top 100 words
+        sparse_vector[word] = float(count)
+    
+    return sparse_vector
 
 async def process_article_for_optimized_storage(article: Dict[str, Any], enrichment_data: Dict[str, Any]) -> Dict[str, Any]:
     """

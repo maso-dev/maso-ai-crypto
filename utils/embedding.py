@@ -1,7 +1,8 @@
 import os
+import re
 from typing import Dict, List, Any
 import openai
-from sklearn.feature_extraction.text import TfidfVectorizer
+from collections import Counter
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = openai.AsyncOpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
@@ -47,8 +48,20 @@ async def embed_chunks(article: Dict[str, Any], chunking: Dict[str, Any]) -> Lis
     return results
 
 def compute_sparse_vectors(text: str) -> Dict[str, float]:
-    vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform([text])
-    # Convert sparse matrix to dense array for processing
-    tfidf = X.toarray()[0]  # type: ignore
-    return {str(i): float(tfidf[i]) for i in range(len(tfidf)) if tfidf[i] > 0} 
+    """Simple word frequency-based sparse vector (replaces TF-IDF for Vercel size optimization)"""
+    # Clean and tokenize text
+    words = re.findall(r'\b\w+\b', text.lower())
+    
+    # Remove common stop words
+    stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'his', 'hers', 'ours', 'theirs'}
+    words = [word for word in words if word not in stop_words and len(word) > 2]
+    
+    # Count word frequencies
+    word_counts = Counter(words)
+    
+    # Create sparse vector (word -> frequency)
+    sparse_vector = {}
+    for word, count in word_counts.most_common(100):  # Limit to top 100 words
+        sparse_vector[word] = float(count)
+    
+    return sparse_vector 
