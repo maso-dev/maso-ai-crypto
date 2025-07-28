@@ -12,12 +12,5 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Import the FastAPI app from main.py
 from main import app
 
-# Create a handler function for Vercel
-def handler(request, context):
-    """Vercel serverless function handler."""
-    from mangum import Adapter
-    adapter = Adapter(app)
-    return adapter(request, context)
-
-# Also export the app directly for compatibility
-app_handler = app 
+# Export the app for Vercel (FastAPI is ASGI compatible)
+handler = app 
