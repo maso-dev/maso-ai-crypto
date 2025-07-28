@@ -1,5 +1,11 @@
 {
     "version": 2,
+    "builds": [
+        {
+            "src": "index.py",
+            "use": "@vercel/python"
+        }
+    ],
     "routes": [
         {
             "src": "/static/(.*)",
@@ -11,7 +17,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "api/index.py"
+            "dest": "index.py"
         }
     ],
     "crons": [
@@ -23,10 +29,5 @@
             "path": "/admin/health",
             "schedule": "0 */6 * * *"
         }
-    ],
-    "functions": {
-        "api/index.py": {
-            "maxDuration": 30
-        }
-    }
+    ]
 }
