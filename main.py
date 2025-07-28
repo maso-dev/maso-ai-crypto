@@ -14,6 +14,12 @@ app = FastAPI(title="Portfolio Analyzer API")
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Handle favicon requests to prevent 404 errors."""
+    from fastapi.responses import Response
+    return Response(status_code=204)  # No content
 app.include_router(crypto_news_rag_router)
 app.include_router(portfolio_router)
 app.include_router(crypto_news_router)
