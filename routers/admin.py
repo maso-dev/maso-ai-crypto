@@ -14,7 +14,7 @@ import json
 # Import admin-specific utilities
 from utils.cost_tracker import cost_tracker
 from utils.milvus import MILVUS_URI, MILVUS_COLLECTION_NAME
-from utils.react_validation import tavily_client, llm
+from utils.react_validation import tavily_client
 import os
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -96,8 +96,8 @@ async def get_system_status(admin: bool = Depends(verify_admin_access)) -> Syste
                 "configured": bool(tavily_client)
             },
             "openai": {
-                "status": "online" if llm else "offline",
-                "configured": bool(llm)
+                "status": "online" if os.getenv("OPENAI_API_KEY") else "offline",
+                "configured": bool(os.getenv("OPENAI_API_KEY"))
             }
         }
         
@@ -291,9 +291,9 @@ async def get_system_config(admin: bool = Depends(verify_admin_access)) -> Syste
             milvus_collection=MILVUS_COLLECTION_NAME or "",
             newsapi_enabled=bool(os.getenv("NEWSAPI_API_KEY")),
             tavily_enabled=bool(tavily_client),
-            openai_enabled=bool(llm),
+            openai_enabled=bool(os.getenv("OPENAI_API_KEY")),
             cost_tracking_enabled=True,
-            validation_enabled=bool(tavily_client and llm)
+            validation_enabled=bool(tavily_client and os.getenv("OPENAI_API_KEY"))
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving system config: {str(e)}")
