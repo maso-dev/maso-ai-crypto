@@ -57,11 +57,14 @@ class BinanceClient:
         self.secret_key = secret_key or BINANCE_SECRET_KEY
         self.base_url = BINANCE_BASE_URL
         
+        # Don't raise error - just log that keys are missing
         if not self.api_key or not self.secret_key:
-            raise ValueError("Binance API key and secret are required")
+            print("⚠️ Binance API keys not configured - using mock data")
     
     def _generate_signature(self, params: Dict[str, Any]) -> str:
         """Generate HMAC signature for authenticated requests."""
+        if not self.secret_key:
+            raise ValueError("Secret key required for signature generation")
         query_string = urlencode(params)
         signature = hmac.new(
             self.secret_key.encode('utf-8'),
@@ -72,6 +75,8 @@ class BinanceClient:
     
     def _get_headers(self) -> Dict[str, str]:
         """Get headers for authenticated requests."""
+        if not self.api_key:
+            raise ValueError("API key required for headers")
         return {
             'X-MBX-APIKEY': self.api_key
         }
@@ -79,8 +84,9 @@ class BinanceClient:
     async def get_account_info(self) -> Dict[str, Any]:
         """Get account information including balances."""
         endpoint = "/api/v3/account"
+        timestamp = int(time.time() * 1000)
         params = {
-            'timestamp': int(time.time() * 1000)
+            'timestamp': timestamp
         }
         params['signature'] = self._generate_signature(params)
         

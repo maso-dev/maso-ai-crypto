@@ -51,8 +51,12 @@ def get_enrichment_chain():
     Input: dict with keys 'title', 'content', 'source_name', 'published_at'.
     Output: NewsEnrichment object with structured metadata including temporal context.
     """
+    if not OPENAI_API_KEY:
+        print("⚠️ OpenAI API key not configured - enrichment disabled")
+        return None
+    
     llm = ChatOpenAI(
-        api_key=SecretStr(OPENAI_API_KEY) if OPENAI_API_KEY else None,
+        api_key=SecretStr(OPENAI_API_KEY),
         model="gpt-4-turbo",
         temperature=0.4
     )
@@ -67,10 +71,13 @@ def get_enrichment_chain():
 # Example usage (for testing):
 if __name__ == "__main__":
     chain = get_enrichment_chain()
-    article = {
-        "title": "Bitcoin surges as ETF inflows hit record highs",
-        "content": "Bitcoin price jumped 10% today after several major ETFs reported record inflows. Analysts say this could signal a new bull run...",
-        "source_name": "CoinDesk"
-    }
-    result = chain.invoke(article)
-    print("Enrichment result:", result) 
+    if chain:
+        article = {
+            "title": "Bitcoin surges as ETF inflows hit record highs",
+            "content": "Bitcoin price jumped 10% today after several major ETFs reported record inflows. Analysts say this could signal a new bull run...",
+            "source_name": "CoinDesk"
+        }
+        result = chain.invoke(article)
+        print("Enrichment result:", result)
+    else:
+        print("OpenAI API key not configured - cannot test enrichment") 

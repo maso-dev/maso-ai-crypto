@@ -92,11 +92,15 @@ class AgentDecisionEngine:
     """Core agent that analyzes portfolio and generates personalized recommendations."""
     
     def __init__(self):
-        self.llm = ChatOpenAI(
-            model="gpt-4-turbo",
-            temperature=0.1,
-            api_key=OPENAI_API_KEY if OPENAI_API_KEY else None
-        )
+        if not OPENAI_API_KEY:
+            print("⚠️ OpenAI API key not configured - using fallback agent")
+            self.llm = None
+        else:
+            self.llm = ChatOpenAI(
+                model="gpt-4-turbo",
+                temperature=0.1,
+                api_key=OPENAI_API_KEY
+            )
         self.analysis_prompt = self._create_analysis_prompt()
         self.recommendation_prompt = self._create_recommendation_prompt()
         self.parser = JsonOutputParser()
