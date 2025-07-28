@@ -14,7 +14,7 @@
     ],
     "crons": [
         {
-            "path": "/crypto_news/populate",
+            "path": "/populate_crypto_news_rag",
             "schedule": "0 6 * * *"
         },
         {

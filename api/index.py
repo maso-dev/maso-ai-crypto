@@ -1,4 +1,16 @@
+#!/usr/bin/env python3
+"""
+Vercel serverless function entry point
+"""
+import sys
+import os
+from pathlib import Path
+
+# Add parent directory to path so we can import from the root
+sys.path.append(str(Path(__file__).parent.parent))
+
+# Import the FastAPI app from main.py
 from main import app
 
-# This exposes your FastAPI app to Vercel
-# The app will be available at your Vercel domain 
+# Export the app for Vercel
+handler = app 
