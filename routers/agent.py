@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
 
 # Import agent-specific utilities
-from utils.simple_agent import generate_simple_agent_analysis, AgentAnalysis, Recommendation, ActionType, RiskLevel
+from utils.enhanced_agent import generate_enhanced_agent_analysis, AgentAnalysis, Recommendation, ActionType, RiskLevel
 from utils.binance_client import get_portfolio_data, PortfolioData
 
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -61,7 +61,8 @@ async def get_agent_analysis(request: AgentAnalysisRequest) -> AgentAnalysisResp
             raise HTTPException(status_code=404, detail="Portfolio data not available")
         
         # Generate agent analysis
-        analysis = await generate_simple_agent_analysis(portfolio_data)
+        symbols = request.symbols if request.symbols else []
+        analysis = await generate_enhanced_agent_analysis(portfolio_data, symbols)
         
         # Generate agent insights
         agent_insights = _generate_agent_insights(analysis)
@@ -138,7 +139,7 @@ async def get_recommendations(
             )
         
         # Generate agent analysis
-        analysis = await generate_simple_agent_analysis(portfolio_data)
+        analysis = await generate_enhanced_agent_analysis(portfolio_data)
         
         # Filter recommendations
         recommendations = analysis.recommendations
@@ -211,7 +212,7 @@ async def get_agent_insights() -> AgentInsightsResponse:
             )
         
         # Generate agent analysis
-        analysis = await generate_simple_agent_analysis(portfolio_data)
+        analysis = await generate_enhanced_agent_analysis(portfolio_data)
         
         # Extract insights
         portfolio_performance = {
@@ -318,7 +319,7 @@ async def get_market_sentiment() -> Dict[str, Any]:
             raise HTTPException(status_code=404, detail="Portfolio data not available")
         
         # Generate agent analysis
-        analysis = await generate_simple_agent_analysis(portfolio_data)
+        analysis = await generate_enhanced_agent_analysis(portfolio_data)
         
         return {
             "market_regime": analysis.portfolio_analysis.market_regime.value,

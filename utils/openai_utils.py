@@ -8,6 +8,10 @@ import json
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = openai.AsyncOpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
+def get_openai_client():
+    """Get OpenAI client instance."""
+    return client
+
 # Simple in-memory cache: {cache_key: (timestamp, (summary, actions))}
 _summary_cache = {}
 CACHE_TTL = 21600  # 6 hours in seconds
