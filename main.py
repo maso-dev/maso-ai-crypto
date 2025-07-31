@@ -4,12 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, FileResponse
 from typing import Dict, Any
 from pathlib import Path
-from utils.binance_client import get_portfolio_data
-from routers.crypto_news_rag import router as crypto_news_rag_router
-from routers.portfolio_user import router as portfolio_router
-from routers.crypto_news import router as crypto_news_router
-from routers.admin import router as admin_router
-from routers.agent import router as agent_router
+import os
 
 app = FastAPI(title="Portfolio Analyzer API")
 
@@ -38,18 +33,74 @@ async def health_check():
         "status": "healthy", 
         "service": "Portfolio Analyzer API",
         "deployment": "Vercel",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "environment_vars": {
+            "binance_key_set": bool(os.getenv("BINANCE_API_KEY")),
+            "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
+            "news_key_set": bool(os.getenv("NEWS_API_KEY"))
+        }
     }
-app.include_router(crypto_news_rag_router)
-app.include_router(portfolio_router)
-app.include_router(crypto_news_router)
-app.include_router(admin_router)
-app.include_router(agent_router)
+
+@app.get("/api/test")
+async def test_endpoint():
+    """Simple test endpoint that doesn't require external dependencies"""
+    return {
+        "message": "FastAPI is working on Vercel!",
+        "timestamp": "2024",
+        "status": "success"
+    }
+
+# Import routers with error handling
+try:
+    from routers.crypto_news_rag import router as crypto_news_rag_router
+    app.include_router(crypto_news_rag_router)
+except ImportError as e:
+    print(f"Warning: Could not import crypto_news_rag_router: {e}")
+
+try:
+    from routers.portfolio_user import router as portfolio_router
+    app.include_router(portfolio_router)
+except ImportError as e:
+    print(f"Warning: Could not import portfolio_router: {e}")
+
+try:
+    from routers.crypto_news import router as crypto_news_router
+    app.include_router(crypto_news_router)
+except ImportError as e:
+    print(f"Warning: Could not import crypto_news_router: {e}")
+
+try:
+    from routers.admin import router as admin_router
+    app.include_router(admin_router)
+except ImportError as e:
+    print(f"Warning: Could not import admin_router: {e}")
+
+try:
+    from routers.agent import router as agent_router
+    app.include_router(agent_router)
+except ImportError as e:
+    print(f"Warning: Could not import agent_router: {e}")
 
 @app.get("/")
 def dashboard(request: Request):
     # Render the dashboard with Jinja2
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    try:
+        return templates.TemplateResponse("dashboard.html", {"request": request})
+    except Exception as e:
+        # Fallback to simple HTML if template fails
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=f"""
+        <html>
+            <head><title>Portfolio Analyzer</title></head>
+            <body>
+                <h1>Portfolio Analyzer API</h1>
+                <p>FastAPI is running on Vercel!</p>
+                <p><a href="/api/health">Health Check</a></p>
+                <p><a href="/api/test">Test Endpoint</a></p>
+                <p>Error loading dashboard: {str(e)}</p>
+            </body>
+        </html>
+        """)
 
 @app.get("/api/portfolio", response_model=Dict[str, Any])
 async def get_portfolio() -> Dict[str, Any]:
@@ -78,7 +129,7 @@ async def get_portfolio() -> Dict[str, Any]:
         else:
             return {"error": "No portfolio data available"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"error": f"Portfolio data unavailable: {str(e)}", "status": "error"}
 
 @app.get("/api/asset/{symbol}", response_model=Dict[str, Any])
 async def get_asset_details(symbol: str) -> Dict[str, Any]:
