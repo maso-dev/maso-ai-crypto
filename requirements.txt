@@ -1,8 +1,8 @@
-# Core FastAPI and web framework
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-jinja2>=3.1.0
-python-multipart>=0.0.6
+# Core FastAPI and web framework (matching working example)
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+jinja2==3.1.2
+python-multipart==0.0.6
 
 # HTTP client and async support
 httpx>=0.25.0
@@ -11,19 +11,21 @@ httpx>=0.25.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 
-# AI and Machine Learning
+# AI and Machine Learning (lighter versions)
 openai>=1.6.1,<2.0.0
 langchain>=0.1.0
 langchain-openai>=0.0.2
+langchain-core>=0.1.0
 
 # Crypto and trading APIs
 python-binance>=1.0.0
 
 # News and data APIs
 newsapi-python>=0.2.6
-tavily-python>=0.3.0
 
 # Utilities
 python-dotenv>=1.0.0
 python-dateutil>=2.8.0
-pytz>=2023.0 
+pytz>=2023.0
+
+# Note: Removed heavy dependencies like langchain, tavily-python for Vercel compatibility 

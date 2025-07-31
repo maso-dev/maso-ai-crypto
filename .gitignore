@@ -98,6 +98,9 @@ poetry.lock
 
 # Environment variables / secrets
 .env
+
+# Vercel example folder (for reference only)
+hello_vercel_success/
 .env.*
 .venv
 .venv/*

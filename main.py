@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from typing import Dict, Any
+from pathlib import Path
 from utils.binance_client import get_portfolio_data
 from routers.crypto_news_rag import router as crypto_news_rag_router
 from routers.portfolio_user import router as portfolio_router
@@ -13,13 +14,32 @@ from routers.agent import router as agent_router
 app = FastAPI(title="Portfolio Analyzer API")
 
 templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Custom static files handling for Vercel (similar to working example)
+@app.get("/static/{path:path}")
+async def static_files(path: str):
+    """Serve static files"""
+    static_dir = Path("static")
+    file_path = static_dir / path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(str(file_path))
+    return {"error": "File not found"}, 404
 
 @app.get("/favicon.ico")
 async def favicon():
     """Handle favicon requests to prevent 404 errors."""
     from fastapi.responses import Response
     return Response(status_code=204)  # No content
+
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint for Vercel deployment"""
+    return {
+        "status": "healthy", 
+        "service": "Portfolio Analyzer API",
+        "deployment": "Vercel",
+        "version": "1.0.0"
+    }
 app.include_router(crypto_news_rag_router)
 app.include_router(portfolio_router)
 app.include_router(crypto_news_router)

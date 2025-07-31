@@ -1,94 +1,127 @@
-# Vercel Deployment Guide for FastAPI
+# Vercel Deployment Guide
 
-## 🚀 Quick Deployment Steps
+## Configuration Changes Made
 
-### 1. **Framework Selection in Vercel**
-- **Framework Preset**: Select **"Other"** (not FastAPI - it's not in the list)
-- **Root Directory**: Leave as default (your repo root)
-- **Build Command**: Leave empty (Vercel will auto-detect)
-- **Output Directory**: Leave empty
+Based on the working example at `hello_vercel_success/`, the following changes were made to ensure successful Vercel deployment:
 
-### 2. **Environment Variables**
-Set these in Vercel Dashboard → Settings → Environment Variables:
+### 1. Vercel Configuration (`vercel.json`)
+- **Entry Point**: Changed from `index.py` to `main.py` to match working example
+- **Build Configuration**: Uses `@vercel/python` builder
+- **Routes**: All routes point to `/main.py`
 
-```
-OPENAI_API_KEY=your_openai_key
-NEWSAPI_API_KEY=your_newsapi_key
-TAVILY_API_KEY=your_tavily_key
-BINANCE_API_KEY=your_binance_key
-BINANCE_SECRET_KEY=your_binance_secret
-MILVUS_TOKEN=your_milvus_token
-```
-
-### 3. **Deployment Configuration**
-Your `vercel.json` is already configured correctly:
-- Entry point: `api/index.py`
-- Static files: `/static/`
-- Function timeout: 30 seconds
-- Cron jobs: Daily news population and health checks
-
-### 4. **Build Process**
-Vercel will:
-1. Install dependencies from `requirements.txt`
-2. Use `api/index.py` as the serverless function
-3. Route all requests through the FastAPI app
-4. Serve static files from `/static/`
-
-### 5. **Troubleshooting**
-
-#### If build fails:
-- Check that all dependencies are in `requirements.txt`
-- Ensure `api/index.py` exists and imports correctly
-- Verify environment variables are set
-
-#### If app doesn't work:
-- Check Vercel function logs
-- Test endpoints individually
-- Verify API keys are working
-
-### 6. **Post-Deployment**
-- Your app will be available at: `https://your-project.vercel.app`
-- Test the main endpoints:
-  - `/` - Dashboard
-  - `/admin/status` - System status
-  - `/portfolio/assets` - Portfolio data
-  - `/agent/insights` - Agent analysis
-
-### 7. **Cron Jobs**
-- Daily news population: 6 AM UTC
-- Health checks: Every 6 hours
-
-## 📁 File Structure for Vercel
-```
-maso-ai-crypto/
-├── api/
-│   └── index.py          # ← Vercel entry point
-├── static/               # ← Static files
-├── templates/            # ← Jinja2 templates
-├── routers/              # ← FastAPI routers
-├── utils/                # ← Utility modules
-├── main.py               # ← FastAPI app
-├── requirements.txt      # ← Dependencies
-├── vercel.json           # ← Vercel config
-└── README.md
+### 2. Static Files Handling
+- **Removed**: `app.mount("/static", StaticFiles(directory="static"), name="static")`
+- **Added**: Custom static file handler similar to working example:
+```python
+@app.get("/static/{path:path}")
+async def static_files(path: str):
+    """Serve static files"""
+    static_dir = Path("static")
+    file_path = static_dir / path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(str(file_path))
+    return {"error": "File not found"}, 404
 ```
 
-## 🔧 Manual Deployment
-If automatic deployment fails:
+### 3. Dependencies (`requirements.txt`)
+- **Pinned Versions**: Used exact versions matching working example
+- **Core Dependencies**: 
+  - `fastapi==0.104.1`
+  - `uvicorn[standard]==0.24.0`
+  - `jinja2==3.1.2`
+  - `python-multipart==0.0.6`
+- **Removed**: `tavily-python` (heavy dependency)
+- **Added**: Required langchain packages for AI functionality
 
-1. **Install Vercel CLI**:
-   ```bash
-   npm i -g vercel
-   ```
+### 4. Health Check Endpoint
+- **Added**: `/api/health` endpoint for deployment verification
 
-2. **Deploy manually**:
-   ```bash
-   vercel --prod
-   ```
+## Deployment Steps
 
-3. **Set environment variables**:
-   ```bash
-   vercel env add OPENAI_API_KEY
-   vercel env add NEWSAPI_API_KEY
-   # ... repeat for all keys
-   ``` 
+### 1. Environment Variables Setup
+Set up the following environment variables in Vercel dashboard:
+
+```bash
+# Required for core functionality
+BINANCE_API_KEY=your_binance_api_key
+BINANCE_SECRET_KEY=your_binance_secret_key
+OPENAI_API_KEY=your_openai_api_key
+NEWS_API_KEY=your_news_api_key
+
+# Optional for enhanced features
+TAVILY_API_KEY=your_tavily_api_key
+DATABASE_URL=sqlite:///cost_tracking.db
+DEBUG=False
+ENVIRONMENT=production
+```
+
+### 2. Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy (first time)
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+### 3. Verify Deployment
+
+1. **Health Check**: Visit `https://your-app.vercel.app/api/health`
+2. **Main Dashboard**: Visit `https://your-app.vercel.app/`
+3. **API Endpoints**: Test portfolio endpoints
+
+## Key Differences from Working Example
+
+| Aspect | Working Example | Our Project |
+|--------|----------------|-------------|
+| **Complexity** | Simple Hello World | Full portfolio analyzer |
+| **Dependencies** | Minimal (4 packages) | Extended (15+ packages) |
+| **Static Files** | Custom handler | Custom handler |
+| **Entry Point** | `main.py` | `main.py` |
+| **Routes** | Simple endpoints | Complex router structure |
+
+## Troubleshooting
+
+### Common Issues:
+
+1. **500 Errors**: Check environment variables are set correctly
+2. **Import Errors**: Ensure all dependencies are in `requirements.txt`
+3. **Static Files**: Verify custom handler is working
+4. **Timeout**: Heavy operations may timeout on serverless
+
+### Debug Steps:
+
+1. Check Vercel function logs in dashboard
+2. Test health endpoint first
+3. Verify environment variables
+4. Check for missing dependencies
+
+## Performance Considerations
+
+- **Cold Starts**: Serverless functions may have cold start delays
+- **Memory Limits**: Vercel has memory constraints (1024MB default)
+- **Timeout**: Functions timeout after 10 seconds
+- **File Size**: Large dependencies may cause deployment issues
+
+## Success Indicators
+
+✅ Health endpoint returns 200  
+✅ Main dashboard loads  
+✅ Static files serve correctly  
+✅ API endpoints respond  
+✅ No 500 errors in logs  
+
+## Next Steps
+
+1. Deploy and test basic functionality
+2. Monitor performance and errors
+3. Optimize heavy operations if needed
+4. Add caching for expensive operations
+5. Consider CDN for static assets 
