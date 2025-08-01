@@ -1,827 +1,625 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Analyzer</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    <title>🏛️ Masonic - Personal Portfolio</title>
     <link rel="stylesheet" href="/static/css/style.css">
-</head>
+    <style>
+        /* Masonic Theme - Personal Portfolio */
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
 
-<body class="crypto-theme">
-    <header>
-        <h1>🚀 Portfolio Analyzer</h1>
-        <p>Track your crypto portfolio in real time</p>
+        .masonic-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 2px solid #c17817;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .masonic-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .masonic-header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .masonic-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 10px 0 0 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #c17817;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .back-link:hover {
+            color: #e6b800;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .masonic-card {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid #2a2a4a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .masonic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c17817, #e6b800);
+        }
+
+        .masonic-card h3 {
+            color: #e6b800;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .portfolio-summary {
+            grid-column: 1 / -1;
+            background: linear-gradient(145deg, #16213e, #0f3460);
+        }
+
+        .portfolio-summary .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(193, 120, 23, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(193, 120, 23, 0.3);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e6b800;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .agent-insights {
+            grid-column: 1 / -1;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #c17817;
+        }
+
+        .insight-type {
+            font-weight: bold;
+            color: #c17817;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .recommendation-item {
+            background: linear-gradient(145deg, rgba(193, 120, 23, 0.1), rgba(230, 184, 0, 0.05));
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(193, 120, 23, 0.3);
+        }
+
+        .recommendation-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .type-buy { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
+        .type-sell { background: linear-gradient(45deg, #dc3545, #e83e8c); color: white; }
+        .type-hold { background: linear-gradient(45deg, #ffc107, #fd7e14); color: white; }
+        .type-rebalance { background: linear-gradient(45deg, #6f42c1, #e83e8c); color: white; }
+
+        .portfolio-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .portfolio-table th {
+            background: rgba(193, 120, 23, 0.2);
+            color: #e6b800;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .portfolio-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .portfolio-table tr:hover {
+            background: rgba(193, 120, 23, 0.1);
+        }
+
+        .roi-positive { color: #28a745; }
+        .roi-negative { color: #dc3545; }
+        .roi-neutral { color: #ffc107; }
+
+        .placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(193, 120, 23, 0.3);
+            border-radius: 50%;
+            border-top-color: #c17817;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .masonic-symbol {
+            font-size: 1.2rem;
+        }
+
+        .exclusive-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(45deg, #c17817, #e6b800);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(193, 120, 23, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <header class="masonic-header">
+        <a href="/" class="back-link">← Back to Welcome</a>
+        <h1>🏛️ Masonic</h1>
+        <p>Personal Portfolio Analysis</p>
     </header>
-    <main>
-        <section id="portfolio-summary">
-            <h2>Portfolio Summary</h2>
-            <div id="portfolio-content" class="placeholder">Loading portfolio data...</div>
-        </section>
-        <section id="market-summary">
-            <h2>🤖 AI Market Summary</h2>
-            <div id="market-summary-content" class="placeholder">Loading AI market analysis...</div>
-        </section>
-        <section id="agent-intelligence">
-            <h2>🧠 Agent Decision Engine</h2>
-            <div id="agent-intelligence-content" class="placeholder">Loading personalized recommendations...</div>
-        </section>
-        <section id="news-insights">
-            <h2>📰 News Insights & Analytics</h2>
-            <div id="news-insights-content" class="placeholder">Loading news analytics...</div>
-        </section>
-        <section id="processing-status">
-            <h2>⚙️ System Status</h2>
-            <div id="processing-status-content" class="placeholder">Loading system status...</div>
-        </section>
-        <section id="validation-status">
-            <h2>🔍 REACT Validation Status</h2>
-            <div id="validation-status-content" class="placeholder">Loading validation status...</div>
-        </section>
-        <section id="cost-tracking">
-            <h2>💰 Cost Tracking & Usage</h2>
-            <div id="cost-tracking-content" class="placeholder">Loading cost tracking...</div>
-        </section>
-        <section id="assets">
-            <h2>Your Assets</h2>
-            <div id="assets-content" class="placeholder">Loading assets...</div>
-        </section>
-        <section id="etf-comparison">
-            <h2>ETF Comparison</h2>
-            <div id="etf-content" class="placeholder">Loading ETF data...</div>
-        </section>
-        <section id="trends">
-            <h2>Trends (Coming Soon)</h2>
-            <div class="placeholder">Trend graphs for each asset will appear here.</div>
-        </section>
-    </main>
-    <footer>
-        <p>Made with FastAPI & Jinja2 | <span class="crypto">₿</span> <span class="crypto">Ξ</span> <span
-                class="crypto">◎</span></p>
-    </footer>
+
+    <div class="main-container">
+        <!-- Portfolio Summary -->
+        <div class="masonic-card portfolio-summary">
+            <div class="exclusive-badge">Personal</div>
+            <h3><span class="masonic-symbol">💰</span> Portfolio Overview</h3>
+            <div id="portfolio-summary-content" class="placeholder">
+                <div class="loading"></div> Loading your portfolio data...
+            </div>
+        </div>
+
+        <!-- Agent Intelligence -->
+        <div class="masonic-card agent-insights">
+            <div class="exclusive-badge">AI</div>
+            <h3><span class="masonic-symbol">🧠</span> Brotherhood Intelligence</h3>
+            <div id="agent-intelligence-content" class="placeholder">
+                <div class="loading"></div> Analyzing your portfolio with AI...
+            </div>
+        </div>
+
+        <!-- Portfolio Grid -->
+        <div class="portfolio-grid">
+            <!-- Your Assets -->
+            <div class="masonic-card">
+                <div class="exclusive-badge">Assets</div>
+                <h3><span class="masonic-symbol">📊</span> Your Assets</h3>
+                <div id="assets-content" class="placeholder">
+                    <div class="loading"></div> Loading assets...
+                </div>
+            </div>
+
+            <!-- Market Analysis -->
+            <div class="masonic-card">
+                <div class="exclusive-badge">Market</div>
+                <h3><span class="masonic-symbol">📈</span> Market Analysis</h3>
+                <div id="market-summary-content" class="placeholder">
+                    <div class="loading"></div> Analyzing market conditions...
+                </div>
+            </div>
+
+            <!-- News Insights -->
+            <div class="masonic-card">
+                <div class="exclusive-badge">News</div>
+                <h3><span class="masonic-symbol">📰</span> News Insights</h3>
+                <div id="news-insights-content" class="placeholder">
+                    <div class="loading"></div> Gathering market intelligence...
+                </div>
+            </div>
+
+            <!-- ETF Comparison -->
+            <div class="masonic-card">
+                <div class="exclusive-badge">ETF</div>
+                <h3><span class="masonic-symbol">🏆</span> ETF Comparison</h3>
+                <div id="etf-content" class="placeholder">
+                    <div class="loading"></div> Comparing with ETF performance...
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Utility functions
         function formatROI(roi) {
             if (roi === null || roi === undefined) return '-';
             const val = Number(roi).toFixed(2);
             return (roi > 0 ? '+' : '') + val + '%';
         }
-        async function loadPortfolio() {
-            const portfolioDiv = document.getElementById('portfolio-content');
-            const assetsDiv = document.getElementById('assets-content');
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        // Load portfolio summary with enhanced data
+        async function loadPortfolioSummary() {
+            const summaryDiv = document.getElementById('portfolio-summary-content');
             try {
-                const res = await fetch('/portfolio/assets');
+                const res = await fetch('/api/portfolio');
                 const data = await res.json();
-                const now = new Date().toLocaleString();
+                
                 if (!data.assets || data.assets.length === 0) {
-                    portfolioDiv.innerHTML = `<b>Add money, man!</b><br><small>No assets found as of ${now}</small>`;
-                    assetsDiv.innerHTML = `<b>No assets to display.</b>`;
+                    summaryDiv.innerHTML = `
+                        <div class="summary-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">$0</div>
+                                <div class="stat-label">Total Value</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Assets</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">0%</div>
+                                <div class="stat-label">ROI</div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; margin-top: 20px; color: #c17817;">
+                            <strong>No portfolio data found.</strong><br>
+                            <small>Connect your Binance account to see your portfolio analysis.</small>
+                        </p>
+                    `;
                 } else {
-                    portfolioDiv.innerHTML = `<b>Total assets:</b> ${data.assets.length} <br><small>Last updated: ${now}</small>`;
-                    let table = `<table class="portfolio-table">
-                        <thead>
-                            <tr>
-                                <th>Asset</th>
-                                <th>Free</th>
-                                <th>Locked</th>
-                                <th>Current Price</th>
-                                <th>Cost Basis</th>
-                                <th>ROI 24h</th>
-                                <th>ROI 7d</th>
-                                <th>ROI 28d</th>
-                                <th>ROI 90d</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-                    for (const a of data.assets) {
-                        table += `<tr>
-                            <td>${a.asset}</td>
-                            <td>${a.free}</td>
-                            <td>${a.locked}</td>
-                            <td>${a.current_price !== undefined ? a.current_price.toFixed(4) : '-'}</td>
-                            <td>${a.average_cost_basis !== undefined ? a.average_cost_basis.toFixed(4) : '-'}</td>
-                            <td>${formatROI(a.roi && a.roi['24h'])}</td>
-                            <td>${formatROI(a.roi && a.roi['7d'])}</td>
-                            <td>${formatROI(a.roi && a.roi['28d'])}</td>
-                            <td>${formatROI(a.roi && a.roi['90d'])}</td>
-                        </tr>`;
-                    }
-                    table += `</tbody></table>`;
-                    assetsDiv.innerHTML = table;
+                    const totalValue = data.total_value_usdt || 0;
+                    const totalAssets = data.assets.length;
+                    const avgROI = data.assets.reduce((sum, asset) => sum + (asset.roi_percentage || 0), 0) / totalAssets;
+                    
+                    summaryDiv.innerHTML = `
+                        <div class="summary-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${formatCurrency(totalValue)}</div>
+                                <div class="stat-label">Total Value</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${totalAssets}</div>
+                                <div class="stat-label">Assets</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value ${avgROI >= 0 ? 'roi-positive' : 'roi-negative'}">${formatROI(avgROI)}</div>
+                                <div class="stat-label">Average ROI</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${new Date().toLocaleDateString()}</div>
+                                <div class="stat-label">Last Updated</div>
+                            </div>
+                        </div>
+                    `;
                 }
             } catch (e) {
-                portfolioDiv.innerHTML = `<b>Error loading portfolio.</b>`;
-                assetsDiv.innerHTML = '';
-            }
-        }
-        async function loadETF() {
-            const etfDiv = document.getElementById('etf-content');
-            try {
-                const res = await fetch('/portfolio/etf-comparison');
-                const data = await res.json();
-                let html = `<b>ETF Allocation:</b> <br>`;
-                html += Object.entries(data.etf_allocation).map(([k, v]) => `${k}: ${(v * 100).toFixed(1)}%`).join(' | ');
-                html += `<br><b>ETF Value Now:</b> $${data.etf_value_now.toFixed(2)} (Initial: $${data.initial_investment})`;
-                html += `<br><b>ETF ROI:</b> 24h: ${formatROI(data.etf_roi['24h'])} | 7d: ${formatROI(data.etf_roi['7d'])} | 28d: ${formatROI(data.etf_roi['28d'])} | 90d: ${formatROI(data.etf_roi['90d'])}`;
-                html += `<br><br><table class="portfolio-table">
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Weight</th>
-                            <th>Current Price</th>
-                            <th>ROI 24h</th>
-                            <th>ROI 7d</th>
-                            <th>ROI 28d</th>
-                            <th>ROI 90d</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-                for (const a of data.assets) {
-                    html += `<tr>
-                        <td>${a.asset}</td>
-                        <td>${(a.weight * 100).toFixed(1)}%</td>
-                        <td>${a.current_price !== undefined ? a.current_price.toFixed(4) : '-'}</td>
-                        <td>${formatROI(a.roi && a.roi['24h'])}</td>
-                        <td>${formatROI(a.roi && a.roi['7d'])}</td>
-                        <td>${formatROI(a.roi && a.roi['28d'])}</td>
-                        <td>${formatROI(a.roi && a.roi['90d'])}</td>
-                    </tr>`;
-                }
-                html += `</tbody></table>`;
-                etfDiv.innerHTML = html;
-            } catch (e) {
-                etfDiv.innerHTML = `<b>Error loading ETF data.</b>`;
-            }
-        }
-        async function loadMarketSummary() {
-            const marketSummaryDiv = document.getElementById('market-summary-content');
-            try {
-                // Get portfolio symbols from the portfolio data
-                const portfolioRes = await fetch('/portfolio/assets');
-                const portfolioData = await portfolioRes.json();
-                const symbols = portfolioData.assets ? portfolioData.assets.map(a => a.asset) : ['BTC', 'ETH'];
-
-                // Call the market summary endpoint with POST
-                const res = await fetch('/portfolio/market_summary', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        symbols: symbols,
-                        limit: 5,
-                        always_include_base_coins: true
-                    })
-                });
-                const data = await res.json();
-
-                let html = `<div class="market-summary-card">`;
-                html += `<div class="summary-section">`;
-                html += `<h3>📊 Market Analysis</h3>`;
-                html += `<p>${data.summary || 'No summary available'}</p>`;
-                html += `</div>`;
-
-                html += `<div class="actions-section">`;
-                html += `<h3>💡 Recommended Actions</h3>`;
-                html += `<p>${data.recommended_actions || 'No recommendations available'}</p>`;
-                html += `</div>`;
-
-                html += `<div class="news-section">`;
-                html += `<h3>📰 Latest News for Your Portfolio</h3>`;
-                if (data.news && data.news.length > 0) {
-                    html += `<ul class="news-list">`;
-                    data.news.forEach(item => {
-                        // Add temporal indicators and rich metadata
-                        const isBreaking = item.is_breaking || false;
-                        const sentiment = item.sentiment || 0.5;
-                        const marketImpact = item.market_impact || 'medium';
-                        const timeRelevance = item.time_relevance || 'recent';
-                        const categories = item.categories || [];
-
-                        // Add validation indicator
-                        const validation = item.validation || {};
-                        const isVerified = validation.is_verified || false;
-                        const riskLevel = validation.risk_level || 'medium';
-                        const confidence = validation.confidence_score || 0;
-
-                        html += `<li class="news-item ${isBreaking ? 'breaking-news' : ''} ${riskLevel === 'high' ? 'high-risk' : ''}">`;
-
-                        // Validation badge
-                        if (isVerified) {
-                            html += `<span class="validation-badge verified">✅ VERIFIED</span>`;
-                        } else if (riskLevel === 'high') {
-                            html += `<span class="validation-badge high-risk">⚠️ HIGH RISK</span>`;
-                        } else if (riskLevel === 'medium') {
-                            html += `<span class="validation-badge medium-risk">⚠️ MEDIUM RISK</span>`;
-                        } else {
-                            html += `<span class="validation-badge low-risk">✅ LOW RISK</span>`;
-                        }
-
-                        // Temporal indicator
-                        if (isBreaking) {
-                            html += `<span class="temporal-badge breaking">🔥 BREAKING</span>`;
-                        } else if (timeRelevance === 'recent') {
-                            html += `<span class="temporal-badge recent">⚡ RECENT</span>`;
-                        }
-
-                        html += `<div class="news-header">`;
-                        html += `<strong>${item.title}</strong>`;
-                        html += `<span class="crypto-topic">${item.crypto_topic}</span>`;
-                        html += `</div>`;
-
-                        html += `<div class="news-content">`;
-                        html += `<p>${item.chunk_text.substring(0, 150)}...</p>`;
-                        html += `</div>`;
-
-                        // Rich metadata display
-                        html += `<div class="news-metadata">`;
-                        html += `<div class="metadata-row">`;
-                        html += `<span class="sentiment-indicator ${getSentimentClass(sentiment)}">`;
-                        html += `😊 ${(sentiment * 100).toFixed(0)}% Positive`;
-                        html += `</span>`;
-                        html += `<span class="impact-indicator ${getImpactClass(marketImpact)}">`;
-                        html += `📈 ${marketImpact.toUpperCase()} Impact`;
-                        html += `</span>`;
-                        html += `<span class="time-indicator">`;
-                        html += `⏰ ${timeRelevance.charAt(0).toUpperCase() + timeRelevance.slice(1)}`;
-                        html += `</span>`;
-                        html += `</div>`;
-
-                        // Validation metadata
-                        if (validation && Object.keys(validation).length > 0) {
-                            html += `<div class="validation-metadata">`;
-                            html += `<div class="validation-row">`;
-                            html += `<span class="validation-status ${isVerified ? 'verified' : 'unverified'}">`;
-                            html += `${isVerified ? '✅' : '❌'} ${isVerified ? 'Verified' : 'Unverified'}`;
-                            html += `</span>`;
-                            html += `<span class="confidence-score">`;
-                            html += `🎯 ${(confidence * 100).toFixed(0)}% Confidence`;
-                            html += `</span>`;
-                            html += `<span class="risk-level ${riskLevel}">`;
-                            html += `⚠️ ${riskLevel.toUpperCase()} Risk`;
-                            html += `</span>`;
-                            html += `</div>`;
-                            if (validation.verification_summary) {
-                                html += `<div class="verification-summary">`;
-                                html += `<small>🔍 ${validation.verification_summary.substring(0, 150)}...</small>`;
-                                html += `</div>`;
-                            }
-                            html += `</div>`;
-                        }
-
-                        if (categories.length > 0) {
-                            html += `<div class="categories">`;
-                            html += `<span class="category-label">🏷️ Categories:</span>`;
-                            categories.forEach(cat => {
-                                html += `<span class="category-tag">${cat}</span>`;
-                            });
-                            html += `</div>`;
-                        }
-                        html += `</div>`;
-
-                        html += `</li>`;
-                    });
-                    html += `</ul>`;
-                } else {
-                    html += `<p>No recent news found for your portfolio.</p>`;
-                }
-                html += `</div>`;
-                html += `</div>`;
-
-                marketSummaryDiv.innerHTML = html;
-            } catch (e) {
-                marketSummaryDiv.innerHTML = `<div class="error">❌ Error loading market summary: ${e.message}</div>`;
+                summaryDiv.innerHTML = `<p style="color: #dc3545;">Error loading portfolio data.</p>`;
             }
         }
 
-        function getSentimentClass(sentiment) {
-            if (sentiment >= 0.7) return 'positive';
-            if (sentiment >= 0.4) return 'neutral';
-            return 'negative';
-        }
-
-        function getImpactClass(impact) {
-            switch (impact.toLowerCase()) {
-                case 'high': return 'high-impact';
-                case 'medium': return 'medium-impact';
-                case 'low': return 'low-impact';
-                default: return 'medium-impact';
-            }
-        }
-
+        // Load agent intelligence with enhanced analysis
         async function loadAgentIntelligence() {
             const agentDiv = document.getElementById('agent-intelligence-content');
             try {
-                // Get agent insights
-                const insightsRes = await fetch('/agent/insights');
-                const insightsData = await insightsRes.json();
-
-                // Get recommendations
-                const recommendationsRes = await fetch('/agent/recommendations?limit=5');
-                const recommendationsData = await recommendationsRes.json();
-
-                let html = `<div class="agent-intelligence-card">`;
-
-                // Portfolio Performance Overview
-                html += `<div class="performance-overview">`;
-                html += `<h3>📊 Portfolio Performance</h3>`;
-                html += `<div class="performance-stats">`;
-                html += `<div class="stat-item">`;
-                html += `<span class="stat-number">$${insightsData.portfolio_performance.total_value.toLocaleString()}</span>`;
-                html += `<span class="stat-label">Total Value</span>`;
-                html += `</div>`;
-                html += `<div class="stat-item">`;
-                html += `<span class="stat-number ${insightsData.portfolio_performance.total_roi >= 0 ? 'positive' : 'negative'}">${insightsData.portfolio_performance.total_roi.toFixed(2)}%</span>`;
-                html += `<span class="stat-label">Total ROI</span>`;
-                html += `</div>`;
-                html += `<div class="stat-item">`;
-                html += `<span class="stat-number">${(insightsData.portfolio_performance.risk_score * 100).toFixed(0)}%</span>`;
-                html += `<span class="stat-label">Risk Score</span>`;
-                html += `</div>`;
-                html += `<div class="stat-item">`;
-                html += `<span class="stat-number">${(insightsData.portfolio_performance.diversification_score * 100).toFixed(0)}%</span>`;
-                html += `<span class="stat-label">Diversification</span>`;
-                html += `</div>`;
-                html += `</div>`;
-                html += `</div>`;
+                const res = await fetch('/agent/insights');
+                const data = await res.json();
+                
+                let html = '';
+                
+                // Portfolio Performance
+                if (data.portfolio_performance) {
+                    html += `
+                        <div class="insight-item">
+                            <div class="insight-type">Portfolio Performance</div>
+                            <p><strong>Total Value:</strong> ${formatCurrency(data.portfolio_performance.total_value || 0)}</p>
+                            <p><strong>ROI:</strong> <span class="${(data.portfolio_performance.total_roi || 0) >= 0 ? 'roi-positive' : 'roi-negative'}">${formatROI(data.portfolio_performance.total_roi)}</span></p>
+                            <p><strong>Risk Score:</strong> ${(data.portfolio_performance.risk_score || 0).toFixed(2)}/10</p>
+                            <p><strong>Market Regime:</strong> ${data.portfolio_performance.market_regime || 'Unknown'}</p>
+                        </div>
+                    `;
+                }
 
                 // Market Analysis
-                html += `<div class="market-analysis">`;
-                html += `<h3>🌍 Market Analysis</h3>`;
-                html += `<div class="market-regime ${insightsData.market_analysis.regime.toLowerCase()}">`;
-                html += `<span class="regime-badge">${insightsData.market_analysis.regime} MARKET</span>`;
-                html += `</div>`;
-
-                if (insightsData.market_analysis.top_performers.length > 0) {
-                    html += `<div class="performers">`;
-                    html += `<h4>🏆 Top Performers</h4>`;
-                    html += `<div class="performer-tags">`;
-                    insightsData.market_analysis.top_performers.forEach(asset => {
-                        html += `<span class="performer-tag">${asset}</span>`;
-                    });
-                    html += `</div>`;
-                    html += `</div>`;
+                if (data.market_analysis) {
+                    html += `
+                        <div class="insight-item">
+                            <div class="insight-type">Market Analysis</div>
+                            <p><strong>Regime:</strong> ${data.market_analysis.regime || 'Unknown'}</p>
+                            <p><strong>Top Performers:</strong> ${(data.market_analysis.top_performers || []).join(', ') || 'None'}</p>
+                            <p><strong>Underperformers:</strong> ${(data.market_analysis.underperformers || []).join(', ') || 'None'}</p>
+                            <p><strong>Rebalancing Needed:</strong> ${data.market_analysis.rebalancing_needed ? 'Yes' : 'No'}</p>
+                        </div>
+                    `;
                 }
 
-                if (insightsData.market_analysis.underperformers.length > 0) {
-                    html += `<div class="underperformers">`;
-                    html += `<h4>📉 Underperformers</h4>`;
-                    html += `<div class="underperformer-tags">`;
-                    insightsData.market_analysis.underperformers.forEach(asset => {
-                        html += `<span class="underperformer-tag">${asset}</span>`;
-                    });
-                    html += `</div>`;
-                    html += `</div>`;
-                }
-                html += `</div>`;
-
-                // Personalized Recommendations
-                html += `<div class="recommendations-section">`;
-                html += `<h3>💡 Personalized Recommendations</h3>`;
-
-                if (recommendationsData && recommendationsData.length > 0) {
-                    html += `<div class="recommendations-list">`;
-                    recommendationsData.forEach((rec, index) => {
-                        const priorityClass = rec.execution_priority <= 2 ? 'high-priority' :
-                            rec.execution_priority <= 3 ? 'medium-priority' : 'low-priority';
-                        const riskClass = rec.risk_level.toLowerCase();
-
-                        html += `<div class="recommendation-card ${priorityClass}">`;
-                        html += `<div class="recommendation-header">`;
-                        html += `<span class="action-badge ${rec.action_type.toLowerCase()}">${rec.action_type}</span>`;
-                        html += `<span class="asset-name">${rec.asset}</span>`;
-                        html += `<span class="priority-badge">Priority ${rec.execution_priority}</span>`;
-                        html += `</div>`;
-
-                        html += `<div class="recommendation-content">`;
-                        html += `<p class="recommendation-reason">${rec.reason}</p>`;
-
-                        html += `<div class="recommendation-details">`;
-                        html += `<div class="detail-row">`;
-                        html += `<span class="confidence-score">🎯 ${(rec.confidence_score * 100).toFixed(0)}% Confidence</span>`;
-                        html += `<span class="risk-level ${riskClass}">⚠️ ${rec.risk_level} Risk</span>`;
-                        html += `</div>`;
-
-                        if (rec.percentage) {
-                            html += `<div class="detail-row">`;
-                            html += `<span class="action-percentage">📊 ${rec.percentage}% of position</span>`;
-                            html += `</div>`;
-                        }
-                        html += `</div>`;
-
-                        html += `<div class="recommendation-context">`;
-                        html += `<div class="context-section">`;
-                        html += `<h5>👤 Personal Context</h5>`;
-                        html += `<p>${rec.personal_context}</p>`;
-                        html += `</div>`;
-
-                        html += `<div class="context-section">`;
-                        html += `<h5>🌍 Market Context</h5>`;
-                        html += `<p>${rec.market_context}</p>`;
-                        html += `</div>`;
-                        html += `</div>`;
-
-                        html += `<div class="expected-impact">`;
-                        html += `<h5>📈 Expected Impact</h5>`;
-                        html += `<p>${rec.expected_impact}</p>`;
-                        html += `</div>`;
-                        html += `</div>`;
-                        html += `</div>`;
-                    });
-                    html += `</div>`;
-                } else {
-                    html += `<p>No specific recommendations at this time. Your portfolio appears to be well-positioned.</p>`;
-                }
-                html += `</div>`;
-
-                // Opportunities and Warnings
-                if (insightsData.opportunities.length > 0 || insightsData.warnings.length > 0) {
-                    html += `<div class="insights-summary">`;
-
-                    if (insightsData.opportunities.length > 0) {
-                        html += `<div class="opportunities">`;
-                        html += `<h3>🚀 Opportunities</h3>`;
-                        html += `<ul>`;
-                        insightsData.opportunities.forEach(opp => {
-                            html += `<li>${opp}</li>`;
-                        });
-                        html += `</ul>`;
-                        html += `</div>`;
-                    }
-
-                    if (insightsData.warnings.length > 0) {
-                        html += `<div class="warnings">`;
-                        html += `<h3>⚠️ Warnings</h3>`;
-                        html += `<ul>`;
-                        insightsData.warnings.forEach(warning => {
-                            html += `<li>${warning}</li>`;
-                        });
-                        html += `</ul>`;
-                        html += `</div>`;
-                    }
-                    html += `</div>`;
+                // Opportunities
+                if (data.opportunities && data.opportunities.length > 0) {
+                    html += `
+                        <div class="insight-item">
+                            <div class="insight-type">Opportunities</div>
+                            ${data.opportunities.map(opp => `
+                                <div class="recommendation-item">
+                                    <div class="recommendation-type type-${opp.action_type?.toLowerCase() || 'hold'}">${opp.action_type || 'HOLD'}</div>
+                                    <strong>${opp.asset}</strong> - ${opp.reason}
+                                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                                        Confidence: ${(opp.confidence_score * 100).toFixed(0)}% | Priority: ${opp.execution_priority || 'Medium'}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
                 }
 
-                html += `</div>`;
-                agentDiv.innerHTML = html;
+                // Warnings
+                if (data.warnings && data.warnings.length > 0) {
+                    html += `
+                        <div class="insight-item">
+                            <div class="insight-type">Warnings</div>
+                            ${data.warnings.map(warning => `<p style="color: #ffc107;">⚠️ ${warning}</p>`).join('')}
+                        </div>
+                    `;
+                }
+
+                agentDiv.innerHTML = html || '<p>No intelligence data available.</p>';
             } catch (e) {
-                agentDiv.innerHTML = `<div class="error">❌ Error loading agent intelligence: ${e.message}</div>`;
+                agentDiv.innerHTML = `<p style="color: #dc3545;">Error loading agent intelligence.</p>`;
             }
         }
 
+        // Load assets with enhanced display
+        async function loadAssets() {
+            const assetsDiv = document.getElementById('assets-content');
+            try {
+                const res = await fetch('/api/portfolio');
+                const data = await res.json();
+                
+                if (!data.assets || data.assets.length === 0) {
+                    assetsDiv.innerHTML = '<p>No assets found.</p>';
+                    return;
+                }
+
+                let table = `
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Holdings</th>
+                                <th>Value</th>
+                                <th>Cost Basis</th>
+                                <th>ROI</th>
+                                <th>Avg Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.assets.forEach(asset => {
+                    const roiClass = (asset.roi_percentage || 0) >= 0 ? 'roi-positive' : 'roi-negative';
+                    table += `
+                        <tr>
+                            <td><strong>${asset.asset}</strong></td>
+                            <td>${(asset.total || 0).toFixed(4)}</td>
+                            <td>${formatCurrency(asset.usdt_value || 0)}</td>
+                            <td>${formatCurrency(asset.cost_basis || 0)}</td>
+                            <td class="${roiClass}">${formatROI(asset.roi_percentage)}</td>
+                            <td>${formatCurrency(asset.avg_buy_price || 0)}</td>
+                        </tr>
+                    `;
+                });
+                
+                table += '</tbody></table>';
+                assetsDiv.innerHTML = table;
+            } catch (e) {
+                assetsDiv.innerHTML = '<p style="color: #dc3545;">Error loading assets.</p>';
+            }
+        }
+
+        // Load market analysis
+        async function loadMarketAnalysis() {
+            const marketDiv = document.getElementById('market-summary-content');
+            try {
+                const res = await fetch('/agent/insights');
+                const data = await res.json();
+                
+                if (data.market_analysis) {
+                    marketDiv.innerHTML = `
+                        <div class="insight-item">
+                            <div class="insight-type">Current Market Regime</div>
+                            <p><strong>${data.market_analysis.regime || 'Unknown'}</strong></p>
+                            <p>Market is currently in a ${data.market_analysis.regime?.toLowerCase() || 'unknown'} phase.</p>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-type">Performance Leaders</div>
+                            <p><strong>Top Performers:</strong> ${(data.market_analysis.top_performers || []).join(', ') || 'None identified'}</p>
+                            <p><strong>Underperformers:</strong> ${(data.market_analysis.underperformers || []).join(', ') || 'None identified'}</p>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-type">Portfolio Health</div>
+                            <p><strong>Diversification Score:</strong> ${(data.portfolio_performance?.diversification_score || 0).toFixed(2)}/10</p>
+                            <p><strong>Rebalancing Needed:</strong> ${data.market_analysis.rebalancing_needed ? 'Yes - Consider rebalancing' : 'No - Portfolio is well-balanced'}</p>
+                        </div>
+                    `;
+                } else {
+                    marketDiv.innerHTML = '<p>Market analysis not available.</p>';
+                }
+            } catch (e) {
+                marketDiv.innerHTML = '<p style="color: #dc3545;">Error loading market analysis.</p>';
+            }
+        }
+
+        // Load news insights
         async function loadNewsInsights() {
-            const newsInsightsDiv = document.getElementById('news-insights-content');
+            const newsDiv = document.getElementById('news-insights-content');
             try {
-                // Get portfolio symbols
-                const portfolioRes = await fetch('/api/portfolio');
-                const portfolioData = await portfolioRes.json();
-                const symbols = portfolioData.assets ? portfolioData.assets.map(a => a.asset) : ['BTC', 'ETH'];
-
-                // Call the market summary endpoint to get news data
-                const res = await fetch('/portfolio/market_summary', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        symbols: symbols,
-                        limit: 10,
-                        always_include_base_coins: true
-                    })
-                });
+                const res = await fetch('/api/news-briefing');
                 const data = await res.json();
-
-                if (data.news && data.news.length > 0) {
-                    // Calculate analytics
-                    const totalNews = data.news.length;
-                    const breakingNews = data.news.filter(item => item.is_breaking).length;
-                    const avgSentiment = data.news.reduce((sum, item) => sum + (item.sentiment || 0.5), 0) / totalNews;
-                    const marketImpacts = data.news.reduce((acc, item) => {
-                        const impact = item.market_impact || 'medium';
-                        acc[impact] = (acc[impact] || 0) + 1;
-                        return acc;
-                    }, {});
-
-                    let html = `<div class="insights-card">`;
-
-                    // Analytics summary
-                    html += `<div class="analytics-summary">`;
-                    html += `<h3>📊 News Analytics</h3>`;
-                    html += `<div class="analytics-grid">`;
-                    html += `<div class="analytics-item">`;
-                    html += `<span class="analytics-number">${totalNews}</span>`;
-                    html += `<span class="analytics-label">Total Articles</span>`;
-                    html += `</div>`;
-                    html += `<div class="analytics-item">`;
-                    html += `<span class="analytics-number">${breakingNews}</span>`;
-                    html += `<span class="analytics-label">Breaking News</span>`;
-                    html += `</div>`;
-                    html += `<div class="analytics-item">`;
-                    html += `<span class="analytics-number">${(avgSentiment * 100).toFixed(0)}%</span>`;
-                    html += `<span class="analytics-label">Avg Sentiment</span>`;
-                    html += `</div>`;
-                    html += `<div class="analytics-item">`;
-                    html += `<span class="analytics-number">${marketImpacts.high || 0}</span>`;
-                    html += `<span class="analytics-label">High Impact</span>`;
-                    html += `</div>`;
-                    html += `</div>`;
-                    html += `</div>`;
-
-                    // Market impact breakdown
-                    html += `<div class="impact-breakdown">`;
-                    html += `<h3>📈 Market Impact Distribution</h3>`;
-                    html += `<div class="impact-bars">`;
-                    Object.entries(marketImpacts).forEach(([impact, count]) => {
-                        const percentage = (count / totalNews * 100).toFixed(1);
-                        html += `<div class="impact-bar">`;
-                        html += `<span class="impact-label">${impact.toUpperCase()}</span>`;
-                        html += `<div class="impact-progress">`;
-                        html += `<div class="impact-fill ${getImpactClass(impact)}" style="width: ${percentage}%"></div>`;
-                        html += `</div>`;
-                        html += `<span class="impact-count">${count} (${percentage}%)</span>`;
-                        html += `</div>`;
+                
+                if (data.intelligence && data.intelligence.length > 0) {
+                    let html = '';
+                    data.intelligence.forEach(item => {
+                        const sentimentClass = item.sentiment === 'bullish' ? 'roi-positive' : 
+                                             item.sentiment === 'bearish' ? 'roi-negative' : 'roi-neutral';
+                        html += `
+                            <div class="insight-item">
+                                <div class="insight-type">${item.sentiment?.toUpperCase() || 'NEUTRAL'}</div>
+                                <p><strong>${item.title}</strong></p>
+                                <p style="font-size: 0.9rem; opacity: 0.8;">${item.brotherhood_insight || 'Market intelligence'}</p>
+                                <p style="font-size: 0.8rem; color: #c17817;">Impact: ${item.impact?.toUpperCase() || 'MEDIUM'}</p>
+                            </div>
+                        `;
                     });
-                    html += `</div>`;
-                    html += `</div>`;
-
-                    // Sentiment distribution
-                    html += `<div class="sentiment-distribution">`;
-                    html += `<h3>😊 Sentiment Analysis</h3>`;
-                    html += `<div class="sentiment-chart">`;
-                    const positive = data.news.filter(item => (item.sentiment || 0.5) >= 0.7).length;
-                    const neutral = data.news.filter(item => (item.sentiment || 0.5) >= 0.4 && (item.sentiment || 0.5) < 0.7).length;
-                    const negative = data.news.filter(item => (item.sentiment || 0.5) < 0.4).length;
-
-                    html += `<div class="sentiment-item positive">`;
-                    html += `<span class="sentiment-emoji">😊</span>`;
-                    html += `<span class="sentiment-label">Positive</span>`;
-                    html += `<span class="sentiment-count">${positive}</span>`;
-                    html += `</div>`;
-                    html += `<div class="sentiment-item neutral">`;
-                    html += `<span class="sentiment-emoji">😐</span>`;
-                    html += `<span class="sentiment-label">Neutral</span>`;
-                    html += `<span class="sentiment-count">${neutral}</span>`;
-                    html += `</div>`;
-                    html += `<div class="sentiment-item negative">`;
-                    html += `<span class="sentiment-emoji">😞</span>`;
-                    html += `<span class="sentiment-label">Negative</span>`;
-                    html += `<span class="sentiment-count">${negative}</span>`;
-                    html += `</div>`;
-                    html += `</div>`;
-                    html += `</div>`;
-
-                    html += `</div>`;
-
-                    newsInsightsDiv.innerHTML = html;
+                    newsDiv.innerHTML = html;
                 } else {
-                    newsInsightsDiv.innerHTML = `<div class="placeholder">No news data available for analytics.</div>`;
+                    newsDiv.innerHTML = '<p>No news insights available.</p>';
                 }
             } catch (e) {
-                newsInsightsDiv.innerHTML = `<div class="error">❌ Error loading news insights: ${e.message}</div>`;
+                newsDiv.innerHTML = '<p style="color: #dc3545;">Error loading news insights.</p>';
             }
         }
 
-        async function loadProcessingStatus() {
-            const statusDiv = document.getElementById('processing-status-content');
+        // Load ETF comparison
+        async function loadETFComparison() {
+            const etfDiv = document.getElementById('etf-content');
             try {
-                let html = `<div class="status-card">`;
-                html += `<h3>⚙️ System Components</h3>`;
-
-                // Check various system components
-                const components = [
-                    { name: 'NewsAPI Integration', status: 'operational', icon: '📰' },
-                    { name: 'AI Enrichment Pipeline', status: 'operational', icon: '🤖' },
-                    { name: 'Temporal Context Processing', status: 'operational', icon: '⏰' },
-                    { name: 'Vector Database (Milvus)', status: 'operational', icon: '🗄️' },
-                    { name: 'Portfolio Data (Binance)', status: 'operational', icon: '📊' },
-                    { name: 'Market Summary Generation', status: 'operational', icon: '📈' },
-                    { name: 'REACT Validation System', status: 'operational', icon: '🔍' }
-                ];
-
-                html += `<div class="components-grid">`;
-                components.forEach(component => {
-                    const statusClass = component.status === 'operational' ? 'operational' : 'error';
-                    const statusIcon = component.status === 'operational' ? '✅' : '❌';
-                    html += `<div class="component-item ${statusClass}">`;
-                    html += `<span class="component-icon">${component.icon}</span>`;
-                    html += `<span class="component-name">${component.name}</span>`;
-                    html += `<span class="component-status">${statusIcon} ${component.status}</span>`;
-                    html += `</div>`;
-                });
-                html += `</div>`;
-
-                // Processing pipeline status
-                html += `<div class="pipeline-status">`;
-                html += `<h3>🔄 Processing Pipeline</h3>`;
-                html += `<div class="pipeline-steps">`;
-                const steps = [
-                    { name: 'News Fetching', status: 'active', description: 'Retrieving latest crypto news' },
-                    { name: 'Temporal Enhancement', status: 'active', description: 'Adding time-based context' },
-                    { name: 'AI Enrichment', status: 'active', description: 'Generating metadata & sentiment' },
-                    { name: 'Summary Processing', status: 'active', description: 'Creating searchable summaries' },
-                    { name: 'REACT Validation', status: 'active', description: 'Fact-checking with Tavily search' },
-                    { name: 'Vector Storage', status: 'active', description: 'Storing in Milvus database' }
-                ];
-
-                steps.forEach((step, index) => {
-                    html += `<div class="pipeline-step">`;
-                    html += `<div class="step-number">${index + 1}</div>`;
-                    html += `<div class="step-content">`;
-                    html += `<div class="step-name">${step.name}</div>`;
-                    html += `<div class="step-description">${step.description}</div>`;
-                    html += `</div>`;
-                    html += `<div class="step-status">✅ Active</div>`;
-                    html += `</div>`;
-                });
-                html += `</div>`;
-                html += `</div>`;
-
-                html += `</div>`;
-                statusDiv.innerHTML = html;
-            } catch (e) {
-                statusDiv.innerHTML = `<div class="error">❌ Error loading system status: ${e.message}</div>`;
-            }
-        }
-
-        async function loadValidationStatus() {
-            const validationDiv = document.getElementById('validation-status-content');
-            try {
-                // Get portfolio symbols
-                const portfolioRes = await fetch('/portfolio/assets');
-                const portfolioData = await portfolioRes.json();
-                const symbols = portfolioData.assets ? portfolioData.assets.map(a => a.asset) : ['BTC', 'ETH'];
-
-                // Call the market summary endpoint to get validation data
-                const res = await fetch('/portfolio/market_summary', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        symbols: symbols,
-                        limit: 10,
-                        always_include_base_coins: true
-                    })
-                });
+                const res = await fetch('/api/etf-comparison');
                 const data = await res.json();
-
-                let html = `<div class="validation-card">`;
-                html += `<h3>🔍 REACT Validation Overview</h3>`;
-
-                if (data.news && data.news.length > 0) {
-                    // Calculate validation statistics
-                    const totalNews = data.news.length;
-                    const validatedNews = data.news.filter(item => item.validation).length;
-                    const verifiedNews = data.news.filter(item => item.validation && item.validation.is_verified).length;
-                    const highRiskNews = data.news.filter(item => item.validation && item.validation.risk_level === 'high').length;
-                    const avgConfidence = data.news.reduce((sum, item) => sum + (item.validation?.confidence_score || 0), 0) / totalNews;
-
-                    html += `<div class="validation-stats">`;
-                    html += `<div class="validation-stat-item">`;
-                    html += `<span class="stat-number">${validatedNews}</span>`;
-                    html += `<span class="stat-label">Validated Articles</span>`;
-                    html += `</div>`;
-                    html += `<div class="validation-stat-item">`;
-                    html += `<span class="stat-number">${verifiedNews}</span>`;
-                    html += `<span class="stat-label">Verified Claims</span>`;
-                    html += `</div>`;
-                    html += `<div class="validation-stat-item">`;
-                    html += `<span class="stat-number">${highRiskNews}</span>`;
-                    html += `<span class="stat-label">High Risk Articles</span>`;
-                    html += `</div>`;
-                    html += `<div class="validation-stat-item">`;
-                    html += `<span class="stat-number">${(avgConfidence * 100).toFixed(0)}%</span>`;
-                    html += `<span class="stat-label">Avg Confidence</span>`;
-                    html += `</div>`;
-                    html += `</div>`;
-
-                    // Validation breakdown
-                    html += `<div class="validation-breakdown">`;
-                    html += `<h4>📊 Validation Breakdown</h4>`;
-                    html += `<div class="validation-bars">`;
-
-                    const riskLevels = ['high', 'medium', 'low'];
-                    riskLevels.forEach(level => {
-                        const count = data.news.filter(item => item.validation && item.validation.risk_level === level).length;
-                        const percentage = (count / totalNews * 100).toFixed(1);
-                        html += `<div class="validation-bar">`;
-                        html += `<span class="validation-label">${level.toUpperCase()} RISK</span>`;
-                        html += `<div class="validation-progress">`;
-                        html += `<div class="validation-fill ${level}-risk" style="width: ${percentage}%"></div>`;
-                        html += `</div>`;
-                        html += `<span class="validation-count">${count} (${percentage}%)</span>`;
-                        html += `</div>`;
-                    });
-
-                    html += `</div>`;
-                    html += `</div>`;
-
+                
+                if (data.etf_allocation) {
+                    etfDiv.innerHTML = `
+                        <div class="insight-item">
+                            <div class="insight-type">ETF Performance</div>
+                            <p><strong>ETF Value:</strong> ${formatCurrency(data.etf_value_now || 0)}</p>
+                            <p><strong>Initial Investment:</strong> ${formatCurrency(data.initial_investment || 0)}</p>
+                            <p><strong>ETF ROI:</strong> <span class="${(data.etf_roi?.['24h'] || 0) >= 0 ? 'roi-positive' : 'roi-negative'}">${formatROI(data.etf_roi?.['24h'])}</span> (24h)</p>
+                        </div>
+                        <div class="insight-item">
+                            <div class="insight-type">ETF Allocation</div>
+                            ${Object.entries(data.etf_allocation || {}).map(([asset, weight]) => `
+                                <p><strong>${asset}:</strong> ${(weight * 100).toFixed(1)}%</p>
+                            `).join('')}
+                        </div>
+                    `;
                 } else {
-                    html += `<div class="placeholder">No validation data available.</div>`;
+                    etfDiv.innerHTML = '<p>ETF comparison not available.</p>';
                 }
-
-                html += `</div>`;
-                validationDiv.innerHTML = html;
             } catch (e) {
-                validationDiv.innerHTML = `<div class="error">❌ Error loading validation status: ${e.message}</div>`;
+                etfDiv.innerHTML = '<p style="color: #dc3545;">Error loading ETF comparison.</p>';
             }
         }
 
-        async function loadCostTracking() {
-            const costDiv = document.getElementById('cost-tracking-content');
-            try {
-                // Get current month summary
-                const currentMonthRes = await fetch('/admin/costs/current-month');
-                const currentMonthData = await currentMonthRes.json();
-
-                // Get cost alerts
-                const alertsRes = await fetch('/admin/costs/alerts');
-                const alertsData = await alertsRes.json();
-
-                let html = `<div class="cost-card">`;
-                html += `<h3>💰 API Cost Overview</h3>`;
-
-                // Current month summary
-                const monthly = currentMonthData.monthly;
-                const today = currentMonthData.today;
-                const projected = currentMonthData.projected_monthly;
-
-                html += `<div class="cost-summary">`;
-                html += `<div class="cost-stat-item">`;
-                html += `<span class="cost-number">$${monthly.total_cost.toFixed(2)}</span>`;
-                html += `<span class="cost-label">This Month</span>`;
-                html += `</div>`;
-                html += `<div class="cost-stat-item">`;
-                html += `<span class="cost-number">$${today.total_cost.toFixed(2)}</span>`;
-                html += `<span class="cost-label">Today</span>`;
-                html += `</div>`;
-                html += `<div class="cost-stat-item">`;
-                html += `<span class="cost-number">$${projected.total_cost.toFixed(2)}</span>`;
-                html += `<span class="cost-label">Projected Monthly</span>`;
-                html += `</div>`;
-                html += `<div class="cost-stat-item">`;
-                html += `<span class="cost-number">${monthly.call_count}</span>`;
-                html += `<span class="cost-label">Total API Calls</span>`;
-                html += `</div>`;
-                html += `</div>`;
-
-                // Service breakdown
-                html += `<div class="service-breakdown">`;
-                html += `<h4>📊 Service Breakdown</h4>`;
-                html += `<div class="service-bars">`;
-
-                Object.entries(monthly.service_costs).forEach(([service, cost]) => {
-                    const percentage = (cost / monthly.total_cost * 100).toFixed(1);
-                    html += `<div class="service-bar">`;
-                    html += `<span class="service-label">${service.toUpperCase()}</span>`;
-                    html += `<div class="service-progress">`;
-                    html += `<div class="service-fill" style="width: ${percentage}%"></div>`;
-                    html += `</div>`;
-                    html += `<span class="service-cost">$${cost.toFixed(2)} (${percentage}%)</span>`;
-                    html += `</div>`;
-                });
-
-                html += `</div>`;
-                html += `</div>`;
-
-                // Cost alerts
-                if (alertsData.alerts.length > 0) {
-                    html += `<div class="cost-alerts">`;
-                    html += `<h4>⚠️ Cost Alerts</h4>`;
-                    html += `<div class="alerts-list">`;
-
-                    alertsData.alerts.forEach(alert => {
-                        const alertClass = alert.severity === 'critical' ? 'critical' :
-                            alert.severity === 'high' ? 'high' : 'medium';
-                        html += `<div class="alert-item ${alertClass}">`;
-                        html += `<span class="alert-icon">${alert.type === 'warning' ? '⚠️' : 'ℹ️'}</span>`;
-                        html += `<span class="alert-message">${alert.message}</span>`;
-                        html += `</div>`;
-                    });
-
-                    html += `</div>`;
-                    html += `</div>`;
-                }
-
-                html += `</div>`;
-                costDiv.innerHTML = html;
-            } catch (e) {
-                costDiv.innerHTML = `<div class="error">❌ Error loading cost tracking: ${e.message}</div>`;
-            }
-        }
-
-        window.onload = function () {
-            loadPortfolio();
-            loadETF();
-            loadMarketSummary();
+        // Initialize all data loading
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPortfolioSummary();
             loadAgentIntelligence();
+            loadAssets();
+            loadMarketAnalysis();
             loadNewsInsights();
-            loadProcessingStatus();
-            loadValidationStatus();
-            loadCostTracking();
-        };
+            loadETFComparison();
+        });
     </script>
 </body>
-
 </html>
