@@ -54,58 +54,11 @@ class AgentInsightsResponse(BaseModel):
 async def get_agent_analysis(request: AgentAnalysisRequest) -> AgentAnalysisResponse:
     """Get comprehensive agent analysis with personalized recommendations."""
     try:
-        # Get portfolio data with improved fallback
-        try:
-            portfolio_data = await get_portfolio_data()
-        except Exception as e:
-            print(f"⚠️ Portfolio data error in agent analysis: {str(e)[:100]}... - using mock data")
-            portfolio_data = None
+        # Get portfolio data (will use mock data on Vercel automatically)
+        portfolio_data = await get_portfolio_data()
         
         if not portfolio_data:
-            # Create mock portfolio data when Binance is not configured
-            from utils.binance_client import PortfolioAsset as BinancePortfolioAsset
-            
-            mock_assets = [
-                BinancePortfolioAsset(
-                    asset="BTC",
-                    free=0.5,
-                    locked=0.0,
-                    total=0.5,
-                    usdt_value=25000.0,
-                    cost_basis=20000.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=40000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ETH",
-                    free=2.0,
-                    locked=0.0,
-                    total=2.0,
-                    usdt_value=8000.0,
-                    cost_basis=6000.0,
-                    roi_percentage=33.3,
-                    avg_buy_price=3000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ADA",
-                    free=1000.0,
-                    locked=0.0,
-                    total=1000.0,
-                    usdt_value=500.0,
-                    cost_basis=400.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=0.4
-                )
-            ]
-            
-            portfolio_data = PortfolioData(
-                total_value_usdt=33500.0,
-                total_cost_basis=26400.0,
-                total_roi_percentage=26.9,
-                assets=mock_assets,
-                last_updated=datetime.now(timezone.utc),
-                trade_history=[]
-            )
+            raise HTTPException(status_code=500, detail="No portfolio data available")
         
         # Generate agent analysis
         symbols = request.symbols if request.symbols else []
@@ -136,58 +89,11 @@ async def get_recommendations(
 ) -> List[Dict[str, Any]]:
     """Get filtered recommendations based on criteria."""
     try:
-        # Get portfolio data with improved fallback
-        try:
-            portfolio_data = await get_portfolio_data()
-        except Exception as e:
-            print(f"⚠️ Portfolio data error in agent analysis: {str(e)[:100]}... - using mock data")
-            portfolio_data = None
+        # Get portfolio data (will use mock data on Vercel automatically)
+        portfolio_data = await get_portfolio_data()
         
         if not portfolio_data:
-            # Create mock portfolio data when Binance is not configured
-            from utils.binance_client import PortfolioAsset as BinancePortfolioAsset
-            
-            mock_assets = [
-                BinancePortfolioAsset(
-                    asset="BTC",
-                    free=0.5,
-                    locked=0.0,
-                    total=0.5,
-                    usdt_value=25000.0,
-                    cost_basis=20000.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=40000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ETH",
-                    free=2.0,
-                    locked=0.0,
-                    total=2.0,
-                    usdt_value=8000.0,
-                    cost_basis=6000.0,
-                    roi_percentage=33.3,
-                    avg_buy_price=3000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ADA",
-                    free=1000.0,
-                    locked=0.0,
-                    total=1000.0,
-                    usdt_value=500.0,
-                    cost_basis=400.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=0.4
-                )
-            ]
-            
-            portfolio_data = PortfolioData(
-                total_value_usdt=33500.0,
-                total_cost_basis=26400.0,
-                total_roi_percentage=26.9,
-                assets=mock_assets,
-                last_updated=datetime.now(timezone.utc),
-                trade_history=[]
-            )
+            raise HTTPException(status_code=500, detail="No portfolio data available")
         
         # Generate agent analysis
         analysis = await generate_enhanced_agent_analysis(portfolio_data)
@@ -213,58 +119,11 @@ async def get_recommendations(
 async def get_agent_insights() -> AgentInsightsResponse:
     """Get high-level agent insights and portfolio analysis."""
     try:
-        # Get portfolio data with improved fallback
-        try:
-            portfolio_data = await get_portfolio_data()
-        except Exception as e:
-            print(f"⚠️ Portfolio data error in agent insights: {str(e)[:100]}... - using mock data")
-            portfolio_data = None
+        # Get portfolio data (will use mock data on Vercel automatically)
+        portfolio_data = await get_portfolio_data()
         
         if not portfolio_data:
-            # Create mock portfolio data when Binance is not configured
-            from utils.binance_client import PortfolioAsset as BinancePortfolioAsset
-            
-            mock_assets = [
-                BinancePortfolioAsset(
-                    asset="BTC",
-                    free=0.5,
-                    locked=0.0,
-                    total=0.5,
-                    usdt_value=25000.0,
-                    cost_basis=20000.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=40000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ETH",
-                    free=2.0,
-                    locked=0.0,
-                    total=2.0,
-                    usdt_value=8000.0,
-                    cost_basis=6000.0,
-                    roi_percentage=33.3,
-                    avg_buy_price=3000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ADA",
-                    free=1000.0,
-                    locked=0.0,
-                    total=1000.0,
-                    usdt_value=500.0,
-                    cost_basis=400.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=0.4
-                )
-            ]
-            
-            portfolio_data = PortfolioData(
-                total_value_usdt=33500.0,
-                total_cost_basis=26400.0,
-                total_roi_percentage=26.9,
-                assets=mock_assets,
-                last_updated=datetime.now(timezone.utc),
-                trade_history=[]
-            )
+            raise HTTPException(status_code=500, detail="No portfolio data available")
         
         # Generate agent analysis
         analysis = await generate_enhanced_agent_analysis(portfolio_data)
@@ -367,58 +226,11 @@ async def get_agent_performance() -> Dict[str, Any]:
 async def get_market_sentiment() -> Dict[str, Any]:
     """Get current market sentiment analysis."""
     try:
-        # Get portfolio data with improved fallback
-        try:
-            portfolio_data = await get_portfolio_data()
-        except Exception as e:
-            print(f"⚠️ Portfolio data error in market sentiment: {str(e)[:100]}... - using mock data")
-            portfolio_data = None
+        # Get portfolio data (will use mock data on Vercel automatically)
+        portfolio_data = await get_portfolio_data()
         
         if not portfolio_data:
-            # Create mock portfolio data when Binance is not configured
-            from utils.binance_client import PortfolioAsset as BinancePortfolioAsset
-            
-            mock_assets = [
-                BinancePortfolioAsset(
-                    asset="BTC",
-                    free=0.5,
-                    locked=0.0,
-                    total=0.5,
-                    usdt_value=25000.0,
-                    cost_basis=20000.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=40000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ETH",
-                    free=2.0,
-                    locked=0.0,
-                    total=2.0,
-                    usdt_value=8000.0,
-                    cost_basis=6000.0,
-                    roi_percentage=33.3,
-                    avg_buy_price=3000.0
-                ),
-                BinancePortfolioAsset(
-                    asset="ADA",
-                    free=1000.0,
-                    locked=0.0,
-                    total=1000.0,
-                    usdt_value=500.0,
-                    cost_basis=400.0,
-                    roi_percentage=25.0,
-                    avg_buy_price=0.4
-                )
-            ]
-            
-            portfolio_data = PortfolioData(
-                total_value_usdt=33500.0,
-                total_cost_basis=26400.0,
-                total_roi_percentage=26.9,
-                assets=mock_assets,
-                last_updated=datetime.now(timezone.utc),
-                trade_history=[]
-            )
+            raise HTTPException(status_code=500, detail="No portfolio data available")
         
         # Generate agent analysis
         analysis = await generate_enhanced_agent_analysis(portfolio_data)

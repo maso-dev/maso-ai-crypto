@@ -260,6 +260,66 @@ def get_binance_client() -> Optional[BinanceClient]:
 
 async def get_portfolio_data() -> Optional[PortfolioData]:
     """Get portfolio data using the global client with fallback to mock data."""
+    
+    # Check if we're on Vercel (force mock data)
+    is_vercel = os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None
+    
+    if is_vercel:
+        print("🏛️ Vercel detected - using Masonic mock data")
+        # Return mock data when on Vercel
+        mock_assets = [
+            PortfolioAsset(
+                asset="BTC",
+                free=0.5,
+                locked=0.0,
+                total=0.5,
+                usdt_value=25000.0,
+                cost_basis=20000.0,
+                roi_percentage=25.0,
+                avg_buy_price=40000.0
+            ),
+            PortfolioAsset(
+                asset="ETH",
+                free=2.0,
+                locked=0.0,
+                total=2.0,
+                usdt_value=8000.0,
+                cost_basis=6000.0,
+                roi_percentage=33.3,
+                avg_buy_price=3000.0
+            ),
+            PortfolioAsset(
+                asset="ADA",
+                free=1000.0,
+                locked=0.0,
+                total=1000.0,
+                usdt_value=500.0,
+                cost_basis=400.0,
+                roi_percentage=25.0,
+                avg_buy_price=0.4
+            ),
+            PortfolioAsset(
+                asset="SOL",
+                free=50.0,
+                locked=0.0,
+                total=50.0,
+                usdt_value=3000.0,
+                cost_basis=2500.0,
+                roi_percentage=20.0,
+                avg_buy_price=50.0
+            )
+        ]
+        
+        return PortfolioData(
+            total_value_usdt=36500.0,
+            total_cost_basis=28900.0,
+            total_roi_percentage=26.3,
+            assets=mock_assets,
+            last_updated=datetime.now(timezone.utc),
+            trade_history=[]
+        )
+    
+    # Try real Binance data for local development
     try:
         client = get_binance_client()
         if client:
