@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from typing import Dict, Any
 from pathlib import Path
 import os
@@ -33,11 +33,11 @@ async def health_check():
         "status": "healthy", 
         "service": "Portfolio Analyzer API",
         "deployment": "Vercel",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "environment_vars": {
             "binance_key_set": bool(os.getenv("BINANCE_API_KEY")),
             "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
-            "news_key_set": bool(os.getenv("NEWS_API_KEY"))
+            "news_key_set": bool(os.getenv("NEWSAPI_KEY"))
         }
     }
 
@@ -49,6 +49,127 @@ async def test_endpoint():
         "timestamp": "2024",
         "status": "success"
     }
+
+# NEW: Welcome section for non-logged users
+@app.get("/")
+async def welcome_page(request: Request):
+    """Welcome page for non-logged users - shows market overview and opportunities"""
+    try:
+        return templates.TemplateResponse("welcome.html", {"request": request})
+    except Exception as e:
+        # Fallback to simple HTML if template fails
+        return HTMLResponse(content=f"""
+        <html>
+            <head><title>Welcome - Portfolio Analyzer</title></head>
+            <body>
+                <h1>🚀 Welcome to Portfolio Analyzer</h1>
+                <p>Your AI-powered crypto portfolio assistant</p>
+                <p><a href="/v1">View Full Dashboard (v1)</a></p>
+                <p><a href="/api/health">Health Check</a></p>
+                <p>Error loading welcome page: {str(e)}</p>
+            </body>
+        </html>
+        """)
+
+# NEW: Dream team portfolio API
+@app.get("/api/dream-team")
+async def get_dream_team_portfolio():
+    """Get dream team portfolio data (BTC, ETH, RIPPLE, SOL, DOGE)"""
+    dream_team = [
+        {"symbol": "BTC", "name": "Bitcoin", "weight": 0.4},
+        {"symbol": "ETH", "name": "Ethereum", "weight": 0.3},
+        {"symbol": "XRP", "name": "Ripple", "weight": 0.15},
+        {"symbol": "SOL", "name": "Solana", "weight": 0.1},
+        {"symbol": "DOGE", "name": "Dogecoin", "weight": 0.05}
+    ]
+    
+    return {
+        "portfolio_name": "Dream Team Portfolio",
+        "description": "A balanced portfolio of top cryptocurrencies",
+        "assets": dream_team,
+        "total_weight": 1.0,
+        "risk_level": "Moderate",
+        "last_updated": "2024"
+    }
+
+# NEW: Today's opportunities API
+@app.get("/api/opportunities")
+async def get_todays_opportunities():
+    """Get today's market opportunities"""
+    return {
+        "date": "2024",
+        "opportunities": [
+            {
+                "type": "buy",
+                "asset": "BTC",
+                "reason": "Strong support level reached",
+                "confidence": 0.8,
+                "timeframe": "short-term"
+            },
+            {
+                "type": "hold",
+                "asset": "ETH",
+                "reason": "Consolidation phase, wait for breakout",
+                "confidence": 0.7,
+                "timeframe": "medium-term"
+            },
+            {
+                "type": "watch",
+                "asset": "SOL",
+                "reason": "Potential breakout candidate",
+                "confidence": 0.6,
+                "timeframe": "short-term"
+            }
+        ]
+    }
+
+# NEW: News briefing API
+@app.get("/api/news-briefing")
+async def get_news_briefing():
+    """Get current news briefing for welcome page"""
+    return {
+        "date": "2024",
+        "summary": "Market showing mixed signals with Bitcoin holding key support levels",
+        "top_stories": [
+            {
+                "title": "Bitcoin maintains $40K support level",
+                "sentiment": "positive",
+                "impact": "high"
+            },
+            {
+                "title": "Ethereum upgrade progress continues",
+                "sentiment": "neutral",
+                "impact": "medium"
+            },
+            {
+                "title": "Regulatory clarity improves market sentiment",
+                "sentiment": "positive",
+                "impact": "high"
+            }
+        ]
+    }
+
+# VERSION 1: Keep current dashboard at /v1
+@app.get("/v1")
+def dashboard_v1(request: Request):
+    """Version 1 dashboard - current implementation"""
+    try:
+        return templates.TemplateResponse("dashboard.html", {"request": request})
+    except Exception as e:
+        # Fallback to simple HTML if template fails
+        return HTMLResponse(content=f"""
+        <html>
+            <head><title>Portfolio Analyzer v1</title></head>
+            <body>
+                <h1>Portfolio Analyzer API v1</h1>
+                <p>FastAPI is running on Vercel!</p>
+                <p><a href="/">← Back to Welcome</a></p>
+                <p><a href="/api/health">Health Check</a></p>
+                <p><a href="/api/test">Test Endpoint</a></p>
+                <p>Error loading dashboard: {str(e)}</p>
+            </body>
+        </html>
+        """)
 
 # Import routers with error handling
 try:
@@ -80,27 +201,6 @@ try:
     app.include_router(agent_router)
 except ImportError as e:
     print(f"Warning: Could not import agent_router: {e}")
-
-@app.get("/")
-def dashboard(request: Request):
-    # Render the dashboard with Jinja2
-    try:
-        return templates.TemplateResponse("dashboard.html", {"request": request})
-    except Exception as e:
-        # Fallback to simple HTML if template fails
-        from fastapi.responses import HTMLResponse
-        return HTMLResponse(content=f"""
-        <html>
-            <head><title>Portfolio Analyzer</title></head>
-            <body>
-                <h1>Portfolio Analyzer API</h1>
-                <p>FastAPI is running on Vercel!</p>
-                <p><a href="/api/health">Health Check</a></p>
-                <p><a href="/api/test">Test Endpoint</a></p>
-                <p>Error loading dashboard: {str(e)}</p>
-            </body>
-        </html>
-        """)
 
 @app.get("/api/portfolio", response_model=Dict[str, Any])
 async def get_portfolio() -> Dict[str, Any]:

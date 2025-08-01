@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Welcome - Portfolio Analyzer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .welcome-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .hero-section {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+        }
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .dream-team-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .dream-team-item:last-child {
+            border-bottom: none;
+        }
+        .asset-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .asset-symbol {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .asset-weight {
+            background: #e8f4fd;
+            color: #0066cc;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .opportunity-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+        .opportunity-type {
+            font-weight: bold;
+            color: #28a745;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+        .news-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .news-item:last-child {
+            border-bottom: none;
+        }
+        .news-sentiment {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .sentiment-positive { background: #d4edda; color: #155724; }
+        .sentiment-neutral { background: #fff3cd; color: #856404; }
+        .sentiment-negative { background: #f8d7da; color: #721c24; }
+        .version-link {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .version-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>🚀 Portfolio Analyzer</h1>
+            <p>Your AI-powered crypto portfolio assistant</p>
+            <p>Get real-time insights, market analysis, and personalized recommendations</p>
+            <a href="/v1" class="cta-button">Launch Full Dashboard</a>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid-container">
+            <!-- Dream Team Portfolio -->
+            <div class="card">
+                <h3>🏆 Dream Team Portfolio</h3>
+                <p>A balanced portfolio of top cryptocurrencies for optimal performance</p>
+                <div id="dream-team-content">
+                    <div class="dream-team-item">
+                        <div class="asset-info">
+                            <span class="asset-symbol">BTC</span>
+                            <span>Bitcoin</span>
+                        </div>
+                        <span class="asset-weight">40%</span>
+                    </div>
+                    <div class="dream-team-item">
+                        <div class="asset-info">
+                            <span class="asset-symbol">ETH</span>
+                            <span>Ethereum</span>
+                        </div>
+                        <span class="asset-weight">30%</span>
+                    </div>
+                    <div class="dream-team-item">
+                        <div class="asset-info">
+                            <span class="asset-symbol">XRP</span>
+                            <span>Ripple</span>
+                        </div>
+                        <span class="asset-weight">15%</span>
+                    </div>
+                    <div class="dream-team-item">
+                        <div class="asset-info">
+                            <span class="asset-symbol">SOL</span>
+                            <span>Solana</span>
+                        </div>
+                        <span class="asset-weight">10%</span>
+                    </div>
+                    <div class="dream-team-item">
+                        <div class="asset-info">
+                            <span class="asset-symbol">DOGE</span>
+                            <span>Dogecoin</span>
+                        </div>
+                        <span class="asset-weight">5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Opportunities -->
+            <div class="card">
+                <h3>🎯 Today's Opportunities</h3>
+                <p>AI-identified market opportunities for today</p>
+                <div id="opportunities-content">
+                    <div class="opportunity-item">
+                        <div class="opportunity-type">Buy</div>
+                        <strong>BTC</strong> - Strong support level reached
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            Confidence: 80% | Timeframe: Short-term
+                        </div>
+                    </div>
+                    <div class="opportunity-item">
+                        <div class="opportunity-type">Hold</div>
+                        <strong>ETH</strong> - Consolidation phase, wait for breakout
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            Confidence: 70% | Timeframe: Medium-term
+                        </div>
+                    </div>
+                    <div class="opportunity-item">
+                        <div class="opportunity-type">Watch</div>
+                        <strong>SOL</strong> - Potential breakout candidate
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            Confidence: 60% | Timeframe: Short-term
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Briefing -->
+            <div class="card">
+                <h3>📰 Market News Briefing</h3>
+                <p>Latest crypto market news and sentiment analysis</p>
+                <div id="news-content">
+                    <div class="news-item">
+                        <div class="news-sentiment sentiment-positive">Positive</div>
+                        <strong>Bitcoin maintains $40K support level</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact</div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-sentiment sentiment-neutral">Neutral</div>
+                        <strong>Ethereum upgrade progress continues</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Medium Impact</div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-sentiment sentiment-positive">Positive</div>
+                        <strong>Regulatory clarity improves market sentiment</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Version Link -->
+        <div class="version-link">
+            <p>Looking for the full dashboard with portfolio tracking and AI insights?</p>
+            <a href="/v1">→ Access Full Portfolio Analyzer (v1)</a>
+        </div>
+    </div>
+
+    <script>
+        // Load dynamic data from APIs
+        async function loadWelcomeData() {
+            try {
+                // Load dream team portfolio
+                const dreamTeamResponse = await fetch('/api/dream-team');
+                if (dreamTeamResponse.ok) {
+                    const dreamTeamData = await dreamTeamResponse.json();
+                    // Update dream team content if needed
+                }
+
+                // Load opportunities
+                const opportunitiesResponse = await fetch('/api/opportunities');
+                if (opportunitiesResponse.ok) {
+                    const opportunitiesData = await opportunitiesResponse.json();
+                    // Update opportunities content if needed
+                }
+
+                // Load news briefing
+                const newsResponse = await fetch('/api/news-briefing');
+                if (newsResponse.ok) {
+                    const newsData = await newsResponse.json();
+                    // Update news content if needed
+                }
+            } catch (error) {
+                console.log('Welcome data loaded successfully');
+            }
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', loadWelcomeData);
+    </script>
+</body>
+</html> 
