@@ -6,7 +6,7 @@ from typing import Dict, Any
 from pathlib import Path
 import os
 
-app = FastAPI(title="Portfolio Analyzer API")
+app = FastAPI(title="🏛️ Masonic - Alpha Strategy Advisor")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -31,7 +31,7 @@ async def health_check():
     """Health check endpoint for Vercel deployment"""
     return {
         "status": "healthy", 
-        "service": "Portfolio Analyzer API",
+        "service": "🏛️ Masonic - Alpha Strategy Advisor",
         "deployment": "Vercel",
         "version": "2.0.0",
         "environment_vars": {
@@ -71,11 +71,11 @@ async def welcome_page(request: Request):
         </html>
         """)
 
-# NEW: Dream team portfolio API
+# NEW: Alpha portfolio API
 @app.get("/api/dream-team")
 async def get_dream_team_portfolio():
-    """Get dream team portfolio data (BTC, ETH, RIPPLE, SOL, DOGE)"""
-    dream_team = [
+    """Get alpha portfolio data (BTC, ETH, RIPPLE, SOL, DOGE)"""
+    alpha_portfolio = [
         {"symbol": "BTC", "name": "Bitcoin", "weight": 0.4},
         {"symbol": "ETH", "name": "Ethereum", "weight": 0.3},
         {"symbol": "XRP", "name": "Ripple", "weight": 0.15},
@@ -84,67 +84,73 @@ async def get_dream_team_portfolio():
     ]
     
     return {
-        "portfolio_name": "Dream Team Portfolio",
-        "description": "A balanced portfolio of top cryptocurrencies",
-        "assets": dream_team,
+        "portfolio_name": "Masonic Alpha Portfolio",
+        "description": "Our brotherhood's most trusted allocation strategy",
+        "assets": alpha_portfolio,
         "total_weight": 1.0,
         "risk_level": "Moderate",
         "last_updated": "2024"
     }
 
-# NEW: Today's opportunities API
+# NEW: Alpha signals API
 @app.get("/api/opportunities")
 async def get_todays_opportunities():
-    """Get today's market opportunities"""
+    """Get today's alpha signals from our brotherhood"""
     return {
         "date": "2024",
-        "opportunities": [
+        "signals": [
             {
-                "type": "buy",
+                "type": "strong_buy",
                 "asset": "BTC",
-                "reason": "Strong support level reached",
-                "confidence": 0.8,
-                "timeframe": "short-term"
+                "reason": "Key support level reached, institutional accumulation detected",
+                "confidence": 0.85,
+                "timeframe": "short-term",
+                "brotherhood_insight": "Smart money positioning for accumulation"
             },
             {
                 "type": "hold",
                 "asset": "ETH",
-                "reason": "Consolidation phase, wait for breakout",
-                "confidence": 0.7,
-                "timeframe": "medium-term"
+                "reason": "Consolidation phase, wait for breakout signal",
+                "confidence": 0.75,
+                "timeframe": "medium-term",
+                "brotherhood_insight": "Technical analysis shows consolidation pattern"
             },
             {
                 "type": "watch",
                 "asset": "SOL",
-                "reason": "Potential breakout candidate",
-                "confidence": 0.6,
-                "timeframe": "short-term"
+                "reason": "Potential breakout candidate, monitor closely",
+                "confidence": 0.65,
+                "timeframe": "short-term",
+                "brotherhood_insight": "Volume analysis suggests accumulation"
             }
         ]
     }
 
-# NEW: News briefing API
+# NEW: Brotherhood intelligence API
 @app.get("/api/news-briefing")
 async def get_news_briefing():
-    """Get current news briefing for welcome page"""
+    """Get brotherhood intelligence for welcome page"""
     return {
         "date": "2024",
-        "summary": "Market showing mixed signals with Bitcoin holding key support levels",
-        "top_stories": [
+        "summary": "Market showing institutional accumulation with Bitcoin holding key support levels",
+        "intelligence": [
             {
-                "title": "Bitcoin maintains $40K support level",
-                "sentiment": "positive",
-                "impact": "high"
+                "title": "Bitcoin maintains $40K support - institutional accumulation detected",
+                "sentiment": "bullish",
+                "impact": "high",
+                "brotherhood_insight": "Smart money positioning for accumulation phase"
             },
             {
-                "title": "Ethereum upgrade progress continues",
+                "title": "Ethereum upgrade progress - smart money positioning",
                 "sentiment": "neutral",
-                "impact": "medium"
+                "impact": "medium",
+                "brotherhood_insight": "Technical analysis shows consolidation pattern"
             },
             {
-                "title": "Regulatory clarity improves market sentiment",
-                "sentiment": "positive",
-                "impact": "high"
+                "title": "Regulatory clarity - institutional adoption accelerating",
+                "sentiment": "bullish",
+                "impact": "high",
+                "brotherhood_insight": "Market intelligence suggests institutional inflow"
             }
         ]
     }

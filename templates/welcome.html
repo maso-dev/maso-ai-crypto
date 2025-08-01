@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Welcome - Portfolio Analyzer</title>
+    <title>🏛️ Masonic - Alpha Strategy Advisor</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         .welcome-container {
@@ -14,56 +14,105 @@
         .hero-section {
             text-align: center;
             padding: 40px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: white;
             border-radius: 15px;
             margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
         }
         .hero-section h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
         }
-        .hero-section p {
-            font-size: 1.2rem;
+        .hero-section .subtitle {
+            font-size: 1.4rem;
             opacity: 0.9;
+            margin-bottom: 15px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-section .tagline {
+            font-size: 1rem;
+            opacity: 0.7;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
         }
         .cta-button {
             display: inline-block;
-            background: #ff6b6b;
+            background: linear-gradient(45deg, #c17817, #e6b800);
             color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
+            padding: 18px 35px;
+            border-radius: 30px;
             text-decoration: none;
             font-weight: bold;
-            margin-top: 20px;
-            transition: transform 0.3s ease;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .cta-button:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(193, 120, 23, 0.3);
+            border-color: #e6b800;
         }
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
+            gap: 25px;
             margin-top: 30px;
         }
         .card {
-            background: white;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
             border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid #e1e5e9;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c17817, #e6b800);
         }
         .card h3 {
-            color: #333;
+            color: #1a1a2e;
             margin-bottom: 15px;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .dream-team-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #f0f0f0;
         }
         .dream-team-item:last-child {
@@ -72,34 +121,38 @@
         .asset-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         .asset-symbol {
             font-weight: bold;
-            color: #667eea;
+            color: #c17817;
+            font-size: 1.1rem;
         }
         .asset-weight {
-            background: #e8f4fd;
-            color: #0066cc;
-            padding: 4px 8px;
-            border-radius: 12px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
             font-size: 0.8rem;
+            font-weight: bold;
         }
         .opportunity-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #28a745;
+            background: linear-gradient(145deg, #f8f9fa, #ffffff);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #c17817;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         .opportunity-type {
             font-weight: bold;
-            color: #28a745;
+            color: #c17817;
             text-transform: uppercase;
             font-size: 0.8rem;
+            letter-spacing: 1px;
         }
         .news-item {
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #f0f0f0;
         }
         .news-item:last-child {
@@ -107,25 +160,51 @@
         }
         .news-sentiment {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 0.7rem;
             font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .sentiment-positive { background: #d4edda; color: #155724; }
-        .sentiment-neutral { background: #fff3cd; color: #856404; }
-        .sentiment-negative { background: #f8d7da; color: #721c24; }
+        .sentiment-positive { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
+        .sentiment-neutral { background: linear-gradient(45deg, #ffc107, #fd7e14); color: white; }
+        .sentiment-negative { background: linear-gradient(45deg, #dc3545, #e83e8c); color: white; }
         .version-link {
             text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(145deg, #f8f9fa, #ffffff);
+            border-radius: 15px;
+            border: 2px solid #e1e5e9;
         }
         .version-link a {
-            color: #667eea;
+            color: #c17817;
             text-decoration: none;
             font-weight: bold;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+        .version-link a:hover {
+            color: #e6b800;
+        }
+        .masonic-symbol {
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+        .exclusive-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(45deg, #c17817, #e6b800);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(193, 120, 23, 0.3);
         }
     </style>
 </head>
@@ -133,18 +212,20 @@
     <div class="welcome-container">
         <!-- Hero Section -->
         <div class="hero-section">
-            <h1>🚀 Portfolio Analyzer</h1>
-            <p>Your AI-powered crypto portfolio assistant</p>
-            <p>Get real-time insights, market analysis, and personalized recommendations</p>
-            <a href="/v1" class="cta-button">Launch Full Dashboard</a>
+            <h1>🏛️ Masonic</h1>
+            <div class="subtitle">Alpha Strategy Advisor</div>
+            <div class="tagline">"Access to insights others don't have"</div>
+            <p>Join the brotherhood of informed traders</p>
+            <a href="/v1" class="cta-button">Enter the Lodge</a>
         </div>
 
         <!-- Main Content Grid -->
         <div class="grid-container">
             <!-- Dream Team Portfolio -->
             <div class="card">
-                <h3>🏆 Dream Team Portfolio</h3>
-                <p>A balanced portfolio of top cryptocurrencies for optimal performance</p>
+                <div class="exclusive-badge">Exclusive</div>
+                <h3><span class="masonic-symbol">🏆</span> Alpha Portfolio</h3>
+                <p>Our brotherhood's most trusted allocation strategy</p>
                 <div id="dream-team-content">
                     <div class="dream-team-item">
                         <div class="asset-info">
@@ -186,28 +267,29 @@
 
             <!-- Today's Opportunities -->
             <div class="card">
-                <h3>🎯 Today's Opportunities</h3>
-                <p>AI-identified market opportunities for today</p>
+                <div class="exclusive-badge">Alpha</div>
+                <h3><span class="masonic-symbol">🎯</span> Today's Alpha Signals</h3>
+                <p>Exclusive market intelligence from our brotherhood</p>
                 <div id="opportunities-content">
                     <div class="opportunity-item">
-                        <div class="opportunity-type">Buy</div>
-                        <strong>BTC</strong> - Strong support level reached
+                        <div class="opportunity-type">Strong Buy</div>
+                        <strong>BTC</strong> - Key support level reached, accumulation phase
                         <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                            Confidence: 80% | Timeframe: Short-term
+                            Confidence: 85% | Timeframe: Short-term
                         </div>
                     </div>
                     <div class="opportunity-item">
                         <div class="opportunity-type">Hold</div>
-                        <strong>ETH</strong> - Consolidation phase, wait for breakout
+                        <strong>ETH</strong> - Consolidation phase, wait for breakout signal
                         <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                            Confidence: 70% | Timeframe: Medium-term
+                            Confidence: 75% | Timeframe: Medium-term
                         </div>
                     </div>
                     <div class="opportunity-item">
                         <div class="opportunity-type">Watch</div>
-                        <strong>SOL</strong> - Potential breakout candidate
+                        <strong>SOL</strong> - Potential breakout candidate, monitor closely
                         <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                            Confidence: 60% | Timeframe: Short-term
+                            Confidence: 65% | Timeframe: Short-term
                         </div>
                     </div>
                 </div>
@@ -215,23 +297,24 @@
 
             <!-- News Briefing -->
             <div class="card">
-                <h3>📰 Market News Briefing</h3>
-                <p>Latest crypto market news and sentiment analysis</p>
+                <div class="exclusive-badge">Insider</div>
+                <h3><span class="masonic-symbol">📰</span> Brotherhood Intelligence</h3>
+                <p>Market insights known only to our inner circle</p>
                 <div id="news-content">
                     <div class="news-item">
-                        <div class="news-sentiment sentiment-positive">Positive</div>
-                        <strong>Bitcoin maintains $40K support level</strong>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact</div>
+                        <div class="news-sentiment sentiment-positive">Bullish</div>
+                        <strong>Bitcoin maintains $40K support - institutional accumulation detected</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact | Insider Knowledge</div>
                     </div>
                     <div class="news-item">
                         <div class="news-sentiment sentiment-neutral">Neutral</div>
-                        <strong>Ethereum upgrade progress continues</strong>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Medium Impact</div>
+                        <strong>Ethereum upgrade progress - smart money positioning</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Medium Impact | Technical Analysis</div>
                     </div>
                     <div class="news-item">
-                        <div class="news-sentiment sentiment-positive">Positive</div>
-                        <strong>Regulatory clarity improves market sentiment</strong>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact</div>
+                        <div class="news-sentiment sentiment-positive">Bullish</div>
+                        <strong>Regulatory clarity - institutional adoption accelerating</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact | Market Intelligence</div>
                     </div>
                 </div>
             </div>
@@ -239,8 +322,8 @@
 
         <!-- Version Link -->
         <div class="version-link">
-            <p>Looking for the full dashboard with portfolio tracking and AI insights?</p>
-            <a href="/v1">→ Access Full Portfolio Analyzer (v1)</a>
+            <p>Ready to access the full Masonic experience?</p>
+            <a href="/v1">→ Enter the Inner Sanctum (Full Dashboard)</a>
         </div>
     </div>
 
@@ -269,7 +352,7 @@
                     // Update news content if needed
                 }
             } catch (error) {
-                console.log('Welcome data loaded successfully');
+                console.log('Masonic data loaded successfully');
             }
         }
 
