@@ -10,11 +10,11 @@ from main import app
 client = TestClient(app)
 
 def test_dashboard_loads():
-    """Test that the dashboard loads successfully."""
+    """Test that the welcome page loads successfully."""
     response = client.get("/")
     assert response.status_code == 200
-    assert "Agent Decision Engine" in response.text
-    assert "Portfolio Analyzer" in response.text
+    assert "Masonic" in response.text
+    assert "Alpha Strategy Advisor" in response.text
 
 def test_agent_insights_endpoint():
     """Test that agent insights endpoint returns valid data."""
