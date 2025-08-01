@@ -335,24 +335,109 @@
                 const dreamTeamResponse = await fetch('/api/dream-team');
                 if (dreamTeamResponse.ok) {
                     const dreamTeamData = await dreamTeamResponse.json();
-                    // Update dream team content if needed
+                    updateDreamTeamContent(dreamTeamData);
                 }
 
                 // Load opportunities
                 const opportunitiesResponse = await fetch('/api/opportunities');
                 if (opportunitiesResponse.ok) {
                     const opportunitiesData = await opportunitiesResponse.json();
-                    // Update opportunities content if needed
+                    updateOpportunitiesContent(opportunitiesData);
                 }
 
                 // Load news briefing
                 const newsResponse = await fetch('/api/news-briefing');
                 if (newsResponse.ok) {
                     const newsData = await newsResponse.json();
-                    // Update news content if needed
+                    updateNewsContent(newsData);
                 }
             } catch (error) {
                 console.log('Masonic data loaded successfully');
+            }
+        }
+
+        // Update dream team portfolio content
+        function updateDreamTeamContent(data) {
+            const container = document.getElementById('dream-team-content');
+            if (!container || !data.assets) return;
+
+            container.innerHTML = '';
+            data.assets.forEach(asset => {
+                const item = document.createElement('div');
+                item.className = 'dream-team-item';
+                item.innerHTML = `
+                    <div class="asset-info">
+                        <span class="asset-symbol">${asset.symbol}</span>
+                        <span>${asset.name}</span>
+                    </div>
+                    <span class="asset-weight">${(asset.weight * 100).toFixed(0)}%</span>
+                `;
+                container.appendChild(item);
+            });
+
+            // Update description if available
+            const description = document.querySelector('#dream-team-content').parentElement.querySelector('p');
+            if (description && data.description) {
+                description.textContent = data.description;
+            }
+        }
+
+        // Update opportunities content
+        function updateOpportunitiesContent(data) {
+            const container = document.getElementById('opportunities-content');
+            if (!container || !data.signals) return;
+
+            container.innerHTML = '';
+            data.signals.forEach(signal => {
+                const item = document.createElement('div');
+                item.className = 'opportunity-item';
+                
+                const typeClass = signal.type === 'strong_buy' ? 'Strong Buy' : 
+                                 signal.type === 'buy' ? 'Buy' : 
+                                 signal.type === 'hold' ? 'Hold' : 
+                                 signal.type === 'sell' ? 'Sell' : 'Watch';
+                
+                item.innerHTML = `
+                    <div class="opportunity-type">${typeClass}</div>
+                    <strong>${signal.asset}</strong> - ${signal.reason}
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        Confidence: ${(signal.confidence * 100).toFixed(0)}% | Timeframe: ${signal.timeframe}
+                    </div>
+                    ${signal.brotherhood_insight ? `<div style="font-size: 0.7rem; color: #c17817; margin-top: 3px; font-style: italic;">💡 ${signal.brotherhood_insight}</div>` : ''}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Update news content
+        function updateNewsContent(data) {
+            const container = document.getElementById('news-content');
+            if (!container || !data.intelligence) return;
+
+            container.innerHTML = '';
+            data.intelligence.forEach(item => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                
+                const sentimentClass = item.sentiment === 'bullish' ? 'sentiment-positive' : 
+                                     item.sentiment === 'bearish' ? 'sentiment-negative' : 'sentiment-neutral';
+                const sentimentText = item.sentiment === 'bullish' ? 'Bullish' : 
+                                    item.sentiment === 'bearish' ? 'Bearish' : 'Neutral';
+                
+                newsItem.innerHTML = `
+                    <div class="news-sentiment ${sentimentClass}">${sentimentText}</div>
+                    <strong>${item.title}</strong>
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        ${item.impact.charAt(0).toUpperCase() + item.impact.slice(1)} Impact | ${item.brotherhood_insight ? item.brotherhood_insight : 'Market Intelligence'}
+                    </div>
+                `;
+                container.appendChild(newsItem);
+            });
+
+            // Update summary if available
+            const summaryElement = document.querySelector('#news-content').parentElement.querySelector('p');
+            if (summaryElement && data.summary) {
+                summaryElement.textContent = data.summary;
             }
         }
 
