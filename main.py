@@ -287,31 +287,60 @@ async def get_news_briefing():
 # VERSION 1: Keep current dashboard at /v1
 @app.get("/dashboard")
 def smart_dashboard(request: Request):
-    """Smart dashboard that detects API connectivity and routes accordingly - Replit compatible version"""
+    """Smart dashboard that detects API connectivity and routes accordingly"""
     try:
-        # For Replit compatibility, start with mock data mode
-        # The frontend will handle the API calls and data detection
-        print("🏛️ Smart Dashboard: Replit mode - showing dashboard with frontend API detection")
-        return templates.TemplateResponse("dashboard.html", {
-            "request": request,
-            "data_mode": "mock",  # Start with mock, frontend will detect real data
-            "api_status": "detecting"
-        })
+        # Test Binance API connectivity
+        from utils.binance_client import get_binance_client, get_portfolio_data
+        
+        # Check if we have API keys configured
+        binance_client = get_binance_client()
+        api_keys_configured = binance_client is not None
+        
+        # Try to get real portfolio data
+        import asyncio
+        portfolio_data = asyncio.run(get_portfolio_data())
+        
+        # Determine if we're using real or mock data
+        is_real_data = False
+        if portfolio_data and api_keys_configured:
+            # Check if this looks like real data (not our mock data)
+            total_value = portfolio_data.total_value_usdt
+            asset_count = len(portfolio_data.assets)
+            
+            # Our mock data has specific characteristics
+            if not (total_value == 36500.0 and asset_count == 4 and 
+                   any(asset.asset == "BTC" and asset.usdt_value == 25000.0 for asset in portfolio_data.assets)):
+                is_real_data = True
+        
+        # Route to appropriate dashboard
+        if is_real_data:
+            print("🏛️ Smart Dashboard: Using REAL Binance data - showing live dashboard")
+            return templates.TemplateResponse("dashboard.html", {
+                "request": request,
+                "data_mode": "real",
+                "api_status": "connected"
+            })
+        else:
+            print("🏛️ Smart Dashboard: Using MOCK data - showing demo dashboard")
+            return templates.TemplateResponse("dashboard_demo.html", {
+                "request": request,
+                "data_mode": "demo",
+                "api_status": "demo"
+            })
             
     except Exception as e:
-        print(f"🏛️ Smart Dashboard Error: {e}")
-        # Fallback to static v1
-        return templates.TemplateResponse("dashboard.html", {
+        print(f"🏛️ Smart Dashboard Error: {e} - showing demo dashboard")
+        return templates.TemplateResponse("dashboard_demo.html", {
             "request": request,
-            "data_mode": "error",
+            "data_mode": "demo",
             "api_status": "error"
         })
 
 @app.get("/v1")
 def dashboard_v1(request: Request):
-    """Version 1 dashboard - static fallback implementation"""
+    """Version 1 dashboard - static demo implementation"""
     try:
-        return templates.TemplateResponse("dashboard.html", {
+        return templates.TemplateResponse("dashboard_demo.html", {
             "request": request,
             "data_mode": "static",
             "api_status": "static"
@@ -323,8 +352,9 @@ def dashboard_v1(request: Request):
             <head><title>Portfolio Analyzer v1</title></head>
             <body>
                 <h1>Portfolio Analyzer API v1</h1>
-                <p>FastAPI is running on Vercel!</p>
+                <p>FastAPI is running!</p>
                 <p><a href="/">← Back to Welcome</a></p>
+                <p><a href="/dashboard">Smart Dashboard</a></p>
                 <p><a href="/api/health">Health Check</a></p>
                 <p><a href="/api/test">Test Endpoint</a></p>
                 <p>Error loading dashboard: {str(e)}</p>
