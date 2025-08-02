@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -182,10 +183,25 @@
             margin-bottom: 8px;
         }
 
-        .type-buy { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
-        .type-sell { background: linear-gradient(45deg, #dc3545, #e83e8c); color: white; }
-        .type-hold { background: linear-gradient(45deg, #ffc107, #fd7e14); color: white; }
-        .type-rebalance { background: linear-gradient(45deg, #6f42c1, #e83e8c); color: white; }
+        .type-buy {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .type-sell {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
+
+        .type-hold {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .type-rebalance {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            color: white;
+        }
 
         .portfolio-table {
             width: 100%;
@@ -216,9 +232,17 @@
             background: rgba(193, 120, 23, 0.1);
         }
 
-        .roi-positive { color: #28a745; }
-        .roi-negative { color: #dc3545; }
-        .roi-neutral { color: #ffc107; }
+        .roi-positive {
+            color: #28a745;
+        }
+
+        .roi-negative {
+            color: #dc3545;
+        }
+
+        .roi-neutral {
+            color: #ffc107;
+        }
 
         .placeholder {
             color: rgba(255, 255, 255, 0.6);
@@ -238,7 +262,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .masonic-symbol {
@@ -261,6 +287,7 @@
         }
     </style>
 </head>
+
 <body>
     <header class="masonic-header">
         <a href="/" class="back-link">← Back to Welcome</a>
@@ -349,14 +376,14 @@
                 console.log('🏛️ Fetching portfolio data...');
                 const res = await fetch('/api/portfolio');
                 console.log('🏛️ Portfolio response status:', res.status);
-                
+
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 }
-                
+
                 const data = await res.json();
                 console.log('🏛️ Portfolio data received:', data);
-                
+
                 if (!data.assets || data.assets.length === 0) {
                     summaryDiv.innerHTML = `
                         <div class="summary-stats">
@@ -382,7 +409,7 @@
                     const totalValue = data.total_value_usdt || 0;
                     const totalAssets = data.assets.length;
                     const avgROI = data.assets.reduce((sum, asset) => sum + (asset.roi_percentage || 0), 0) / totalAssets;
-                    
+
                     summaryDiv.innerHTML = `
                         <div class="summary-stats">
                             <div class="stat-item">
@@ -416,16 +443,16 @@
                 console.log('🏛️ Fetching agent insights...');
                 const res = await fetch('/agent/insights');
                 console.log('🏛️ Agent insights response status:', res.status);
-                
+
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 }
-                
+
                 const data = await res.json();
                 console.log('🏛️ Agent insights data received:', data);
-                
+
                 let html = '';
-                
+
                 // Portfolio Performance
                 if (data.portfolio_performance) {
                     html += `
@@ -492,7 +519,7 @@
             try {
                 const res = await fetch('/api/portfolio');
                 const data = await res.json();
-                
+
                 if (!data.assets || data.assets.length === 0) {
                     assetsDiv.innerHTML = '<p>No assets found.</p>';
                     return;
@@ -512,7 +539,7 @@
                         </thead>
                         <tbody>
                 `;
-                
+
                 data.assets.forEach(asset => {
                     const roiClass = (asset.roi_percentage || 0) >= 0 ? 'roi-positive' : 'roi-negative';
                     table += `
@@ -526,7 +553,7 @@
                         </tr>
                     `;
                 });
-                
+
                 table += '</tbody></table>';
                 assetsDiv.innerHTML = table;
             } catch (e) {
@@ -540,7 +567,7 @@
             try {
                 const res = await fetch('/agent/insights');
                 const data = await res.json();
-                
+
                 if (data.market_analysis) {
                     marketDiv.innerHTML = `
                         <div class="insight-item">
@@ -573,12 +600,12 @@
             try {
                 const res = await fetch('/api/news-briefing');
                 const data = await res.json();
-                
+
                 if (data.intelligence && data.intelligence.length > 0) {
                     let html = '';
                     data.intelligence.forEach(item => {
-                        const sentimentClass = item.sentiment === 'bullish' ? 'roi-positive' : 
-                                             item.sentiment === 'bearish' ? 'roi-negative' : 'roi-neutral';
+                        const sentimentClass = item.sentiment === 'bullish' ? 'roi-positive' :
+                            item.sentiment === 'bearish' ? 'roi-negative' : 'roi-neutral';
                         html += `
                             <div class="insight-item">
                                 <div class="insight-type">${item.sentiment?.toUpperCase() || 'NEUTRAL'}</div>
@@ -603,7 +630,7 @@
             try {
                 const res = await fetch('/api/etf-comparison');
                 const data = await res.json();
-                
+
                 if (data.etf_allocation) {
                     etfDiv.innerHTML = `
                         <div class="insight-item">
@@ -628,9 +655,9 @@
         }
 
         // Initialize all data loading
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('🏛️ Masonic Dashboard: Loading data...');
-            
+
             // Add error handling and logging
             Promise.all([
                 loadPortfolioSummary().catch(e => console.error('Portfolio Summary Error:', e)),
@@ -647,4 +674,5 @@
         });
     </script>
 </body>
+
 </html>
