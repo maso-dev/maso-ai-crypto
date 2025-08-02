@@ -17,6 +17,7 @@ from utils.enhanced_news_pipeline import get_enhanced_crypto_news, EnhancedNewsP
 from utils.enrichment import enrich_news_articles
 from utils.realtime_data import realtime_manager, DataSource, CryptoPrice, MarketUpdate
 from utils.vector_rag import EnhancedVectorRAG, VectorQuery, QueryType, intelligent_search, insert_enhanced_news_batch
+from utils.ai_agent import CryptoAIAgent, AgentTask, execute_agent_task, analyze_market_sentiment, generate_portfolio_recommendations
 from langchain_core.runnables import RunnableConfig
 
 router = APIRouter(prefix="/brain", tags=["brain"])
@@ -495,6 +496,144 @@ async def react_agent_search(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ReAct agent search failed: {str(e)}")
+
+# AI Agent Endpoints
+@router.post("/agent/execute")
+async def execute_ai_agent_task(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Execute an AI agent task with LangGraph workflow."""
+    try:
+        task_type = request.get("task_type", "market_analysis")
+        query = request.get("query", "")
+        symbols = request.get("symbols", [])
+        
+        # Convert task type to enum
+        try:
+            task = AgentTask(task_type)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid task type: {task_type}")
+        
+        # Execute with LangSmith tracing
+        config: Optional[RunnableConfig] = {
+            "tags": ["ai_agent", task_type],
+            "metadata": {
+                "task_type": task_type,
+                "query": query,
+                "symbols": symbols,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+        result = await execute_agent_task(task, query, symbols, config)
+        
+        # Convert to serializable format
+        return {
+            "success": True,
+            "task_type": task_type,
+            "query": query,
+            "symbols": symbols,
+            "current_step": result.current_step,
+            "confidence_score": result.confidence_score,
+            "reasoning_steps": result.reasoning_steps,
+            "search_results_count": len(result.search_results),
+            "market_data": result.market_data,
+            "analysis_results": result.analysis_results,
+            "recommendations": result.recommendations,
+            "error": result.error,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI agent execution failed: {str(e)}")
+
+@router.post("/agent/market-analysis")
+async def analyze_market_with_agent(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Perform market analysis using AI agent."""
+    try:
+        symbols = request.get("symbols", [])
+        
+        if not symbols:
+            raise HTTPException(status_code=400, detail="No symbols provided")
+        
+        # Execute market analysis
+        config: Optional[RunnableConfig] = {
+            "tags": ["ai_agent", "market_analysis"],
+            "metadata": {
+                "symbols": symbols,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+        result = await analyze_market_sentiment(symbols, config)
+        
+        return {
+            "success": True,
+            "task": "market_analysis",
+            "symbols": symbols,
+            "confidence_score": result.confidence_score,
+            "market_analysis": result.analysis_results.get("market_analysis", ""),
+            "synthesis": result.analysis_results.get("synthesis", ""),
+            "recommendations": result.recommendations,
+            "reasoning_steps": result.reasoning_steps,
+            "error": result.error,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Market analysis failed: {str(e)}")
+
+@router.post("/agent/portfolio-recommendations")
+async def get_portfolio_recommendations(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate portfolio recommendations using AI agent."""
+    try:
+        symbols = request.get("symbols", [])
+        risk_profile = request.get("risk_profile", "moderate")
+        
+        if not symbols:
+            raise HTTPException(status_code=400, detail="No symbols provided")
+        
+        # Execute portfolio recommendation
+        config: Optional[RunnableConfig] = {
+            "tags": ["ai_agent", "portfolio_recommendation"],
+            "metadata": {
+                "symbols": symbols,
+                "risk_profile": risk_profile,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+        result = await generate_portfolio_recommendations(symbols, risk_profile, config)
+        
+        return {
+            "success": True,
+            "task": "portfolio_recommendation",
+            "symbols": symbols,
+            "risk_profile": risk_profile,
+            "confidence_score": result.confidence_score,
+            "recommendations": result.recommendations,
+            "market_analysis": result.analysis_results.get("market_analysis", ""),
+            "reasoning_steps": result.reasoning_steps,
+            "error": result.error,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Portfolio recommendations failed: {str(e)}")
+
+@router.get("/agent/tasks")
+async def get_available_agent_tasks() -> Dict[str, Any]:
+    """Get list of available AI agent tasks."""
+    return {
+        "success": True,
+        "available_tasks": [
+            {
+                "task_type": task.value,
+                "description": task.name.replace("_", " ").title(),
+                "category": "analysis" if "analysis" in task.value else "recommendation"
+            }
+            for task in AgentTask
+        ],
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
 
 # Real-time Data Endpoints
 @router.get("/realtime/prices")
