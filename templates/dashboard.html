@@ -210,22 +210,49 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             overflow: hidden;
+            table-layout: fixed;
         }
 
         .portfolio-table th {
             background: rgba(193, 120, 23, 0.2);
             color: #e6b800;
-            padding: 12px;
+            padding: 12px 8px;
             text-align: left;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.8rem;
             letter-spacing: 1px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .portfolio-table td {
-            padding: 12px;
+            padding: 12px 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            font-size: 0.9em;
+        }
+
+        /* Table container to prevent overflow */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .portfolio-table {
+                font-size: 0.8em;
+                min-width: 600px; /* Ensure table doesn't get too cramped */
+            }
+            
+            .portfolio-table th,
+            .portfolio-table td {
+                padding: 8px 4px;
+            }
         }
 
         .portfolio-table tr:hover {
@@ -555,7 +582,7 @@
                 });
 
                 table += '</tbody></table>';
-                assetsDiv.innerHTML = table;
+                assetsDiv.innerHTML = `<div class="table-container">${table}</div>`;
             } catch (e) {
                 assetsDiv.innerHTML = '<p style="color: #dc3545;">Error loading assets.</p>';
             }
