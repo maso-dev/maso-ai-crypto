@@ -362,13 +362,13 @@
         <div class="data-mode-indicator">
             <span class="mode-badge mode-{{ data_mode }}">
                 {% if data_mode == "real" %}
-                    🔗 Live Data
+                🔗 Live Data
                 {% elif data_mode == "mock" %}
-                    📊 Demo Data
+                📊 Demo Data
                 {% elif data_mode == "static" %}
-                    📋 Static Mode
+                📋 Static Mode
                 {% else %}
-                    ⚠️ Fallback
+                ⚠️ Fallback
                 {% endif %}
             </span>
         </div>
@@ -465,9 +465,9 @@
                 console.log('🏛️ Portfolio data received:', data);
 
                 // Check if we're using mock data
-                const isMockData = data.data_source === "binance" && 
-                                 data.total_value_usdt === 36500.0 && 
-                                 data.assets.length === 4;
+                const isMockData = data.data_source === "binance" &&
+                    data.total_value_usdt === 36500.0 &&
+                    data.assets.length === 4;
 
                 if (!data.assets || data.assets.length === 0) {
                     summaryDiv.innerHTML = `
