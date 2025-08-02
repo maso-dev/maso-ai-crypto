@@ -46,9 +46,10 @@ async def health_check():
 async def test_endpoint():
     """Simple test endpoint that doesn't require external dependencies"""
     return {
-        "message": "FastAPI is working on Vercel!",
+        "message": "FastAPI is working!",
         "timestamp": "2024",
-        "status": "success"
+        "status": "success",
+        "endpoints": ["/", "/v1", "/dashboard", "/api/health", "/api/portfolio"]
     }
 
 # NEW: Welcome section for non-logged users
@@ -285,47 +286,17 @@ async def get_news_briefing():
 
 # VERSION 1: Keep current dashboard at /v1
 @app.get("/dashboard")
-async def smart_dashboard(request: Request):
-    """Smart dashboard that detects API connectivity and routes accordingly"""
+def smart_dashboard(request: Request):
+    """Smart dashboard that detects API connectivity and routes accordingly - Replit compatible version"""
     try:
-        # Test Binance API connectivity
-        from utils.binance_client import get_binance_client, get_portfolio_data
-        
-        # Check if we have API keys configured
-        binance_client = get_binance_client()
-        api_keys_configured = binance_client is not None
-        
-        # Try to get real portfolio data
-        portfolio_data = await get_portfolio_data()
-        
-        # Determine if we're using real or mock data
-        is_real_data = False
-        if portfolio_data and api_keys_configured:
-            # Check if this looks like real data (not our mock data)
-            total_value = portfolio_data.total_value_usdt
-            asset_count = len(portfolio_data.assets)
-            
-            # Our mock data has specific characteristics
-            if not (total_value == 36500.0 and asset_count == 4 and 
-                   any(asset.asset == "BTC" and asset.usdt_value == 25000.0 for asset in portfolio_data.assets)):
-                is_real_data = True
-        
-        # Route to appropriate dashboard
-        if is_real_data:
-            print("🏛️ Smart Dashboard: Using REAL Binance data - showing dynamic dashboard")
-            return templates.TemplateResponse("dashboard.html", {
-                "request": request,
-                "data_mode": "real",
-                "api_status": "connected"
-            })
-        else:
-            print("🏛️ Smart Dashboard: Using MOCK data - redirecting to static v1")
-            # Redirect to static v1 dashboard
-            return templates.TemplateResponse("dashboard.html", {
-                "request": request,
-                "data_mode": "mock",
-                "api_status": "fallback"
-            })
+        # For Replit compatibility, start with mock data mode
+        # The frontend will handle the API calls and data detection
+        print("🏛️ Smart Dashboard: Replit mode - showing dashboard with frontend API detection")
+        return templates.TemplateResponse("dashboard.html", {
+            "request": request,
+            "data_mode": "mock",  # Start with mock, frontend will detect real data
+            "api_status": "detecting"
+        })
             
     except Exception as e:
         print(f"🏛️ Smart Dashboard Error: {e}")
