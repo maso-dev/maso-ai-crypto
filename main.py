@@ -78,32 +78,36 @@ async def welcome_page(request: Request):
 async def get_dream_team_portfolio():
     """Get alpha portfolio data using AI analysis"""
     try:
-        # Use enhanced agent for portfolio analysis
-        from utils.enhanced_agent import get_enhanced_agent
-        from utils.binance_client import get_portfolio_data
-        
-        # Get portfolio data (will use mock if no API keys)
-        portfolio_data = await get_portfolio_data()
-        
-        # Get enhanced agent analysis
-        agent = get_enhanced_agent()
-        if portfolio_data:
-            analysis = await agent.generate_complete_analysis(portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
-        else:
-            # Use mock portfolio data for analysis
-            from utils.binance_client import PortfolioData, PortfolioAsset
-            mock_portfolio = PortfolioData(
-                total_value_usdt=100000.0,
-                total_cost_basis=60000.0,
-                total_roi_percentage=66.67,
-                assets=[
-                    PortfolioAsset(asset="BTC", free=1.0, locked=0.0, total=1.0, usdt_value=40000.0, cost_basis=35000.0, roi_percentage=14.29, avg_buy_price=35000.0),
-                    PortfolioAsset(asset="ETH", free=10.0, locked=0.0, total=10.0, usdt_value=30000.0, cost_basis=25000.0, roi_percentage=20.0, avg_buy_price=2500.0),
-                ],
-                last_updated=datetime.now(),
-                trade_history=[]
-            )
-            analysis = await agent.generate_complete_analysis(mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+        # Use enhanced agent for portfolio analysis (with fallback for missing LangChain)
+        try:
+            from utils.enhanced_agent import get_enhanced_agent
+            from utils.binance_client import get_portfolio_data
+            
+            # Get portfolio data (will use mock if no API keys)
+            portfolio_data = await get_portfolio_data()
+            
+            # Get enhanced agent analysis
+            agent = get_enhanced_agent()
+            if portfolio_data:
+                analysis = await agent.generate_complete_analysis(portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+            else:
+                # Use mock portfolio data for analysis
+                from utils.binance_client import PortfolioData, PortfolioAsset
+                mock_portfolio = PortfolioData(
+                    total_value_usdt=100000.0,
+                    total_cost_basis=60000.0,
+                    total_roi_percentage=66.67,
+                    assets=[
+                        PortfolioAsset(asset="BTC", free=1.0, locked=0.0, total=1.0, usdt_value=40000.0, cost_basis=35000.0, roi_percentage=14.29, avg_buy_price=35000.0),
+                        PortfolioAsset(asset="ETH", free=10.0, locked=0.0, total=10.0, usdt_value=30000.0, cost_basis=25000.0, roi_percentage=20.0, avg_buy_price=2500.0),
+                    ],
+                    last_updated=datetime.now(),
+                    trade_history=[]
+                )
+                analysis = await agent.generate_complete_analysis(mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+        except ImportError:
+            # Fallback when LangChain dependencies are missing
+            analysis = None
         
         # Extract alpha portfolio from analysis
         alpha_portfolio = [
@@ -116,13 +120,13 @@ async def get_dream_team_portfolio():
         
         return {
             "portfolio_name": "Masonic Alpha Portfolio",
-            "description": analysis.agent_insights[:100] + "..." if analysis.agent_insights else "Our brotherhood's most trusted allocation strategy",
+            "description": analysis.agent_insights[:100] + "..." if analysis and analysis.agent_insights else "Our brotherhood's most trusted allocation strategy",
             "assets": alpha_portfolio,
             "total_weight": 1.0,
-            "risk_level": analysis.portfolio_analysis.portfolio_risk_score,
-            "market_regime": analysis.portfolio_analysis.market_regime.value,
-            "confidence": analysis.confidence_overall,
-            "last_updated": analysis.timestamp.isoformat()
+            "risk_level": analysis.portfolio_analysis.portfolio_risk_score if analysis else "Moderate",
+            "market_regime": analysis.portfolio_analysis.market_regime.value if analysis else "bullish",
+            "confidence": analysis.confidence_overall if analysis else 0.75,
+            "last_updated": analysis.timestamp.isoformat() if analysis else datetime.now().isoformat()
         }
     except Exception as e:
         # Fallback to static data if AI analysis fails
@@ -148,45 +152,50 @@ async def get_dream_team_portfolio():
 async def get_todays_opportunities():
     """Get today's alpha signals using AI analysis"""
     try:
-        # Use enhanced agent for recommendations
-        from utils.enhanced_agent import get_enhanced_agent
-        from utils.binance_client import get_portfolio_data
-        
-        # Get portfolio data (will use mock if no API keys)
-        portfolio_data = await get_portfolio_data()
-        
-        # Get enhanced agent analysis
-        agent = get_enhanced_agent()
-        if portfolio_data:
-            analysis = await agent.generate_complete_analysis(portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
-        else:
-            # Use mock portfolio data for analysis
-            from utils.binance_client import PortfolioData, PortfolioAsset
-            mock_portfolio = PortfolioData(
-                total_value_usdt=100000.0,
-                total_cost_basis=60000.0,
-                total_roi_percentage=66.67,
-                assets=[
-                    PortfolioAsset(asset="BTC", free=1.0, locked=0.0, total=1.0, usdt_value=40000.0, cost_basis=35000.0, roi_percentage=14.29, avg_buy_price=35000.0),
-                    PortfolioAsset(asset="ETH", free=10.0, locked=0.0, total=10.0, usdt_value=30000.0, cost_basis=25000.0, roi_percentage=20.0, avg_buy_price=2500.0),
-                ],
-                last_updated=datetime.now(),
-                trade_history=[]
-            )
-            analysis = await agent.generate_complete_analysis(mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+        # Use enhanced agent for recommendations (with fallback for missing LangChain)
+        try:
+            from utils.enhanced_agent import get_enhanced_agent
+            from utils.binance_client import get_portfolio_data
+            
+            # Get portfolio data (will use mock if no API keys)
+            portfolio_data = await get_portfolio_data()
+            
+            # Get enhanced agent analysis
+            agent = get_enhanced_agent()
+            if portfolio_data:
+                analysis = await agent.generate_complete_analysis(portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+            else:
+                # Use mock portfolio data for analysis
+                from utils.binance_client import PortfolioData, PortfolioAsset
+                mock_portfolio = PortfolioData(
+                    total_value_usdt=100000.0,
+                    total_cost_basis=60000.0,
+                    total_roi_percentage=66.67,
+                    assets=[
+                        PortfolioAsset(asset="BTC", free=1.0, locked=0.0, total=1.0, usdt_value=40000.0, cost_basis=35000.0, roi_percentage=14.29, avg_buy_price=35000.0),
+                        PortfolioAsset(asset="ETH", free=10.0, locked=0.0, total=10.0, usdt_value=30000.0, cost_basis=25000.0, roi_percentage=20.0, avg_buy_price=2500.0),
+                    ],
+                    last_updated=datetime.now(),
+                    trade_history=[]
+                )
+                analysis = await agent.generate_complete_analysis(mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+        except ImportError:
+            # Fallback when LangChain dependencies are missing
+            analysis = None
         
         # Convert recommendations to alpha signals
         signals = []
-        for rec in analysis.recommendations[:3]:  # Top 3 recommendations
-            signals.append({
-                "type": rec.action_type.value.lower(),
-                "asset": rec.asset,
-                "reason": rec.reason,
-                "confidence": rec.confidence_score,
-                "timeframe": "short-term" if rec.execution_priority <= 2 else "medium-term",
-                "brotherhood_insight": rec.personal_context,
-                "market_context": rec.market_context
-            })
+        if analysis and analysis.recommendations:
+            for rec in analysis.recommendations[:3]:  # Top 3 recommendations
+                signals.append({
+                    "type": rec.action_type.value.lower(),
+                    "asset": rec.asset,
+                    "reason": rec.reason,
+                    "confidence": rec.confidence_score,
+                    "timeframe": "short-term" if rec.execution_priority <= 2 else "medium-term",
+                    "brotherhood_insight": rec.personal_context,
+                    "market_context": rec.market_context
+                })
         
         # If no AI recommendations, use fallback
         if not signals:
@@ -218,10 +227,10 @@ async def get_todays_opportunities():
             ]
         
         return {
-            "date": analysis.timestamp.isoformat(),
+            "date": analysis.timestamp.isoformat() if analysis else datetime.now().isoformat(),
             "signals": signals,
-            "market_regime": analysis.portfolio_analysis.market_regime.value,
-            "confidence_overall": analysis.confidence_overall
+            "market_regime": analysis.portfolio_analysis.market_regime.value if analysis else "bullish",
+            "confidence_overall": analysis.confidence_overall if analysis else 0.75
         }
     except Exception as e:
         # Fallback to static data if AI analysis fails
@@ -376,13 +385,13 @@ try:
 except ImportError as e:
     print(f"Warning: Could not import agent_router: {e}")
 
-# Include enhanced brain router
+# Include enhanced brain router (with LangChain dependency handling)
 try:
     from routers.brain_enhanced import router as brain_router
     app.include_router(brain_router)
     print("✅ Enhanced brain router loaded with LangSmith integration")
 except Exception as e:
-    print(f"Warning: Could not import enhanced brain_router: {e}")
+    print(f"Warning: Could not import enhanced brain_router (LangChain dependencies missing): {e}")
     try:
         from routers.brain import router as brain_router
         app.include_router(brain_router)
@@ -395,7 +404,7 @@ except Exception as e:
             print("✅ Simple brain router loaded (LangGraph not available)")
         except Exception as e3:
             print(f"Warning: Could not import brain_router: {e3}")
-            print("Brain section will not be available")
+            print("Brain section will not be available (LangChain dependencies missing)")
 
 @app.get("/api/portfolio", response_model=Dict[str, Any])
 async def get_portfolio() -> Dict[str, Any]:
