@@ -156,6 +156,59 @@
                         </div>
                     </div>
 
+                    <!-- Real-time Data Controls -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">📊 Real-time Data</h2>
+                            <p class="text-sm text-gray-500">Live crypto price data with LiveCoinWatch API</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Data Source</label>
+                                    <select id="data-source"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="livecoinwatch" selected>🪙 LiveCoinWatch (Default)</option>
+                                        <option value="mock">🎭 Mock Data</option>
+                                        <option value="coingecko">🪙 CoinGecko</option>
+                                        <option value="binance">🔗 Binance WebSocket</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end space-x-2">
+                                    <button onclick="startRealtimeData()"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        ▶️ Start
+                                    </button>
+                                    <button onclick="stopRealtimeData()"
+                                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        ⏹️ Stop
+                                    </button>
+                                    <button onclick="getRealtimeStatus()"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        📊 Status
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Real-time Status -->
+                            <div id="realtime-status" class="hidden">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900 mb-2">Real-time Status</h4>
+                                    <div id="realtime-status-content" class="text-sm text-gray-600"></div>
+                                </div>
+                            </div>
+
+                            <!-- Live Prices -->
+                            <div id="live-prices" class="hidden">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900 mb-2">Live Prices</h4>
+                                    <div id="prices-content" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Brain Operations -->
                     <div class="bg-white rounded-lg shadow">
                         <div class="px-6 py-4 border-b border-gray-200">
@@ -486,6 +539,111 @@
             } catch (error) {
                 console.error('Error executing operation:', error);
                 alert('Error executing operation');
+            }
+        }
+
+        // Real-time Data Functions
+        async function startRealtimeData() {
+            const dataSource = document.getElementById('data-source').value;
+            try {
+                const response = await fetch('/brain/realtime/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ source: dataSource })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Real-time data started successfully!');
+                    getRealtimeStatus();
+                } else {
+                    alert('Failed to start real-time data: ' + data.detail);
+                }
+            } catch (error) {
+                console.error('Error starting real-time data:', error);
+                alert('Error starting real-time data');
+            }
+        }
+
+        async function stopRealtimeData() {
+            try {
+                const response = await fetch('/brain/realtime/stop', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Real-time data stopped successfully!');
+                    getRealtimeStatus();
+                } else {
+                    alert('Failed to stop real-time data: ' + data.detail);
+                }
+            } catch (error) {
+                console.error('Error stopping real-time data:', error);
+                alert('Error stopping real-time data');
+            }
+        }
+
+        async function getRealtimeStatus() {
+            try {
+                const response = await fetch('/brain/realtime/status');
+                const data = await response.json();
+
+                const statusDiv = document.getElementById('realtime-status');
+                const statusContent = document.getElementById('realtime-status-content');
+
+                if (data.success) {
+                    const statusHtml = `
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <span class="font-medium">Status:</span> 
+                                <span class="${data.running ? 'text-green-600' : 'text-red-600'}">${data.running ? 'Running' : 'Stopped'}</span>
+                            </div>
+                            <div>
+                                <span class="font-medium">Subscribers:</span> ${data.subscribers}
+                            </div>
+                            <div>
+                                <span class="font-medium">WebSocket Clients:</span> ${data.websocket_clients}
+                            </div>
+                            <div>
+                                <span class="font-medium">Cached Prices:</span> ${data.cached_prices}
+                            </div>
+                        </div>
+                    `;
+                    statusContent.innerHTML = statusHtml;
+                    statusDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error getting real-time status:', error);
+            }
+        }
+
+        async function getCurrentPrices() {
+            try {
+                const response = await fetch('/brain/realtime/prices');
+                const data = await response.json();
+
+                const pricesDiv = document.getElementById('live-prices');
+                const pricesContent = document.getElementById('prices-content');
+
+                if (data.success && data.prices) {
+                    const pricesHtml = Object.entries(data.prices).map(([symbol, price]) => `
+                        <div class="bg-white p-3 rounded border">
+                            <div class="font-medium text-gray-900">${symbol}</div>
+                            <div class="text-lg font-bold text-green-600">$${price.price.toFixed(2)}</div>
+                            <div class="text-sm ${price.change_24h >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${price.change_24h >= 0 ? '+' : ''}${price.change_24h.toFixed(2)}%
+                            </div>
+                        </div>
+                    `).join('');
+
+                    pricesContent.innerHTML = pricesHtml;
+                    pricesDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error getting current prices:', error);
             }
         }
     </script>

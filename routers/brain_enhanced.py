@@ -4,16 +4,18 @@ Enhanced Brain API Router
 Integrates news processing, AI enrichment, and LangSmith tracing.
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 import os
 import asyncio
+import json
 from pydantic import BaseModel
 
 # Import our enhanced components
 from utils.enhanced_news_pipeline import get_enhanced_crypto_news, EnhancedNewsPipeline
 from utils.enrichment import enrich_news_articles
+from utils.realtime_data import realtime_manager, DataSource, CryptoPrice, MarketUpdate
 
 router = APIRouter(prefix="/brain", tags=["brain"])
 
@@ -361,4 +363,162 @@ async def get_knowledge_stats() -> Dict[str, Any]:
             "nodes": 2500,
             "relationships": 5000
         }
-    } 
+    }
+
+# Real-time Data Endpoints
+@router.get("/realtime/prices")
+async def get_current_prices() -> Dict[str, Any]:
+    """Get current crypto prices."""
+    prices = realtime_manager.get_current_prices()
+    return {
+        "success": True,
+        "prices": {
+            symbol: {
+                "price": price.price,
+                "change_24h": price.change_24h,
+                "volume_24h": price.volume_24h,
+                "market_cap": price.market_cap,
+                "timestamp": price.timestamp.isoformat(),
+                "source": price.source
+            } for symbol, price in prices.items()
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@router.get("/realtime/price/{symbol}")
+async def get_price(symbol: str) -> Dict[str, Any]:
+    """Get current price for a specific symbol."""
+    price = realtime_manager.get_price(symbol)
+    if price:
+        return {
+            "success": True,
+            "symbol": symbol.upper(),
+            "price": price.price,
+            "change_24h": price.change_24h,
+            "volume_24h": price.volume_24h,
+            "market_cap": price.market_cap,
+            "timestamp": price.timestamp.isoformat(),
+            "source": price.source
+        }
+    else:
+        raise HTTPException(status_code=404, detail=f"Price not found for {symbol}")
+
+@router.post("/realtime/start")
+async def start_realtime_data(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Start real-time data stream."""
+    try:
+        source = request.get("source", "mock")
+        data_source = DataSource(source.lower())
+        await realtime_manager.start(data_source)
+        return {
+            "success": True,
+            "message": f"Real-time data started with source: {source}",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except ValueError as e:
+        source = request.get("source", "unknown")
+        raise HTTPException(status_code=400, detail=f"Invalid data source: {source}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to start real-time data: {str(e)}")
+
+@router.post("/realtime/stop")
+async def stop_realtime_data() -> Dict[str, Any]:
+    """Stop real-time data stream."""
+    await realtime_manager.stop()
+    return {
+        "success": True,
+        "message": "Real-time data stopped",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@router.get("/realtime/status")
+async def get_realtime_status() -> Dict[str, Any]:
+    """Get real-time data status."""
+    return {
+        "success": True,
+        "running": realtime_manager.running,
+        "subscribers": len(realtime_manager.subscribers),
+        "websocket_clients": len(realtime_manager.websocket_connections),
+        "cached_prices": len(realtime_manager.price_cache),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+# WebSocket endpoint for real-time data streaming
+@router.websocket("/realtime/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    """WebSocket endpoint for real-time data streaming."""
+    await websocket.accept()
+    
+    try:
+        # Add client to real-time manager
+        await realtime_manager.add_websocket_client(websocket, client_id)
+        
+        # Subscribe to updates
+        async def websocket_callback(update):
+            try:
+                if isinstance(update, CryptoPrice):
+                    message = {
+                        "type": "price_update",
+                        "symbol": update.symbol,
+                        "price": update.price,
+                        "change_24h": update.change_24h,
+                        "volume_24h": update.volume_24h,
+                        "market_cap": update.market_cap,
+                        "timestamp": update.timestamp.isoformat(),
+                        "source": update.source
+                    }
+                elif isinstance(update, MarketUpdate):
+                    message = {
+                        "type": "market_update",
+                        "update_type": update.type,
+                        "symbol": update.symbol,
+                        "data": update.data,
+                        "priority": update.priority,
+                        "timestamp": update.timestamp.isoformat()
+                    }
+                else:
+                    message = {
+                        "type": "update",
+                        "data": str(update),
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                
+                await websocket.send_text(json.dumps(message))
+            except Exception as e:
+                print(f"Error sending WebSocket message: {e}")
+        
+        realtime_manager.subscribe(websocket_callback)
+        
+        # Keep connection alive and handle incoming messages
+        while True:
+            try:
+                # Wait for messages from client
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle client messages
+                if message.get("type") == "ping":
+                    await websocket.send_text(json.dumps({
+                        "type": "pong",
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }))
+                elif message.get("type") == "subscribe":
+                    # Handle subscription requests
+                    await websocket.send_text(json.dumps({
+                        "type": "subscribed",
+                        "symbols": message.get("symbols", []),
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }))
+                
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                print(f"WebSocket error: {e}")
+                break
+                
+    except Exception as e:
+        print(f"WebSocket connection error: {e}")
+    finally:
+        # Clean up
+        realtime_manager.unsubscribe(websocket_callback)
+        await realtime_manager.remove_websocket_client(client_id) 
