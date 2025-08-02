@@ -623,7 +623,7 @@ async def admin_configuration():
         # 3. NewsAPI Service Test
         newsapi_status = {
             "name": "NewsAPI",
-            "key_set": bool(os.getenv("NEWSAPI_KEY")),
+            "key_set": bool(os.getenv("NEWSAPI_KEY") or os.getenv("NEWS_API_KEY")),
             "test_working": False,
             "error": None
         }
