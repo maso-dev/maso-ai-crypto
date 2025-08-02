@@ -29,7 +29,7 @@ Set these in Vercel Dashboard → Settings → Environment Variables:
 - [ ] `BINANCE_API_KEY` - Your Binance API key
 - [ ] `BINANCE_SECRET_KEY` - Your Binance secret key
 - [ ] `OPENAI_API_KEY` - Your OpenAI API key
-- [ ] `NEWS_API_KEY` - Your News API key
+- [ ] `NEWSAPI_KEY` - Your News API key
 
 ### Optional for Enhanced Features:
 - [ ] `TAVILY_API_KEY` - For web search functionality

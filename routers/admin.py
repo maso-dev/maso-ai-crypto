@@ -88,8 +88,8 @@ async def get_system_status(admin: bool = Depends(verify_admin_access)) -> Syste
                 "collection": MILVUS_COLLECTION_NAME or "not configured"
             },
             "newsapi": {
-                "status": "online" if os.getenv("NEWSAPI_API_KEY") else "offline",
-                "configured": bool(os.getenv("NEWSAPI_API_KEY"))
+                "status": "online" if os.getenv("NEWSAPI_KEY") else "offline",
+"configured": bool(os.getenv("NEWSAPI_KEY"))
             },
             "tavily": {
                 "status": "online" if tavily_client else "offline",
@@ -121,7 +121,7 @@ async def get_system_status(admin: bool = Depends(verify_admin_access)) -> Syste
         api_keys = {
             "openai": bool(os.getenv("OPENAI_API_KEY")),
             "tavily": bool(os.getenv("TAVILY_API_KEY")),
-            "newsapi": bool(os.getenv("NEWSAPI_API_KEY")),
+            "newsapi": bool(os.getenv("NEWSAPI_KEY")),
             "binance": bool(os.getenv("BINANCE_API_KEY") and os.getenv("BINANCE_SECRET_KEY"))
         }
         
@@ -289,7 +289,7 @@ async def get_system_config(admin: bool = Depends(verify_admin_access)) -> Syste
         return SystemConfig(
             milvus_uri=MILVUS_URI or "",
             milvus_collection=MILVUS_COLLECTION_NAME or "",
-            newsapi_enabled=bool(os.getenv("NEWSAPI_API_KEY")),
+            newsapi_enabled=bool(os.getenv("NEWSAPI_KEY")),
             tavily_enabled=bool(tavily_client),
             openai_enabled=bool(os.getenv("OPENAI_API_KEY")),
             cost_tracking_enabled=True,

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masonic Brain Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <h1 class="text-3xl font-bold text-gray-900">🧠 Masonic Brain</h1>
+                        <span class="ml-3 px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                            Enhanced v1.0
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="/" class="text-gray-500 hover:text-gray-700">← Back to App</a>
+                        <a href="/admin" class="text-gray-500 hover:text-gray-700">Admin</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Status Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <span class="text-green-600">🧠</span>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Brain Status</p>
+                            <p class="text-lg font-semibold text-gray-900" id="brain-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="text-blue-600">📰</span>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">News Pipeline</p>
+                            <p class="text-lg font-semibold text-gray-900" id="news-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span class="text-purple-600">🔍</span>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">LangSmith</p>
+                            <p class="text-lg font-semibold text-gray-900" id="langsmith-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <span class="text-yellow-600">⚡</span>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Performance</p>
+                            <p class="text-lg font-semibold text-gray-900" id="performance-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column: News Processing -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- News Processing Panel -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">📰 News Processing</h2>
+                            <p class="text-sm text-gray-500">AI-powered news enrichment with LangSmith tracing</p>
+                        </div>
+                        <div class="p-6">
+                            <!-- News Processing Controls -->
+                            <div class="mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Symbols</label>
+                                        <input type="text" id="news-symbols" value="Bitcoin,Ethereum"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Hours Back</label>
+                                        <input type="number" id="news-hours" value="24" min="1" max="168"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Articles</label>
+                                        <input type="number" id="news-max" value="10" min="1" max="50"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <button onclick="processNews()"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        🔄 Process News
+                                    </button>
+                                    <button onclick="analyzeNews()"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        📊 Analyze Sentiment
+                                    </button>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="enable-enrichment" checked
+                                            class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <span class="text-sm text-gray-700">Enable AI Enrichment</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- News Results -->
+                            <div id="news-results" class="hidden">
+                                <div class="border-t border-gray-200 pt-4">
+                                    <h3 class="text-md font-medium text-gray-900 mb-3">📰 Processed Articles</h3>
+                                    <div id="articles-list" class="space-y-3"></div>
+                                </div>
+                            </div>
+
+                            <!-- Analysis Results -->
+                            <div id="analysis-results" class="hidden">
+                                <div class="border-t border-gray-200 pt-4">
+                                    <h3 class="text-md font-medium text-gray-900 mb-3">📊 Sentiment Analysis</h3>
+                                    <div id="sentiment-chart" class="h-64"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brain Operations -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">⚙️ Brain Operations</h2>
+                            <p class="text-sm text-gray-500">Execute brain operations and monitor performance</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button onclick="executeOperation('refresh_news')"
+                                    class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left">
+                                    <div class="flex items-center">
+                                        <span class="text-2xl mr-3">🔄</span>
+                                        <div>
+                                            <h3 class="font-medium text-gray-900">Refresh News</h3>
+                                            <p class="text-sm text-gray-500">Update news knowledge base</p>
+                                        </div>
+                                    </div>
+                                </button>
+                                <button onclick="executeOperation('analyze_market')"
+                                    class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left">
+                                    <div class="flex items-center">
+                                        <span class="text-2xl mr-3">📈</span>
+                                        <div>
+                                            <h3 class="font-medium text-gray-900">Market Analysis</h3>
+                                            <p class="text-sm text-gray-500">Analyze market trends</p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="operation-results" class="mt-4 hidden">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900 mb-2">Operation Results</h4>
+                                    <pre id="operation-output" class="text-sm text-gray-600 whitespace-pre-wrap"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Metrics & Configuration -->
+                <div class="space-y-6">
+                    <!-- Brain Metrics -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">📊 Brain Metrics</h2>
+                            <p class="text-sm text-gray-500">Real-time performance indicators</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="metrics-content" class="space-y-4">
+                                <div class="animate-pulse">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">⚙️ Configuration</h2>
+                            <p class="text-sm text-gray-500">Brain system configuration</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="config-content" class="space-y-4">
+                                <div class="animate-pulse">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Knowledge Base -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">📚 Knowledge Base</h2>
+                            <p class="text-sm text-gray-500">Knowledge base statistics</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="knowledge-content" class="space-y-4">
+                                <div class="animate-pulse">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDashboardData();
+            // Refresh data every 30 seconds
+            setInterval(loadDashboardData, 30000);
+        });
+
+        async function loadDashboardData() {
+            try {
+                // Load brain health
+                const healthResponse = await fetch('/brain/health');
+                const healthData = await healthResponse.json();
+                updateHealthStatus(healthData);
+
+                // Load metrics
+                const metricsResponse = await fetch('/brain/metrics');
+                const metricsData = await metricsResponse.json();
+                updateMetrics(metricsData);
+
+                // Load configuration
+                const configResponse = await fetch('/brain/config');
+                const configData = await configResponse.json();
+                updateConfiguration(configData);
+
+                // Load knowledge stats
+                const knowledgeResponse = await fetch('/brain/knowledge/stats');
+                const knowledgeData = await knowledgeResponse.json();
+                updateKnowledgeStats(knowledgeData);
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateHealthStatus(data) {
+            document.getElementById('brain-status').textContent = data.status;
+            document.getElementById('news-status').textContent = data.checks.newsapi_configured ? 'Active' : 'Inactive';
+            document.getElementById('langsmith-status').textContent = data.checks.langsmith_configured ? 'Connected' : 'Disconnected';
+            document.getElementById('performance-status').textContent = 'Optimal';
+        }
+
+        function updateMetrics(data) {
+            const metricsHtml = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Requests Processed</p>
+                        <p class="text-lg font-semibold">${data.performance.requests_processed}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Articles Processed</p>
+                        <p class="text-lg font-semibold">${data.performance.articles_processed}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Success Rate</p>
+                        <p class="text-lg font-semibold">${(data.performance.enrichment_success_rate * 100).toFixed(1)}%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">LangSmith Traces</p>
+                        <p class="text-lg font-semibold">${data.langsmith.traces_sent}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('metrics-content').innerHTML = metricsHtml;
+        }
+
+        function updateConfiguration(data) {
+            const configHtml = `
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-500">Brain ID</p>
+                        <p class="text-sm font-medium">${data.brain_id}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Environment</p>
+                        <p class="text-sm font-medium">${data.environment}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">LangSmith Project</p>
+                        <p class="text-sm font-medium">${data.langsmith.project_name}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Enrichment Model</p>
+                        <p class="text-sm font-medium">${data.enrichment.model}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('config-content').innerHTML = configHtml;
+        }
+
+        function updateKnowledgeStats(data) {
+            const knowledgeHtml = `
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Articles</p>
+                        <p class="text-lg font-semibold">${data.knowledge_base.total_articles}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Enriched Articles</p>
+                        <p class="text-lg font-semibold">${data.knowledge_base.enriched_articles}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Vector Store</p>
+                        <p class="text-sm font-medium">${data.vector_store.status} (${data.vector_store.embeddings} embeddings)</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Graph Store</p>
+                        <p class="text-sm font-medium">${data.graph_store.status} (${data.graph_store.nodes} nodes)</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('knowledge-content').innerHTML = knowledgeHtml;
+        }
+
+        async function processNews() {
+            const symbols = document.getElementById('news-symbols').value;
+            const hours = document.getElementById('news-hours').value;
+            const maxArticles = document.getElementById('news-max').value;
+            const enableEnrichment = document.getElementById('enable-enrichment').checked;
+
+            try {
+                const response = await fetch(`/brain/news/enriched?symbols=${encodeURIComponent(symbols)}&hours_back=${hours}&max_articles=${maxArticles}&enable_enrichment=${enableEnrichment}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayNewsResults(data.data);
+                } else {
+                    alert('Failed to process news');
+                }
+            } catch (error) {
+                console.error('Error processing news:', error);
+                alert('Error processing news');
+            }
+        }
+
+        async function analyzeNews() {
+            const symbols = document.getElementById('news-symbols').value;
+            const hours = document.getElementById('news-hours').value;
+
+            try {
+                const response = await fetch(`/brain/news/analyze?symbols=${encodeURIComponent(symbols)}&hours_back=${hours}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayAnalysisResults(data.analysis);
+                } else {
+                    alert(data.message || 'Failed to analyze news');
+                }
+            } catch (error) {
+                console.error('Error analyzing news:', error);
+                alert('Error analyzing news');
+            }
+        }
+
+        function displayNewsResults(data) {
+            const resultsDiv = document.getElementById('news-results');
+            const articlesList = document.getElementById('articles-list');
+
+            if (data.articles && data.articles.length > 0) {
+                const articlesHtml = data.articles.map(article => `
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">${article.title}</h4>
+                        <p class="text-sm text-gray-600 mb-2">${article.source_name} • ${article.hours_ago} hours ago</p>
+                        ${article.enrichment ? `
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div><span class="text-gray-500">Sentiment:</span> ${article.enrichment.sentiment.toFixed(2)}</div>
+                                <div><span class="text-gray-500">Trust:</span> ${article.enrichment.trust.toFixed(2)}</div>
+                                <div><span class="text-gray-500">Impact:</span> ${article.enrichment.market_impact}</div>
+                                <div><span class="text-gray-500">Category:</span> ${article.enrichment.macro_category}</div>
+                            </div>
+                        ` : '<p class="text-sm text-gray-500">No enrichment data</p>'}
+                    </div>
+                `).join('');
+
+                articlesList.innerHTML = articlesHtml;
+                resultsDiv.classList.remove('hidden');
+            } else {
+                articlesList.innerHTML = '<p class="text-gray-500">No articles found</p>';
+                resultsDiv.classList.remove('hidden');
+            }
+        }
+
+        function displayAnalysisResults(analysis) {
+            const resultsDiv = document.getElementById('analysis-results');
+            resultsDiv.classList.remove('hidden');
+
+            // Create sentiment chart
+            const ctx = document.createElement('canvas');
+            ctx.id = 'sentimentChart';
+            document.getElementById('sentiment-chart').innerHTML = '';
+            document.getElementById('sentiment-chart').appendChild(ctx);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Impact', 'Medium Impact', 'Low Impact'],
+                    datasets: [{
+                        data: [analysis.market_impact.high_impact, analysis.market_impact.medium_impact, analysis.market_impact.low_impact],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        async function executeOperation(operation) {
+            try {
+                const response = await fetch('/brain/operations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        operation: operation,
+                        parameters: {}
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('operation-output').textContent = JSON.stringify(data, null, 2);
+                    document.getElementById('operation-results').classList.remove('hidden');
+                } else {
+                    alert('Operation failed');
+                }
+            } catch (error) {
+                console.error('Error executing operation:', error);
+                alert('Error executing operation');
+            }
+        }
+    </script>
+</body>
+
+</html>

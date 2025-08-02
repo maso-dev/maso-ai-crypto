@@ -408,6 +408,27 @@ try:
 except ImportError as e:
     print(f"Warning: Could not import agent_router: {e}")
 
+# Include enhanced brain router
+try:
+    from routers.brain_enhanced import router as brain_router
+    app.include_router(brain_router)
+    print("✅ Enhanced brain router loaded with LangSmith integration")
+except Exception as e:
+    print(f"Warning: Could not import enhanced brain_router: {e}")
+    try:
+        from routers.brain import router as brain_router
+        app.include_router(brain_router)
+        print("✅ Full brain router loaded with LangGraph support")
+    except Exception as e2:
+        print(f"Warning: Could not import full brain_router: {e2}")
+        try:
+            from routers.brain_simple import router as brain_router
+            app.include_router(brain_router)
+            print("✅ Simple brain router loaded (LangGraph not available)")
+        except Exception as e3:
+            print(f"Warning: Could not import brain_router: {e3}")
+            print("Brain section will not be available")
+
 @app.get("/api/portfolio", response_model=Dict[str, Any])
 async def get_portfolio() -> Dict[str, Any]:
     """Get portfolio data using the new async Binance client."""
@@ -623,7 +644,7 @@ async def admin_configuration():
         # 3. NewsAPI Service Test
         newsapi_status = {
             "name": "NewsAPI",
-            "key_set": bool(os.getenv("NEWSAPI_KEY") or os.getenv("NEWS_API_KEY")),
+            "key_set": bool(os.getenv("NEWSAPI_KEY")),
             "test_working": False,
             "error": None
         }
@@ -696,6 +717,24 @@ def admin_page(request: Request):
                 <p><a href="/">← Back to Welcome</a></p>
                 <p><a href="/admin_conf">View JSON API</a></p>
                 <p>Error loading admin page: {str(e)}</p>
+            </body>
+        </html>
+        """)
+
+@app.get("/brain-dashboard")
+def brain_dashboard(request: Request):
+    """Brain dashboard page - HTML interface"""
+    try:
+        return templates.TemplateResponse("brain_dashboard.html", {"request": request})
+    except Exception as e:
+        return HTMLResponse(content=f"""
+        <html>
+            <head><title>Brain Dashboard - Masonic</title></head>
+            <body>
+                <h1>Brain Dashboard</h1>
+                <p><a href="/">← Back to Welcome</a></p>
+                <p><a href="/admin">Admin</a></p>
+                <p>Error loading brain dashboard: {str(e)}</p>
             </body>
         </html>
         """)

@@ -55,7 +55,7 @@ class NewsAnalyzer:
     
     def __init__(self):
         self.openai_client = get_openai_client()
-        self.news_api_key = os.getenv("NEWS_API_KEY")
+        self.news_api_key = os.getenv("NEWSAPI_KEY")
     
     async def get_crypto_news(self, symbols: Optional[List[str]] = None, hours: int = 24) -> List[NewsArticle]:
         """Fetch and process crypto news articles."""

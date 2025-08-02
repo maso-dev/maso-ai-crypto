@@ -33,7 +33,7 @@ cp env.example .env
      - `BINANCE_API_KEY` (optional - will use mock data if not set)
      - `BINANCE_SECRET_KEY` (optional - will use mock data if not set)
      - `OPENAI_API_KEY` (optional - will use fallback sentiment if not set)
-     - `NEWS_API_KEY` (optional - will use mock news if not set)
+     - `NEWSAPI_KEY` (optional - will use mock news if not set)
      - `TAVILY_API_KEY` (optional - for web search features)
 
 ### Step 3: Test Your Deployment
