@@ -246,9 +246,10 @@
         @media (max-width: 768px) {
             .portfolio-table {
                 font-size: 0.8em;
-                min-width: 600px; /* Ensure table doesn't get too cramped */
+                min-width: 600px;
+                /* Ensure table doesn't get too cramped */
             }
-            
+
             .portfolio-table th,
             .portfolio-table td {
                 padding: 8px 4px;
@@ -312,6 +313,43 @@
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(193, 120, 23, 0.3);
         }
+
+        /* Data Mode Indicator */
+        .data-mode-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .mode-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-real {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .mode-mock {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .mode-static {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .mode-error {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
     </style>
 </head>
 
@@ -320,6 +358,21 @@
         <a href="/" class="back-link">← Back to Welcome</a>
         <h1>🏛️ Masonic</h1>
         <p>Personal Portfolio Analysis</p>
+        {% if data_mode %}
+        <div class="data-mode-indicator">
+            <span class="mode-badge mode-{{ data_mode }}">
+                {% if data_mode == "real" %}
+                    🔗 Live Data
+                {% elif data_mode == "mock" %}
+                    📊 Demo Data
+                {% elif data_mode == "static" %}
+                    📋 Static Mode
+                {% else %}
+                    ⚠️ Fallback
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
     </header>
 
     <div class="main-container">
@@ -411,6 +464,11 @@
                 const data = await res.json();
                 console.log('🏛️ Portfolio data received:', data);
 
+                // Check if we're using mock data
+                const isMockData = data.data_source === "binance" && 
+                                 data.total_value_usdt === 36500.0 && 
+                                 data.assets.length === 4;
+
                 if (!data.assets || data.assets.length === 0) {
                     summaryDiv.innerHTML = `
                         <div class="summary-stats">
@@ -456,6 +514,15 @@
                                 <div class="stat-label">Last Updated</div>
                             </div>
                         </div>
+                        ${isMockData ? `
+                            <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; border-radius: 8px; padding: 10px; margin-top: 15px; text-align: center;">
+                                <p style="margin: 0; color: #ffc107; font-size: 0.9em;">
+                                    <strong>📊 Demo Mode:</strong> Showing sample data. 
+                                    <a href="/v1" style="color: #e6b800; text-decoration: underline;">Switch to Static Mode</a> or 
+                                    <a href="/" style="color: #e6b800; text-decoration: underline;">configure API keys</a> for live data.
+                                </p>
+                            </div>
+                        ` : ''}
                     `;
                 }
             } catch (e) {
