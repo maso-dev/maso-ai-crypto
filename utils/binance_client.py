@@ -249,81 +249,46 @@ def get_binance_client() -> Optional[BinanceClient]:
     """Get or create Binance client instance."""
     global binance_client
     
+    print(f"🏛️ Checking Binance API keys: API_KEY={'SET' if BINANCE_API_KEY else 'NOT SET'}, SECRET_KEY={'SET' if BINANCE_SECRET_KEY else 'NOT SET'}")
+    
     if binance_client is None and BINANCE_API_KEY and BINANCE_SECRET_KEY:
         try:
+            print("🏛️ Creating new Binance client...")
             binance_client = BinanceClient()
+            print("🏛️ Binance client created successfully!")
         except Exception as e:
             print(f"Warning: Could not initialize Binance client: {e}")
             return None
+    elif not BINANCE_API_KEY or not BINANCE_SECRET_KEY:
+        print("🏛️ Binance API keys not configured - cannot create client")
     
     return binance_client
 
 async def get_portfolio_data() -> Optional[PortfolioData]:
     """Get portfolio data using the global client with fallback to mock data."""
     
-    # Check if we're on Vercel (force mock data)
+    # Check if we're on Vercel (force mock data) or Replit (use real APIs)
     is_vercel = os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None
+    is_replit = os.getenv("REPL_ID") is not None or os.getenv("REPL_OWNER") is not None or os.getenv("REPL_SLUG") is not None
+    
+    print(f"🏛️ Environment Check: Vercel={is_vercel}, Replit={is_replit}")
+    print(f"🏛️ Environment Variables: REPL_ID={os.getenv('REPL_ID')}, REPL_OWNER={os.getenv('REPL_OWNER')}, REPL_SLUG={os.getenv('REPL_SLUG')}")
     
     if is_vercel:
         print("🏛️ Vercel detected - using Masonic mock data")
-        # Return mock data when on Vercel
-        mock_assets = [
-            PortfolioAsset(
-                asset="BTC",
-                free=0.5,
-                locked=0.0,
-                total=0.5,
-                usdt_value=25000.0,
-                cost_basis=20000.0,
-                roi_percentage=25.0,
-                avg_buy_price=40000.0
-            ),
-            PortfolioAsset(
-                asset="ETH",
-                free=2.0,
-                locked=0.0,
-                total=2.0,
-                usdt_value=8000.0,
-                cost_basis=6000.0,
-                roi_percentage=33.3,
-                avg_buy_price=3000.0
-            ),
-            PortfolioAsset(
-                asset="ADA",
-                free=1000.0,
-                locked=0.0,
-                total=1000.0,
-                usdt_value=500.0,
-                cost_basis=400.0,
-                roi_percentage=25.0,
-                avg_buy_price=0.4
-            ),
-            PortfolioAsset(
-                asset="SOL",
-                free=50.0,
-                locked=0.0,
-                total=50.0,
-                usdt_value=3000.0,
-                cost_basis=2500.0,
-                roi_percentage=20.0,
-                avg_buy_price=50.0
-            )
-        ]
-        
-        return PortfolioData(
-            total_value_usdt=36500.0,
-            total_cost_basis=28900.0,
-            total_roi_percentage=26.3,
-            assets=mock_assets,
-            last_updated=datetime.now(timezone.utc),
-            trade_history=[]
-        )
+    elif is_replit:
+        print("🏛️ Replit detected - using real Binance API")
+        # Continue to try real Binance API on Replit
     
     # Try real Binance data for local development
     try:
+        print("🏛️ Attempting to get Binance client...")
         client = get_binance_client()
         if client:
+            print("🏛️ Binance client created successfully, fetching portfolio data...")
             return await client.get_portfolio_data()
+        else:
+            print("🏛️ No Binance client available - API keys not configured")
     except Exception as e:
         print(f"⚠️ Binance API error ({str(e)[:100]}...) - using mock data")
     
