@@ -1,333 +1,710 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏛️ Masonic - Alpha Strategy Advisor</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        .welcome-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* Apple Liquid Glass Design System */
+        :root {
+            /* Neon Color Palette */
+            --neon-blue: #00d4ff;
+            --neon-purple: #a855f7;
+            --neon-pink: #ec4899;
+            --neon-cyan: #06b6d4;
+            --neon-green: #10b981;
+            --neon-yellow: #f59e0b;
+            --neon-red: #ef4444;
+            --neon-orange: #f97316;
+
+            /* Metal Colors */
+            --metal-silver: #e2e8f0;
+            --metal-gold: #fbbf24;
+            --metal-bronze: #cd7f32;
+            --metal-platinum: #94a3b8;
+
+            /* Glass Effects */
+            --glass-primary: rgba(255, 255, 255, 0.08);
+            --glass-secondary: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --glass-blur: blur(20px);
+
+            /* Background Gradients */
+            --bg-gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            --bg-gradient-secondary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --bg-gradient-accent: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #0c4a6e 100%);
         }
+
+        body {
+            background: var(--bg-gradient-primary);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Liquid Glass Header */
+        .liquid-header {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 2.25rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+        }
+
+        .nav-link:hover {
+            color: #ffffff;
+            background: var(--glass-secondary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .nav-link.active {
+            color: var(--neon-blue);
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Hero Section */
         .hero-section {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 2rem;
+            padding: 4rem 2rem;
+            margin-bottom: 3rem;
             text-align: center;
-            padding: 40px 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: white;
-            border-radius: 15px;
-            margin-bottom: 30px;
+            box-shadow: var(--glass-shadow);
             position: relative;
             overflow: hidden;
         }
+
         .hero-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            opacity: 0.8;
         }
-        .hero-section h1 {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
+
+        .hero-title {
+            font-size: 4rem;
             font-weight: 300;
-            letter-spacing: 2px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5));
         }
-        .hero-section .subtitle {
-            font-size: 1.4rem;
-            opacity: 0.9;
-            margin-bottom: 15px;
-            font-weight: 300;
-            position: relative;
-            z-index: 1;
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
         }
-        .hero-section .tagline {
-            font-size: 1rem;
-            opacity: 0.7;
+
+        .hero-tagline {
             font-style: italic;
-            position: relative;
-            z-index: 1;
+            color: var(--neon-cyan);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
         }
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(45deg, #c17817, #e6b800);
-            color: white;
-            padding: 18px 35px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 25px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            position: relative;
-            z-index: 1;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+
+        .hero-description {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
         }
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(193, 120, 23, 0.3);
-            border-color: #e6b800;
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-        .card {
-            background: linear-gradient(145deg, #ffffff, #f8f9fa);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e1e5e9;
+
+        /* Liquid Glass Cards */
+        .liquid-card {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
         }
-        .card::before {
+
+        .liquid-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #c17817, #e6b800);
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            opacity: 0.8;
         }
-        .card h3 {
-            color: #1a1a2e;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
-            font-weight: 600;
+
+        .liquid-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
         }
-        .dream-team-item {
+
+        .card-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.3));
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .card-content {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Grid Layouts */
+        .liquid-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+
+        /* Portfolio Items */
+        .portfolio-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
         }
-        .dream-team-item:last-child {
+
+        .portfolio-item:hover {
+            background: var(--glass-secondary);
+            border-radius: 0.75rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .portfolio-item:last-child {
             border-bottom: none;
         }
+
         .asset-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 1rem;
         }
+
         .asset-symbol {
-            font-weight: bold;
-            color: #c17817;
-            font-size: 1.1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--neon-blue);
         }
+
+        .asset-name {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
         .asset-weight {
-            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
             color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
-        .opportunity-item {
-            background: linear-gradient(145deg, #f8f9fa, #ffffff);
-            padding: 18px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid #c17817;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        /* Signal Items */
+        .signal-item {
+            background: var(--glass-secondary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--neon-green);
+            transition: all 0.3s ease;
         }
-        .opportunity-type {
-            font-weight: bold;
-            color: #c17817;
+
+        .signal-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .signal-item.hold {
+            border-left-color: var(--neon-yellow);
+        }
+
+        .signal-item.watch {
+            border-left-color: var(--neon-cyan);
+        }
+
+        .signal-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            color: white;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+            color: white;
+        }
+
+        .badge-cyan {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            color: white;
+        }
+
+        .signal-asset {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .signal-reason {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .signal-meta {
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.8rem;
-            letter-spacing: 1px;
         }
+
+        /* News Items */
         .news-item {
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
         }
+
+        .news-item:hover {
+            background: var(--glass-secondary);
+            border-radius: 0.75rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
         .news-item:last-child {
             border-bottom: none;
         }
-        .news-sentiment {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+
+        .news-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
         }
-        .sentiment-positive { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
-        .sentiment-neutral { background: linear-gradient(45deg, #ffc107, #fd7e14); color: white; }
-        .sentiment-negative { background: linear-gradient(45deg, #dc3545, #e83e8c); color: white; }
-        .version-link {
-            text-align: center;
-            margin-top: 40px;
-            padding: 25px;
-            background: linear-gradient(145deg, #f8f9fa, #ffffff);
-            border-radius: 15px;
-            border: 2px solid #e1e5e9;
+
+        .news-meta {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
         }
-        .version-link a {
-            color: #c17817;
+
+        /* Liquid Button */
+        .liquid-button {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            color: #ffffff;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
         }
-        .version-link a:hover {
-            color: #e6b800;
+
+        .liquid-button:hover {
+            background: var(--glass-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-        .masonic-symbol {
-            font-size: 1.2rem;
-            margin-right: 8px;
+
+        .liquid-button.primary {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            border-color: rgba(0, 212, 255, 0.3);
         }
+
+        .liquid-button.primary:hover {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Exclusive Badge */
         .exclusive-badge {
             position: absolute;
             top: -10px;
             right: -10px;
-            background: linear-gradient(45deg, #c17817, #e6b800);
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
             font-size: 0.7rem;
-            font-weight: bold;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(193, 120, 23, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .main-container {
+                padding: 2rem 1rem;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .liquid-card {
+                padding: 1.5rem;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Text Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-secondary {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .text-tertiary {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 2rem;
+        }
+
+        .mb-5 {
+            margin-bottom: 3rem;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        .absolute {
+            position: absolute;
+        }
+
+        .top-0 {
+            top: 0;
+        }
+
+        .right-0 {
+            right: 0;
+        }
+
+        .transform {
+            transform: translateX(0.5rem) translateY(-0.5rem);
         }
     </style>
 </head>
+
 <body>
-    <div class="welcome-container">
+    <header class="liquid-header">
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">🏛️</span>
+                <span>Masonic</span>
+            </a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="/" class="nav-link active">Home</a></li>
+                    <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                    <li><a href="/brain-dashboard" class="nav-link">Brain</a></li>
+                    <li><a href="/admin" class="nav-link">Admin</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
         <!-- Hero Section -->
         <div class="hero-section">
-            <h1>🏛️ Masonic</h1>
-            <div class="subtitle">Alpha Strategy Advisor</div>
-            <div class="tagline">"Access to insights others don't have"</div>
-            <p>Join the brotherhood of informed traders</p>
-                            <a href="/dashboard" class="cta-button">Enter the Lodge (Smart)</a>
+            <h1 class="hero-title">🏛️ Masonic</h1>
+            <h2 class="hero-subtitle">Alpha Strategy Advisor</h2>
+            <p class="hero-tagline">"Access to insights others don't have"</p>
+            <p class="hero-description">Join the brotherhood of informed traders</p>
+            <a href="/dashboard" class="liquid-button primary">
+                <span>🚀</span>
+                Enter the Lodge (Smart)
+            </a>
         </div>
 
         <!-- Main Content Grid -->
-        <div class="grid-container">
+        <div class="liquid-grid grid-3 mb-5">
             <!-- Dream Team Portfolio -->
-            <div class="card">
+            <div class="liquid-card relative">
                 <div class="exclusive-badge">Exclusive</div>
-                <h3><span class="masonic-symbol">🏆</span> Alpha Portfolio</h3>
-                <p>Our brotherhood's most trusted allocation strategy</p>
-                <div id="dream-team-content">
-                    <div class="dream-team-item">
-                        <div class="asset-info">
-                            <span class="asset-symbol">BTC</span>
-                            <span>Bitcoin</span>
+                <div class="card-header">
+                    <span class="card-icon">🏆</span>
+                    <h3 class="card-title">Alpha Portfolio</h3>
+                </div>
+                <div class="card-content">
+                    <p class="text-secondary mb-4">Our brotherhood's most trusted allocation strategy</p>
+                    <div id="dream-team-content">
+                        <div class="portfolio-item">
+                            <div class="asset-info">
+                                <span class="asset-symbol">BTC</span>
+                                <span class="asset-name">Bitcoin</span>
+                            </div>
+                            <span class="asset-weight">40%</span>
                         </div>
-                        <span class="asset-weight">40%</span>
-                    </div>
-                    <div class="dream-team-item">
-                        <div class="asset-info">
-                            <span class="asset-symbol">ETH</span>
-                            <span>Ethereum</span>
+                        <div class="portfolio-item">
+                            <div class="asset-info">
+                                <span class="asset-symbol">ETH</span>
+                                <span class="asset-name">Ethereum</span>
+                            </div>
+                            <span class="asset-weight">30%</span>
                         </div>
-                        <span class="asset-weight">30%</span>
-                    </div>
-                    <div class="dream-team-item">
-                        <div class="asset-info">
-                            <span class="asset-symbol">XRP</span>
-                            <span>Ripple</span>
+                        <div class="portfolio-item">
+                            <div class="asset-info">
+                                <span class="asset-symbol">XRP</span>
+                                <span class="asset-name">Ripple</span>
+                            </div>
+                            <span class="asset-weight">15%</span>
                         </div>
-                        <span class="asset-weight">15%</span>
-                    </div>
-                    <div class="dream-team-item">
-                        <div class="asset-info">
-                            <span class="asset-symbol">SOL</span>
-                            <span>Solana</span>
+                        <div class="portfolio-item">
+                            <div class="asset-info">
+                                <span class="asset-symbol">SOL</span>
+                                <span class="asset-name">Solana</span>
+                            </div>
+                            <span class="asset-weight">10%</span>
                         </div>
-                        <span class="asset-weight">10%</span>
-                    </div>
-                    <div class="dream-team-item">
-                        <div class="asset-info">
-                            <span class="asset-symbol">DOGE</span>
-                            <span>Dogecoin</span>
+                        <div class="portfolio-item">
+                            <div class="asset-info">
+                                <span class="asset-symbol">DOGE</span>
+                                <span class="asset-name">Dogecoin</span>
+                            </div>
+                            <span class="asset-weight">5%</span>
                         </div>
-                        <span class="asset-weight">5%</span>
                     </div>
                 </div>
             </div>
 
             <!-- Today's Opportunities -->
-            <div class="card">
+            <div class="liquid-card relative">
                 <div class="exclusive-badge">Alpha</div>
-                <h3><span class="masonic-symbol">🎯</span> Today's Alpha Signals</h3>
-                <p>Exclusive market intelligence from our brotherhood</p>
-                <div id="opportunities-content">
-                    <div class="opportunity-item">
-                        <div class="opportunity-type">Strong Buy</div>
-                        <strong>BTC</strong> - Key support level reached, accumulation phase
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                            Confidence: 85% | Timeframe: Short-term
+                <div class="card-header">
+                    <span class="card-icon">🎯</span>
+                    <h3 class="card-title">Today's Alpha Signals</h3>
+                </div>
+                <div class="card-content">
+                    <p class="text-secondary mb-4">Exclusive market intelligence from our brotherhood</p>
+                    <div id="opportunities-content">
+                        <div class="signal-item">
+                            <div class="signal-badge badge-success">Strong Buy</div>
+                            <div class="signal-asset">BTC</div>
+                            <div class="signal-reason">Key support level reached, accumulation phase</div>
+                            <div class="signal-meta">
+                                Confidence: 85% | Timeframe: Short-term
+                            </div>
                         </div>
-                    </div>
-                    <div class="opportunity-item">
-                        <div class="opportunity-type">Hold</div>
-                        <strong>ETH</strong> - Consolidation phase, wait for breakout signal
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                            Confidence: 75% | Timeframe: Medium-term
+                        <div class="signal-item hold">
+                            <div class="signal-badge badge-warning">Hold</div>
+                            <div class="signal-asset">ETH</div>
+                            <div class="signal-reason">Consolidation phase, wait for breakout signal</div>
+                            <div class="signal-meta">
+                                Confidence: 75% | Timeframe: Medium-term
+                            </div>
                         </div>
-                    </div>
-                    <div class="opportunity-item">
-                        <div class="opportunity-type">Watch</div>
-                        <strong>SOL</strong> - Potential breakout candidate, monitor closely
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                            Confidence: 65% | Timeframe: Short-term
+                        <div class="signal-item watch">
+                            <div class="signal-badge badge-cyan">Watch</div>
+                            <div class="signal-asset">SOL</div>
+                            <div class="signal-reason">Potential breakout candidate, monitor closely</div>
+                            <div class="signal-meta">
+                                Confidence: 65% | Timeframe: Short-term
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- News Briefing -->
-            <div class="card">
+            <div class="liquid-card relative">
                 <div class="exclusive-badge">Insider</div>
-                <h3><span class="masonic-symbol">📰</span> Brotherhood Intelligence</h3>
-                <p>Market insights known only to our inner circle</p>
-                <div id="news-content">
-                    <div class="news-item">
-                        <div class="news-sentiment sentiment-positive">Bullish</div>
-                        <strong>Bitcoin maintains $40K support - institutional accumulation detected</strong>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact | Insider Knowledge</div>
-                    </div>
-                    <div class="news-item">
-                        <div class="news-sentiment sentiment-neutral">Neutral</div>
-                        <strong>Ethereum upgrade progress - smart money positioning</strong>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Medium Impact | Technical Analysis</div>
-                    </div>
-                    <div class="news-item">
-                        <div class="news-sentiment sentiment-positive">Bullish</div>
-                        <strong>Regulatory clarity - institutional adoption accelerating</strong>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">High Impact | Market Intelligence</div>
+                <div class="card-header">
+                    <span class="card-icon">📰</span>
+                    <h3 class="card-title">Brotherhood Intelligence</h3>
+                </div>
+                <div class="card-content">
+                    <p class="text-secondary mb-4">Market insights known only to our inner circle</p>
+                    <div id="news-content">
+                        <div class="news-item">
+                            <div class="signal-badge badge-success mb-2">Bullish</div>
+                            <div class="news-title">Bitcoin maintains $40K support - institutional accumulation detected
+                            </div>
+                            <div class="news-meta">High Impact | Insider Knowledge</div>
+                        </div>
+                        <div class="news-item">
+                            <div class="signal-badge badge-warning mb-2">Neutral</div>
+                            <div class="news-title">Ethereum upgrade progress - smart money positioning</div>
+                            <div class="news-meta">Medium Impact | Technical Analysis</div>
+                        </div>
+                        <div class="news-item">
+                            <div class="signal-badge badge-success mb-2">Bullish</div>
+                            <div class="news-title">Regulatory clarity - institutional adoption accelerating</div>
+                            <div class="news-meta">High Impact | Market Intelligence</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Version Link -->
-        <div class="version-link">
-            <p>Ready to access the full Masonic experience?</p>
-                            <a href="/dashboard">→ Smart Dashboard (Auto-detect)</a>
-                <br>
-                <a href="/v1" style="margin-top: 10px; display: inline-block;">→ Demo Dashboard (Static)</a>
+        <div class="liquid-card text-center">
+            <div class="card-content">
+                <p class="text-secondary mb-4">Ready to access the full Masonic experience?</p>
+                <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                    <a href="/dashboard" class="liquid-button primary">
+                        <span>🚀</span>
+                        Smart Dashboard (Auto-detect)
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
         // Load dynamic data from APIs
@@ -366,11 +743,11 @@
             container.innerHTML = '';
             data.assets.forEach(asset => {
                 const item = document.createElement('div');
-                item.className = 'dream-team-item';
+                item.className = 'portfolio-item';
                 item.innerHTML = `
                     <div class="asset-info">
                         <span class="asset-symbol">${asset.symbol}</span>
-                        <span>${asset.name}</span>
+                        <span class="asset-name">${asset.name}</span>
                     </div>
                     <span class="asset-weight">${(asset.weight * 100).toFixed(0)}%</span>
                 `;
@@ -392,20 +769,29 @@
             container.innerHTML = '';
             data.signals.forEach(signal => {
                 const item = document.createElement('div');
-                item.className = 'opportunity-item';
-                
-                const typeClass = signal.type === 'strong_buy' ? 'Strong Buy' : 
-                                 signal.type === 'buy' ? 'Buy' : 
-                                 signal.type === 'hold' ? 'Hold' : 
-                                 signal.type === 'sell' ? 'Sell' : 'Watch';
-                
+                item.className = 'signal-item';
+
+                const typeClass = signal.type === 'strong_buy' ? 'success' :
+                    signal.type === 'buy' ? 'success' :
+                        signal.type === 'hold' ? 'warning' :
+                            signal.type === 'sell' ? 'danger' : 'cyan';
+
+                const typeText = signal.type === 'strong_buy' ? 'Strong Buy' :
+                    signal.type === 'buy' ? 'Buy' :
+                        signal.type === 'hold' ? 'Hold' :
+                            signal.type === 'sell' ? 'Sell' : 'Watch';
+
+                if (signal.type === 'hold') item.classList.add('hold');
+                if (signal.type === 'watch') item.classList.add('watch');
+
                 item.innerHTML = `
-                    <div class="opportunity-type">${typeClass}</div>
-                    <strong>${signal.asset}</strong> - ${signal.reason}
-                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                    <div class="signal-badge badge-${typeClass}">${typeText}</div>
+                    <div class="signal-asset">${signal.asset}</div>
+                    <div class="signal-reason">${signal.reason}</div>
+                    <div class="signal-meta">
                         Confidence: ${(signal.confidence * 100).toFixed(0)}% | Timeframe: ${signal.timeframe}
                     </div>
-                    ${signal.brotherhood_insight ? `<div style="font-size: 0.7rem; color: #c17817; margin-top: 3px; font-style: italic;">💡 ${signal.brotherhood_insight}</div>` : ''}
+                    ${signal.brotherhood_insight ? `<div style="font-size: 0.8rem; color: var(--neon-blue); margin-top: 0.5rem; font-style: italic;">💡 ${signal.brotherhood_insight}</div>` : ''}
                 `;
                 container.appendChild(item);
             });
@@ -420,16 +806,16 @@
             data.intelligence.forEach(item => {
                 const newsItem = document.createElement('div');
                 newsItem.className = 'news-item';
-                
-                const sentimentClass = item.sentiment === 'bullish' ? 'sentiment-positive' : 
-                                     item.sentiment === 'bearish' ? 'sentiment-negative' : 'sentiment-neutral';
-                const sentimentText = item.sentiment === 'bullish' ? 'Bullish' : 
-                                    item.sentiment === 'bearish' ? 'Bearish' : 'Neutral';
-                
+
+                const sentimentClass = item.sentiment === 'bullish' ? 'success' :
+                    item.sentiment === 'bearish' ? 'danger' : 'warning';
+                const sentimentText = item.sentiment === 'bullish' ? 'Bullish' :
+                    item.sentiment === 'bearish' ? 'Bearish' : 'Neutral';
+
                 newsItem.innerHTML = `
-                    <div class="news-sentiment ${sentimentClass}">${sentimentText}</div>
-                    <strong>${item.title}</strong>
-                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                    <div class="signal-badge badge-${sentimentClass} mb-2">${sentimentText}</div>
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-meta">
                         ${item.impact.charAt(0).toUpperCase() + item.impact.slice(1)} Impact | ${item.brotherhood_insight ? item.brotherhood_insight : 'Market Intelligence'}
                     </div>
                 `;
@@ -447,4 +833,5 @@
         document.addEventListener('DOMContentLoaded', loadWelcomeData);
     </script>
 </body>
-</html> 
+
+</html>

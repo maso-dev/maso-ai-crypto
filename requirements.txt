@@ -30,3 +30,19 @@ pytz>=2023.0
 
 # Note: Removed heavy dependencies like langchain, tavily-python for Vercel compatibility 
 binance
+
+# LangGraph and advanced AI
+langgraph                0.6.2
+langgraph-checkpoint     2.1.1
+langgraph-prebuilt       0.6.2
+langgraph-sdk            0.2.0
+langsmith                0.0.69
+langchain-community      0.0.10
+
+# Database and graph
+neo4j                    5.15.0
+py2neo                   2021.2.3
+
+# Real-time data
+websockets               12.0
+aiohttp                  3.9.1

@@ -5,295 +5,630 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masonic Brain Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        /* Apple Liquid Glass Design System */
+        :root {
+            /* Neon Color Palette */
+            --neon-blue: #00d4ff;
+            --neon-purple: #a855f7;
+            --neon-pink: #ec4899;
+            --neon-cyan: #06b6d4;
+            --neon-green: #10b981;
+            --neon-yellow: #f59e0b;
+            --neon-red: #ef4444;
+            --neon-orange: #f97316;
+
+            /* Metal Colors */
+            --metal-silver: #e2e8f0;
+            --metal-gold: #fbbf24;
+            --metal-bronze: #cd7f32;
+            --metal-platinum: #94a3b8;
+
+            /* Glass Effects */
+            --glass-primary: rgba(255, 255, 255, 0.08);
+            --glass-secondary: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --glass-blur: blur(20px);
+
+            /* Background Gradients */
+            --bg-gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            --bg-gradient-secondary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --bg-gradient-accent: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #0c4a6e 100%);
+        }
+
+        body {
+            background: var(--bg-gradient-primary);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Liquid Glass Header */
+        .liquid-header {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+        }
+
+        .version-badge {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .header-nav a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+        }
+
+        .header-nav a:hover {
+            color: #ffffff;
+            background: var(--glass-secondary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Status Grid */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Status Cards */
+        .status-card {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .status-icon.brain {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--neon-green);
+        }
+
+        .status-icon.news {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--neon-blue);
+        }
+
+        .status-icon.langsmith {
+            background: rgba(168, 85, 247, 0.2);
+            color: var(--neon-purple);
+        }
+
+        .status-icon.performance {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--neon-yellow);
+        }
+
+        .status-info h3 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0 0 0.25rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-info p {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Liquid Glass Cards */
+        .liquid-card {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            opacity: 0.8;
+        }
+
+        .liquid-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.3));
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .card-content {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* News Items */
+        .news-item {
+            background: var(--glass-secondary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .news-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .news-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-meta {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-processing {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--neon-yellow);
+        }
+
+        .status-completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--neon-green);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--neon-red);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--glass-secondary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .liquid-button {
+            background: var(--glass-primary);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.75rem;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .liquid-button:hover {
+            background: var(--glass-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .liquid-button.primary {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .liquid-button.primary:hover {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .liquid-button.success {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .liquid-button.warning {
+            background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .liquid-card {
+                padding: 1.5rem;
+            }
+
+            .control-panel {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading Animation */
+        .liquid-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            border-top-color: var(--neon-blue);
+            animation: liquid-spin 1s ease-in-out infinite;
+        }
+
+        @keyframes liquid-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Text Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-secondary {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 2rem;
+        }
+
+        .space-y-6>*+* {
+            margin-top: 1.5rem;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50">
+<body>
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="bg-white shadow-sm border-b">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-6">
-                    <div class="flex items-center">
-                        <h1 class="text-3xl font-bold text-gray-900">🧠 Masonic Brain</h1>
-                        <span class="ml-3 px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
-                            Enhanced v1.0
-                        </span>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <a href="/" class="text-gray-500 hover:text-gray-700">← Back to App</a>
-                        <a href="/admin" class="text-gray-500 hover:text-gray-700">Admin</a>
-                    </div>
+        <header class="liquid-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>🧠 Masonic Brain</h1>
+                    <span class="version-badge">Enhanced v1.0</span>
+                </div>
+                <div class="header-nav">
+                    <a href="/">← Back to App</a>
+                    <a href="/admin">Admin</a>
+                    <button onclick="refreshDashboard()" class="liquid-button" style="margin-left: 1rem;">
+                        🔄 Refresh Data
+                    </button>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="main-container">
             <!-- Status Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <span class="text-green-600">🧠</span>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Brain Status</p>
-                            <p class="text-lg font-semibold text-gray-900" id="brain-status">Loading...</p>
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-icon brain">🧠</div>
+                        <div class="status-info">
+                            <h3>Brain Status</h3>
+                            <p id="brain-status">Loading...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span class="text-blue-600">📰</span>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">News Pipeline</p>
-                            <p class="text-lg font-semibold text-gray-900" id="news-status">Loading...</p>
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-icon news">📰</div>
+                        <div class="status-info">
+                            <h3>News Pipeline</h3>
+                            <p id="news-status">Loading...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                <span class="text-purple-600">🔍</span>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">LangSmith</p>
-                            <p class="text-lg font-semibold text-gray-900" id="langsmith-status">Loading...</p>
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-icon langsmith">🔍</div>
+                        <div class="status-info">
+                            <h3>LangSmith</h3>
+                            <p id="langsmith-status">Loading...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <span class="text-yellow-600">⚡</span>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Performance</p>
-                            <p class="text-lg font-semibold text-gray-900" id="performance-status">Loading...</p>
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <div class="status-icon performance">⚡</div>
+                        <div class="status-info">
+                            <h3>Performance</h3>
+                            <p id="performance-status">Loading...</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Main Dashboard Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="dashboard-grid">
                 <!-- Left Column: News Processing -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="space-y-6">
                     <!-- News Processing Panel -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">📰 News Processing</h2>
-                            <p class="text-sm text-gray-500">AI-powered news enrichment with LangSmith tracing</p>
+                    <div class="liquid-card">
+                        <div class="card-header">
+                            <span class="card-icon">📰</span>
+                            <h2 class="card-title">News Processing Pipeline</h2>
                         </div>
-                        <div class="p-6">
-                            <!-- News Processing Controls -->
-                            <div class="mb-6">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Symbols</label>
-                                        <input type="text" id="news-symbols" value="Bitcoin,Ethereum"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Hours Back</label>
-                                        <input type="number" id="news-hours" value="24" min="1" max="168"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Articles</label>
-                                        <input type="number" id="news-max" value="10" min="1" max="50"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                </div>
-                                <div class="mt-4 flex space-x-3">
-                                    <button onclick="processNews()"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        🔄 Process News
-                                    </button>
-                                    <button onclick="analyzeNews()"
-                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                        📊 Analyze Sentiment
-                                    </button>
-                                    <label class="flex items-center">
-                                        <input type="checkbox" id="enable-enrichment" checked
-                                            class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                        <span class="text-sm text-gray-700">Enable AI Enrichment</span>
-                                    </label>
-                                </div>
+                        <div class="card-content">
+                            <div class="control-panel">
+                                <button class="liquid-button primary" onclick="startNewsProcessing()">
+                                    <span>🚀</span>
+                                    Start Processing
+                                </button>
+                                <button class="liquid-button success" onclick="refreshNewsData()">
+                                    <span>🔄</span>
+                                    Refresh Data
+                                </button>
+                                <button class="liquid-button warning" onclick="clearNewsCache()">
+                                    <span>🗑️</span>
+                                    Clear Cache
+                                </button>
                             </div>
-
-                            <!-- News Results -->
-                            <div id="news-results" class="hidden">
-                                <div class="border-t border-gray-200 pt-4">
-                                    <h3 class="text-md font-medium text-gray-900 mb-3">📰 Processed Articles</h3>
-                                    <div id="articles-list" class="space-y-3"></div>
-                                </div>
-                            </div>
-
-                            <!-- Analysis Results -->
-                            <div id="analysis-results" class="hidden">
-                                <div class="border-t border-gray-200 pt-4">
-                                    <h3 class="text-md font-medium text-gray-900 mb-3">📊 Sentiment Analysis</h3>
-                                    <div id="sentiment-chart" class="h-64"></div>
-                                </div>
+                            <div id="news-processing-content">
+                                <div class="liquid-loading"></div> Loading news processing data...
                             </div>
                         </div>
                     </div>
 
-                    <!-- Real-time Data Controls -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">📊 Real-time Data</h2>
-                            <p class="text-sm text-gray-500">Live crypto price data with LiveCoinWatch API</p>
+                    <!-- AI Agent Status -->
+                    <div class="liquid-card">
+                        <div class="card-header">
+                            <span class="card-icon">🤖</span>
+                            <h2 class="card-title">AI Agent Status</h2>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Data Source</label>
-                                    <select id="data-source"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="livecoinwatch" selected>🪙 LiveCoinWatch (Default)</option>
-                                        <option value="mock">🎭 Mock Data</option>
-                                        <option value="coingecko">🪙 CoinGecko</option>
-                                        <option value="binance">🔗 Binance WebSocket</option>
-                                    </select>
-                                </div>
-                                <div class="flex items-end space-x-2">
-                                    <button onclick="startRealtimeData()"
-                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                        ▶️ Start
-                                    </button>
-                                    <button onclick="stopRealtimeData()"
-                                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                        ⏹️ Stop
-                                    </button>
-                                    <button onclick="getRealtimeStatus()"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        📊 Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Real-time Status -->
-                            <div id="realtime-status" class="hidden">
-                                <div class="bg-gray-50 rounded-lg p-4">
-                                    <h4 class="font-medium text-gray-900 mb-2">Real-time Status</h4>
-                                    <div id="realtime-status-content" class="text-sm text-gray-600"></div>
-                                </div>
-                            </div>
-
-                            <!-- Live Prices -->
-                            <div id="live-prices" class="hidden">
-                                <div class="bg-gray-50 rounded-lg p-4">
-                                    <h4 class="font-medium text-gray-900 mb-2">Live Prices</h4>
-                                    <div id="prices-content" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                                    </div>
-                                </div>
+                        <div class="card-content">
+                            <div id="agent-status-content">
+                                <div class="liquid-loading"></div> Loading agent status...
                             </div>
                         </div>
                     </div>
 
-                    <!-- Brain Operations -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">⚙️ Brain Operations</h2>
-                            <p class="text-sm text-gray-500">Execute brain operations and monitor performance</p>
+                    <!-- Performance Metrics -->
+                    <div class="liquid-card">
+                        <div class="card-header">
+                            <span class="card-icon">📊</span>
+                            <h2 class="card-title">Performance Metrics</h2>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button onclick="executeOperation('refresh_news')"
-                                    class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left">
-                                    <div class="flex items-center">
-                                        <span class="text-2xl mr-3">🔄</span>
-                                        <div>
-                                            <h3 class="font-medium text-gray-900">Refresh News</h3>
-                                            <p class="text-sm text-gray-500">Update news knowledge base</p>
-                                        </div>
-                                    </div>
-                                </button>
-                                <button onclick="executeOperation('analyze_market')"
-                                    class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left">
-                                    <div class="flex items-center">
-                                        <span class="text-2xl mr-3">📈</span>
-                                        <div>
-                                            <h3 class="font-medium text-gray-900">Market Analysis</h3>
-                                            <p class="text-sm text-gray-500">Analyze market trends</p>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                            <div id="operation-results" class="mt-4 hidden">
-                                <div class="bg-gray-50 rounded-lg p-4">
-                                    <h4 class="font-medium text-gray-900 mb-2">Operation Results</h4>
-                                    <pre id="operation-output" class="text-sm text-gray-600 whitespace-pre-wrap"></pre>
-                                </div>
+                        <div class="card-content">
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Metrics & Configuration -->
+                <!-- Right Column: System Info -->
                 <div class="space-y-6">
-                    <!-- Brain Metrics -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">📊 Brain Metrics</h2>
-                            <p class="text-sm text-gray-500">Real-time performance indicators</p>
+                    <!-- System Health -->
+                    <div class="liquid-card">
+                        <div class="card-header">
+                            <span class="card-icon">💚</span>
+                            <h2 class="card-title">System Health</h2>
                         </div>
-                        <div class="p-6">
-                            <div id="metrics-content" class="space-y-4">
-                                <div class="animate-pulse">
-                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                                </div>
+                        <div class="card-content">
+                            <div id="system-health-content">
+                                <div class="liquid-loading"></div> Loading system health...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="liquid-card">
+                        <div class="card-header">
+                            <span class="card-icon">📝</span>
+                            <h2 class="card-title">Recent Activity</h2>
+                        </div>
+                        <div class="card-content">
+                            <div id="recent-activity-content">
+                                <div class="liquid-loading"></div> Loading recent activity...
                             </div>
                         </div>
                     </div>
 
                     <!-- Configuration -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">⚙️ Configuration</h2>
-                            <p class="text-sm text-gray-500">Brain system configuration</p>
+                    <div class="liquid-card">
+                        <div class="card-header">
+                            <span class="card-icon">⚙️</span>
+                            <h2 class="card-title">Configuration</h2>
                         </div>
-                        <div class="p-6">
-                            <div id="config-content" class="space-y-4">
-                                <div class="animate-pulse">
-                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Knowledge Base -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-900">📚 Knowledge Base</h2>
-                            <p class="text-sm text-gray-500">Knowledge base statistics</p>
-                        </div>
-                        <div class="p-6">
-                            <div id="knowledge-content" class="space-y-4">
-                                <div class="animate-pulse">
-                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                                </div>
+                        <div class="card-content">
+                            <div id="configuration-content">
+                                <div class="liquid-loading"></div> Loading configuration...
                             </div>
                         </div>
                     </div>
@@ -303,204 +638,222 @@
     </div>
 
     <script>
-        // Initialize dashboard
+        // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', function () {
             loadDashboardData();
-            // Refresh data every 30 seconds
-            setInterval(loadDashboardData, 30000);
+            initializeCharts();
         });
 
+        // Load all dashboard data
         async function loadDashboardData() {
             try {
-                // Load brain health
-                const healthResponse = await fetch('/brain/health');
-                const healthData = await healthResponse.json();
-                updateHealthStatus(healthData);
-
-                // Load metrics
-                const metricsResponse = await fetch('/brain/metrics');
-                const metricsData = await metricsResponse.json();
-                updateMetrics(metricsData);
-
-                // Load configuration
-                const configResponse = await fetch('/brain/config');
-                const configData = await configResponse.json();
-                updateConfiguration(configData);
-
-                // Load knowledge stats
-                const knowledgeResponse = await fetch('/brain/knowledge/stats');
-                const knowledgeData = await knowledgeResponse.json();
-                updateKnowledgeStats(knowledgeData);
-
+                await Promise.all([
+                    loadStatusData(),
+                    loadNewsProcessingData(),
+                    loadAgentStatusData(),
+                    loadSystemHealthData(),
+                    loadRecentActivityData(),
+                    loadConfigurationData()
+                ]);
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
         }
 
-        function updateHealthStatus(data) {
-            document.getElementById('brain-status').textContent = data.status;
-            document.getElementById('news-status').textContent = data.checks.newsapi_configured ? 'Active' : 'Inactive';
-            document.getElementById('langsmith-status').textContent = data.checks.langsmith_configured ? 'Connected' : 'Disconnected';
-            document.getElementById('performance-status').textContent = 'Optimal';
-        }
-
-        function updateMetrics(data) {
-            const metricsHtml = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-500">Requests Processed</p>
-                        <p class="text-lg font-semibold">${data.performance.requests_processed}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Articles Processed</p>
-                        <p class="text-lg font-semibold">${data.performance.articles_processed}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Success Rate</p>
-                        <p class="text-lg font-semibold">${(data.performance.enrichment_success_rate * 100).toFixed(1)}%</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">LangSmith Traces</p>
-                        <p class="text-lg font-semibold">${data.langsmith.traces_sent}</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('metrics-content').innerHTML = metricsHtml;
-        }
-
-        function updateConfiguration(data) {
-            const configHtml = `
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-500">Brain ID</p>
-                        <p class="text-sm font-medium">${data.brain_id}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Environment</p>
-                        <p class="text-sm font-medium">${data.environment}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">LangSmith Project</p>
-                        <p class="text-sm font-medium">${data.langsmith.project_name}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Enrichment Model</p>
-                        <p class="text-sm font-medium">${data.enrichment.model}</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('config-content').innerHTML = configHtml;
-        }
-
-        function updateKnowledgeStats(data) {
-            const knowledgeHtml = `
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-500">Total Articles</p>
-                        <p class="text-lg font-semibold">${data.knowledge_base.total_articles}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Enriched Articles</p>
-                        <p class="text-lg font-semibold">${data.knowledge_base.enriched_articles}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Vector Store</p>
-                        <p class="text-sm font-medium">${data.vector_store.status} (${data.vector_store.embeddings} embeddings)</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Graph Store</p>
-                        <p class="text-sm font-medium">${data.graph_store.status} (${data.graph_store.nodes} nodes)</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('knowledge-content').innerHTML = knowledgeHtml;
-        }
-
-        async function processNews() {
-            const symbols = document.getElementById('news-symbols').value;
-            const hours = document.getElementById('news-hours').value;
-            const maxArticles = document.getElementById('news-max').value;
-            const enableEnrichment = document.getElementById('enable-enrichment').checked;
-
+        // Load status data
+        async function loadStatusData() {
             try {
-                const response = await fetch(`/brain/news/enriched?symbols=${encodeURIComponent(symbols)}&hours_back=${hours}&max_articles=${maxArticles}&enable_enrichment=${enableEnrichment}`);
+                const response = await fetch('/brain/status');
                 const data = await response.json();
 
-                if (data.success) {
-                    displayNewsResults(data.data);
-                } else {
-                    alert('Failed to process news');
-                }
+                document.getElementById('brain-status').textContent = data.brain_status || 'Unknown';
+                document.getElementById('news-status').textContent = data.news_status || 'Unknown';
+                document.getElementById('langsmith-status').textContent = data.langsmith_status || 'Unknown';
+                document.getElementById('performance-status').textContent = data.performance_status || 'Unknown';
             } catch (error) {
-                console.error('Error processing news:', error);
-                alert('Error processing news');
+                console.error('Error loading status data:', error);
             }
         }
 
-        async function analyzeNews() {
-            const symbols = document.getElementById('news-symbols').value;
-            const hours = document.getElementById('news-hours').value;
-
+        // Load news processing data
+        async function loadNewsProcessingData() {
             try {
-                const response = await fetch(`/brain/news/analyze?symbols=${encodeURIComponent(symbols)}&hours_back=${hours}`);
+                const response = await fetch('/brain/news-processing');
                 const data = await response.json();
 
-                if (data.success) {
-                    displayAnalysisResults(data.analysis);
-                } else {
-                    alert(data.message || 'Failed to analyze news');
-                }
-            } catch (error) {
-                console.error('Error analyzing news:', error);
-                alert('Error analyzing news');
-            }
-        }
-
-        function displayNewsResults(data) {
-            const resultsDiv = document.getElementById('news-results');
-            const articlesList = document.getElementById('articles-list');
-
-            if (data.articles && data.articles.length > 0) {
-                const articlesHtml = data.articles.map(article => `
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <h4 class="font-medium text-gray-900 mb-2">${article.title}</h4>
-                        <p class="text-sm text-gray-600 mb-2">${article.source_name} • ${article.hours_ago} hours ago</p>
-                        ${article.enrichment ? `
-                            <div class="grid grid-cols-2 gap-2 text-sm">
-                                <div><span class="text-gray-500">Sentiment:</span> ${article.enrichment.sentiment.toFixed(2)}</div>
-                                <div><span class="text-gray-500">Trust:</span> ${article.enrichment.trust.toFixed(2)}</div>
-                                <div><span class="text-gray-500">Impact:</span> ${article.enrichment.market_impact}</div>
-                                <div><span class="text-gray-500">Category:</span> ${article.enrichment.macro_category}</div>
+                const container = document.getElementById('news-processing-content');
+                if (data.articles && data.articles.length > 0) {
+                    let html = '';
+                    data.articles.forEach(article => {
+                        const statusClass = article.status === 'processing' ? 'status-processing' :
+                            article.status === 'completed' ? 'status-completed' : 'status-error';
+                        html += `
+                            <div class="news-item">
+                                <div class="news-title">${article.title}</div>
+                                <div class="news-meta">${article.source} • ${article.published_at}</div>
+                                <span class="news-status ${statusClass}">${article.status.toUpperCase()}</span>
                             </div>
-                        ` : '<p class="text-sm text-gray-500">No enrichment data</p>'}
-                    </div>
-                `).join('');
-
-                articlesList.innerHTML = articlesHtml;
-                resultsDiv.classList.remove('hidden');
-            } else {
-                articlesList.innerHTML = '<p class="text-gray-500">No articles found</p>';
-                resultsDiv.classList.remove('hidden');
+                        `;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="text-secondary">No news articles found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading news processing data:', error);
             }
         }
 
-        function displayAnalysisResults(analysis) {
-            const resultsDiv = document.getElementById('analysis-results');
-            resultsDiv.classList.remove('hidden');
+        // Load agent status data
+        async function loadAgentStatusData() {
+            try {
+                const response = await fetch('/brain/agent-status');
+                const data = await response.json();
 
-            // Create sentiment chart
-            const ctx = document.createElement('canvas');
-            ctx.id = 'sentimentChart';
-            document.getElementById('sentiment-chart').innerHTML = '';
-            document.getElementById('sentiment-chart').appendChild(ctx);
+                const container = document.getElementById('agent-status-content');
+                container.innerHTML = `
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <div class="status-icon brain">🤖</div>
+                            <div class="status-info">
+                                <h3>Agent Status</h3>
+                                <p>${data.status || 'Unknown'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <div class="status-icon performance">⚡</div>
+                            <div class="status-info">
+                                <h3>Response Time</h3>
+                                <p>${data.response_time || 'N/A'}ms</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading agent status data:', error);
+            }
+        }
+
+        // Load system health data
+        async function loadSystemHealthData() {
+            try {
+                const response = await fetch('/brain/system-health');
+                const data = await response.json();
+
+                const container = document.getElementById('system-health-content');
+                container.innerHTML = `
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <div class="status-icon brain">💚</div>
+                            <div class="status-info">
+                                <h3>Overall Health</h3>
+                                <p>${data.overall_health || 'Unknown'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <div class="status-icon performance">📊</div>
+                            <div class="status-info">
+                                <h3>Memory Usage</h3>
+                                <p>${data.memory_usage || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading system health data:', error);
+            }
+        }
+
+        // Load recent activity data
+        async function loadRecentActivityData() {
+            try {
+                const response = await fetch('/brain/recent-activity');
+                const data = await response.json();
+
+                const container = document.getElementById('recent-activity-content');
+                if (data.activities && data.activities.length > 0) {
+                    let html = '';
+                    data.activities.forEach(activity => {
+                        html += `
+                            <div class="news-item">
+                                <div class="news-title">${activity.action}</div>
+                                <div class="news-meta">${activity.timestamp}</div>
+                                <span class="news-status status-completed">${activity.status.toUpperCase()}</span>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="text-secondary">No recent activity found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading recent activity data:', error);
+            }
+        }
+
+        // Load configuration data
+        async function loadConfigurationData() {
+            try {
+                const response = await fetch('/brain/configuration');
+                const data = await response.json();
+
+                const container = document.getElementById('configuration-content');
+                container.innerHTML = `
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <div class="status-icon langsmith">⚙️</div>
+                            <div class="status-info">
+                                <h3>API Keys</h3>
+                                <p>${data.api_keys_configured ? 'Configured' : 'Not Configured'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <div class="status-icon performance">🔧</div>
+                            <div class="status-info">
+                                <h3>Services</h3>
+                                <p>${data.services_running || 0} Running</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading configuration data:', error);
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            const ctx = document.getElementById('performanceChart');
+            if (!ctx) return;
+
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.log('Chart.js not available, skipping chart initialization');
+                return;
+            }
 
             new Chart(ctx, {
-                type: 'doughnut',
+                type: 'line',
                 data: {
-                    labels: ['High Impact', 'Medium Impact', 'Low Impact'],
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
                     datasets: [{
-                        data: [analysis.market_impact.high_impact, analysis.market_impact.medium_impact, analysis.market_impact.low_impact],
-                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+                        label: 'Response Time (ms)',
+                        data: [120, 150, 180, 200, 160, 140],
+                        borderColor: '#00d4ff',
+                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Processing Load (%)',
+                        data: [45, 52, 68, 75, 62, 58],
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        tension: 0.4
                     }]
                 },
                 options: {
@@ -508,142 +861,68 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
                         }
                     }
                 }
             });
         }
 
-        async function executeOperation(operation) {
-            try {
-                const response = await fetch('/brain/operations', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        operation: operation,
-                        parameters: {}
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('operation-output').textContent = JSON.stringify(data, null, 2);
-                    document.getElementById('operation-results').classList.remove('hidden');
-                } else {
-                    alert('Operation failed');
-                }
-            } catch (error) {
-                console.error('Error executing operation:', error);
-                alert('Error executing operation');
-            }
+        // Control functions
+        function startNewsProcessing() {
+            console.log('Starting news processing...');
+            // Add implementation here
         }
 
-        // Real-time Data Functions
-        async function startRealtimeData() {
-            const dataSource = document.getElementById('data-source').value;
-            try {
-                const response = await fetch('/brain/realtime/start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ source: dataSource })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('Real-time data started successfully!');
-                    getRealtimeStatus();
-                } else {
-                    alert('Failed to start real-time data: ' + data.detail);
-                }
-            } catch (error) {
-                console.error('Error starting real-time data:', error);
-                alert('Error starting real-time data');
-            }
+        function refreshNewsData() {
+            console.log('Refreshing news data...');
+            loadNewsProcessingData();
         }
 
-        async function stopRealtimeData() {
-            try {
-                const response = await fetch('/brain/realtime/stop', {
-                    method: 'POST'
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('Real-time data stopped successfully!');
-                    getRealtimeStatus();
-                } else {
-                    alert('Failed to stop real-time data: ' + data.detail);
-                }
-            } catch (error) {
-                console.error('Error stopping real-time data:', error);
-                alert('Error stopping real-time data');
-            }
+        function clearNewsCache() {
+            console.log('Clearing news cache...');
+            // Add implementation here
         }
 
-        async function getRealtimeStatus() {
-            try {
-                const response = await fetch('/brain/realtime/status');
-                const data = await response.json();
-
-                const statusDiv = document.getElementById('realtime-status');
-                const statusContent = document.getElementById('realtime-status-content');
-
-                if (data.success) {
-                    const statusHtml = `
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <span class="font-medium">Status:</span> 
-                                <span class="${data.running ? 'text-green-600' : 'text-red-600'}">${data.running ? 'Running' : 'Stopped'}</span>
-                            </div>
-                            <div>
-                                <span class="font-medium">Subscribers:</span> ${data.subscribers}
-                            </div>
-                            <div>
-                                <span class="font-medium">WebSocket Clients:</span> ${data.websocket_clients}
-                            </div>
-                            <div>
-                                <span class="font-medium">Cached Prices:</span> ${data.cached_prices}
-                            </div>
-                        </div>
-                    `;
-                    statusContent.innerHTML = statusHtml;
-                    statusDiv.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error getting real-time status:', error);
+        // Refresh all dashboard data
+        async function refreshDashboard() {
+            console.log('🔄 Refreshing dashboard data...');
+            const refreshButton = document.querySelector('button[onclick="refreshDashboard()"]');
+            if (refreshButton) {
+                refreshButton.innerHTML = '🔄 Refreshing...';
+                refreshButton.disabled = true;
             }
-        }
 
-        async function getCurrentPrices() {
             try {
-                const response = await fetch('/brain/realtime/prices');
-                const data = await response.json();
-
-                const pricesDiv = document.getElementById('live-prices');
-                const pricesContent = document.getElementById('prices-content');
-
-                if (data.success && data.prices) {
-                    const pricesHtml = Object.entries(data.prices).map(([symbol, price]) => `
-                        <div class="bg-white p-3 rounded border">
-                            <div class="font-medium text-gray-900">${symbol}</div>
-                            <div class="text-lg font-bold text-green-600">$${price.price.toFixed(2)}</div>
-                            <div class="text-sm ${price.change_24h >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                ${price.change_24h >= 0 ? '+' : ''}${price.change_24h.toFixed(2)}%
-                            </div>
-                        </div>
-                    `).join('');
-
-                    pricesContent.innerHTML = pricesHtml;
-                    pricesDiv.classList.remove('hidden');
-                }
+                await loadDashboardData();
+                console.log('✅ Dashboard refreshed successfully');
             } catch (error) {
-                console.error('Error getting current prices:', error);
+                console.error('❌ Error refreshing dashboard:', error);
+            } finally {
+                if (refreshButton) {
+                    refreshButton.innerHTML = '🔄 Refresh Data';
+                    refreshButton.disabled = false;
+                }
             }
         }
     </script>
