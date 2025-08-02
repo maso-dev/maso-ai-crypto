@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Masonic - Admin Configuration</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #c17817;
+        }
+
+        .back-link {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #e6b800;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .overall-health {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(193, 120, 23, 0.3);
+            text-align: center;
+        }
+
+        .health-score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .health-good { color: #28a745; }
+        .health-warning { color: #ffc107; }
+        .health-error { color: #dc3545; }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .service-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(193, 120, 23, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .service-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .service-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e6b800;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-good { background-color: #28a745; }
+        .status-warning { background-color: #ffc107; }
+        .status-error { background-color: #dc3545; }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .status-label {
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 120px;
+        }
+
+        .status-value {
+            font-family: monospace;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #ff6b6b;
+        }
+
+        .env-info {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(193, 120, 23, 0.3);
+        }
+
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .env-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .env-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .env-value {
+            font-weight: bold;
+            color: #e6b800;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(193, 120, 23, 0.3);
+            border-radius: 50%;
+            border-top-color: #c17817;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #c17817, #e6b800);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(193, 120, 23, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <a href="/" class="back-link">← Back to Welcome</a>
+        <h1>🏛️ Masonic</h1>
+        <p>Admin Configuration & Service Status</p>
+    </header>
+
+    <div class="admin-container">
+        <div class="overall-health">
+            <div id="health-score" class="health-score">Loading...</div>
+            <div id="health-text">Checking service status...</div>
+        </div>
+
+        <div class="env-info">
+            <h3>🌍 Environment Information</h3>
+            <div id="env-grid" class="env-grid">
+                <div class="loading"></div> Loading environment info...
+            </div>
+        </div>
+
+        <div class="services-grid" id="services-grid">
+            <div class="loading"></div> Loading services...
+        </div>
+
+        <div style="text-align: center;">
+            <button class="refresh-btn" onclick="loadAdminData()">🔄 Refresh Status</button>
+        </div>
+    </div>
+
+    <script>
+        async function loadAdminData() {
+            try {
+                const response = await fetch('/admin_conf');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateHealthDisplay(data);
+                    updateEnvironmentInfo(data.environment);
+                    updateServicesStatus(data.services);
+                } else {
+                    showError('Failed to load admin data: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error loading admin data: ' + error.message);
+            }
+        }
+
+        function updateHealthDisplay(data) {
+            const healthScore = document.getElementById('health-score');
+            const healthText = document.getElementById('health-text');
+            
+            healthScore.textContent = data.overall_health;
+            healthText.textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+            
+            // Set color based on health
+            const [working, total] = data.overall_health.split('/')[0].split(' ')[0].split('/');
+            const percentage = (working / total) * 100;
+            
+            healthScore.className = 'health-score';
+            if (percentage >= 80) {
+                healthScore.classList.add('health-good');
+            } else if (percentage >= 50) {
+                healthScore.classList.add('health-warning');
+            } else {
+                healthScore.classList.add('health-error');
+            }
+        }
+
+        function updateEnvironmentInfo(env) {
+            const envGrid = document.getElementById('env-grid');
+            envGrid.innerHTML = `
+                <div class="env-item">
+                    <div class="env-label">Platform</div>
+                    <div class="env-value">${env.platform}</div>
+                </div>
+                <div class="env-item">
+                    <div class="env-label">Deployment</div>
+                    <div class="env-value">${env.deployment}</div>
+                </div>
+                <div class="env-item">
+                    <div class="env-label">Python Version</div>
+                    <div class="env-value">${env.python_version}</div>
+                </div>
+                <div class="env-item">
+                    <div class="env-label">Timestamp</div>
+                    <div class="env-value">${new Date(env.timestamp).toLocaleTimeString()}</div>
+                </div>
+            `;
+        }
+
+        function updateServicesStatus(services) {
+            const servicesGrid = document.getElementById('services-grid');
+            servicesGrid.innerHTML = '';
+            
+            Object.entries(services).forEach(([key, service]) => {
+                const card = createServiceCard(service);
+                servicesGrid.appendChild(card);
+            });
+        }
+
+        function createServiceCard(service) {
+            const card = document.createElement('div');
+            card.className = 'service-card';
+            
+            const icon = getServiceIcon(service.name);
+            const keyStatus = service.key_set ? 'good' : 'error';
+            const testStatus = service.test_working ? 'good' : (service.key_set ? 'warning' : 'error');
+            
+            card.innerHTML = `
+                <div class="service-header">
+                    <div class="service-icon">${icon}</div>
+                    <div class="service-name">${service.name}</div>
+                </div>
+                
+                <div class="status-item">
+                    <span class="status-indicator status-${keyStatus}"></span>
+                    <span class="status-label">API Key:</span>
+                    <span class="status-value">${service.key_set ? 'SET' : 'NOT SET'}</span>
+                </div>
+                
+                <div class="status-item">
+                    <span class="status-indicator status-${testStatus}"></span>
+                    <span class="status-label">Test Status:</span>
+                    <span class="status-value">${service.test_working ? 'WORKING' : 'FAILED'}</span>
+                </div>
+                
+                ${service.model ? `
+                <div class="status-item">
+                    <span class="status-label">Model:</span>
+                    <span class="status-value">${service.model}</span>
+                </div>
+                ` : ''}
+                
+                ${service.account_type ? `
+                <div class="status-item">
+                    <span class="status-label">Account:</span>
+                    <span class="status-value">${service.account_type}</span>
+                </div>
+                ` : ''}
+                
+                ${service.articles_count ? `
+                <div class="status-item">
+                    <span class="status-label">Articles:</span>
+                    <span class="status-value">${service.articles_count}</span>
+                </div>
+                ` : ''}
+                
+                ${service.error ? `
+                <div class="error-message">
+                    <strong>Error:</strong> ${service.error}
+                </div>
+                ` : ''}
+            `;
+            
+            return card;
+        }
+
+        function getServiceIcon(serviceName) {
+            const icons = {
+                'OpenAI': '🤖',
+                'Binance': '💰',
+                'NewsAPI': '📰'
+            };
+            return icons[serviceName] || '🔧';
+        }
+
+        function showError(message) {
+            const servicesGrid = document.getElementById('services-grid');
+            servicesGrid.innerHTML = `
+                <div class="service-card" style="grid-column: 1 / -1;">
+                    <div class="error-message">
+                        <strong>Error:</strong> ${message}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAdminData();
+        });
+    </script>
+</body>
+</html> 

@@ -296,9 +296,13 @@ def smart_dashboard(request: Request):
         binance_client = get_binance_client()
         api_keys_configured = binance_client is not None
         
+        print(f"🏛️ Smart Dashboard: API keys configured: {api_keys_configured}")
+        
         # Try to get real portfolio data
         import asyncio
         portfolio_data = asyncio.run(get_portfolio_data())
+        
+        print(f"🏛️ Smart Dashboard: Portfolio data received: {portfolio_data is not None}")
         
         # Determine if we're using real or mock data
         is_real_data = False
@@ -307,10 +311,21 @@ def smart_dashboard(request: Request):
             total_value = portfolio_data.total_value_usdt
             asset_count = len(portfolio_data.assets)
             
-            # Our mock data has specific characteristics
-            if not (total_value == 36500.0 and asset_count == 4 and 
-                   any(asset.asset == "BTC" and asset.usdt_value == 25000.0 for asset in portfolio_data.assets)):
+            print(f"🏛️ Smart Dashboard: Total value: {total_value}, Asset count: {asset_count}")
+            
+            # Check for mock data characteristics
+            is_mock_data = (
+                total_value == 36500.0 and 
+                asset_count == 4 and 
+                any(asset.asset == "BTC" and asset.usdt_value == 25000.0 for asset in portfolio_data.assets)
+            )
+            
+            print(f"🏛️ Smart Dashboard: Is mock data: {is_mock_data}")
+            
+            # If it's NOT mock data, then it's real data
+            if not is_mock_data:
                 is_real_data = True
+                print("🏛️ Smart Dashboard: Detected REAL data!")
         
         # Route to appropriate dashboard
         if is_real_data:
@@ -542,3 +557,145 @@ async def etf_comparison() -> Dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching ETF comparison: {str(e)}")
+
+@app.get("/admin_conf")
+async def admin_configuration():
+    """Admin configuration page - shows all service statuses and API tests"""
+    try:
+        # Test all services
+        services_status = {}
+        
+        # 1. OpenAI Service Test
+        openai_status = {
+            "name": "OpenAI",
+            "key_set": bool(os.getenv("OPENAI_API_KEY")),
+            "test_working": False,
+            "error": None
+        }
+        
+        if openai_status["key_set"]:
+            try:
+                from utils.openai_utils import get_openai_client
+                client = get_openai_client()
+                if client:
+                    # Simple test - try to create a completion
+                    response = await client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role": "user", "content": "Hello"}],
+                        max_tokens=5
+                    )
+                    openai_status["test_working"] = True
+                    openai_status["model"] = "gpt-3.5-turbo"
+                else:
+                    openai_status["error"] = "Client not initialized"
+            except Exception as e:
+                openai_status["error"] = str(e)[:100]
+        
+        services_status["openai"] = openai_status
+        
+        # 2. Binance Service Test
+        binance_status = {
+            "name": "Binance",
+            "key_set": bool(os.getenv("BINANCE_API_KEY") and os.getenv("BINANCE_SECRET_KEY")),
+            "test_working": False,
+            "error": None
+        }
+        
+        if binance_status["key_set"]:
+            try:
+                from utils.binance_client import get_binance_client
+                client = get_binance_client()
+                if client:
+                    # Test account info endpoint
+                    account_info = await client.get_account_info()
+                    if account_info and "makerCommission" in account_info:
+                        binance_status["test_working"] = True
+                        binance_status["account_type"] = "Spot"
+                    else:
+                        binance_status["error"] = "Invalid account response"
+                else:
+                    binance_status["error"] = "Client not initialized"
+            except Exception as e:
+                binance_status["error"] = str(e)[:100]
+        
+        services_status["binance"] = binance_status
+        
+        # 3. NewsAPI Service Test
+        newsapi_status = {
+            "name": "NewsAPI",
+            "key_set": bool(os.getenv("NEWSAPI_KEY")),
+            "test_working": False,
+            "error": None
+        }
+        
+        if newsapi_status["key_set"]:
+            try:
+                from utils.newsapi import fetch_news_articles
+                # Test with a simple crypto news search
+                articles = await fetch_news_articles(["bitcoin"], hours_back=1)
+                if articles and len(articles) > 0:
+                    newsapi_status["test_working"] = True
+                    newsapi_status["articles_count"] = len(articles)
+                else:
+                    newsapi_status["error"] = "No articles returned"
+            except Exception as e:
+                newsapi_status["error"] = str(e)[:100]
+        
+        services_status["newsapi"] = newsapi_status
+        
+        # 4. Environment Information
+        env_info = {
+            "platform": "Unknown",
+            "deployment": "Unknown",
+            "python_version": "3.x",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Detect platform
+        if os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV"):
+            env_info["platform"] = "Vercel"
+            env_info["deployment"] = os.getenv("VERCEL_ENV", "production")
+        elif os.getenv("REPL_ID") or os.getenv("REPL_OWNER"):
+            env_info["platform"] = "Replit"
+            env_info["deployment"] = "replit"
+        else:
+            env_info["platform"] = "Local"
+            env_info["deployment"] = "development"
+        
+        # Calculate overall health
+        total_services = len(services_status)
+        working_services = sum(1 for service in services_status.values() if service["test_working"])
+        overall_health = f"{working_services}/{total_services} services working"
+        
+        return {
+            "status": "success",
+            "overall_health": overall_health,
+            "environment": env_info,
+            "services": services_status,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+@app.get("/admin")
+def admin_page(request: Request):
+    """Admin configuration page - HTML interface"""
+    try:
+        return templates.TemplateResponse("admin.html", {"request": request})
+    except Exception as e:
+        return HTMLResponse(content=f"""
+        <html>
+            <head><title>Admin - Masonic</title></head>
+            <body>
+                <h1>Admin Configuration</h1>
+                <p><a href="/">← Back to Welcome</a></p>
+                <p><a href="/admin_conf">View JSON API</a></p>
+                <p>Error loading admin page: {str(e)}</p>
+            </body>
+        </html>
+        """)
