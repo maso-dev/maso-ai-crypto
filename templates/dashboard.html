@@ -346,8 +346,16 @@
         async function loadPortfolioSummary() {
             const summaryDiv = document.getElementById('portfolio-summary-content');
             try {
+                console.log('🏛️ Fetching portfolio data...');
                 const res = await fetch('/api/portfolio');
+                console.log('🏛️ Portfolio response status:', res.status);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                
                 const data = await res.json();
+                console.log('🏛️ Portfolio data received:', data);
                 
                 if (!data.assets || data.assets.length === 0) {
                     summaryDiv.innerHTML = `
@@ -405,8 +413,16 @@
         async function loadAgentIntelligence() {
             const agentDiv = document.getElementById('agent-intelligence-content');
             try {
+                console.log('🏛️ Fetching agent insights...');
                 const res = await fetch('/agent/insights');
+                console.log('🏛️ Agent insights response status:', res.status);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                
                 const data = await res.json();
+                console.log('🏛️ Agent insights data received:', data);
                 
                 let html = '';
                 
@@ -613,12 +629,21 @@
 
         // Initialize all data loading
         document.addEventListener('DOMContentLoaded', function() {
-            loadPortfolioSummary();
-            loadAgentIntelligence();
-            loadAssets();
-            loadMarketAnalysis();
-            loadNewsInsights();
-            loadETFComparison();
+            console.log('🏛️ Masonic Dashboard: Loading data...');
+            
+            // Add error handling and logging
+            Promise.all([
+                loadPortfolioSummary().catch(e => console.error('Portfolio Summary Error:', e)),
+                loadAgentIntelligence().catch(e => console.error('Agent Intelligence Error:', e)),
+                loadAssets().catch(e => console.error('Assets Error:', e)),
+                loadMarketAnalysis().catch(e => console.error('Market Analysis Error:', e)),
+                loadNewsInsights().catch(e => console.error('News Insights Error:', e)),
+                loadETFComparison().catch(e => console.error('ETF Comparison Error:', e))
+            ]).then(() => {
+                console.log('🏛️ Masonic Dashboard: All data loaded successfully!');
+            }).catch(e => {
+                console.error('🏛️ Masonic Dashboard: Error loading data:', e);
+            });
         });
     </script>
 </body>
