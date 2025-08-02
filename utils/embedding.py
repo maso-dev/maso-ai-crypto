@@ -64,4 +64,33 @@ def compute_sparse_vectors(text: str) -> Dict[str, float]:
     for word, count in word_counts.most_common(100):  # Limit to top 100 words
         sparse_vector[word] = float(count)
     
-    return sparse_vector 
+    return sparse_vector
+
+async def get_embeddings(texts: List[str]) -> List[List[float]]:
+    """
+    Get embeddings for a list of texts using OpenAI's text-embedding-ada-002 model.
+    
+    Args:
+        texts: List of text strings to embed
+        
+    Returns:
+        List of embedding vectors (each vector is a list of floats)
+    """
+    if not client:
+        print("⚠️ OpenAI client not available - returning empty embeddings")
+        return [[0.0] * 1536 for _ in texts]  # text-embedding-ada-002 has 1536 dimensions
+    
+    embeddings = []
+    for text in texts:
+        try:
+            response = await client.embeddings.create(
+                model="text-embedding-ada-002",
+                input=text
+            )
+            embeddings.append(response.data[0].embedding)
+        except Exception as e:
+            print(f"Error getting embedding: {e}")
+            # Return zero vector as fallback
+            embeddings.append([0.0] * 1536)
+    
+    return embeddings 

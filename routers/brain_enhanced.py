@@ -16,6 +16,8 @@ from pydantic import BaseModel
 from utils.enhanced_news_pipeline import get_enhanced_crypto_news, EnhancedNewsPipeline
 from utils.enrichment import enrich_news_articles
 from utils.realtime_data import realtime_manager, DataSource, CryptoPrice, MarketUpdate
+from utils.vector_rag import EnhancedVectorRAG, VectorQuery, QueryType, intelligent_search, insert_enhanced_news_batch
+from langchain_core.runnables import RunnableConfig
 
 router = APIRouter(prefix="/brain", tags=["brain"])
 
@@ -364,6 +366,135 @@ async def get_knowledge_stats() -> Dict[str, Any]:
             "relationships": 5000
         }
     }
+
+@router.post("/knowledge/search")
+async def search_knowledge_base(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Search the knowledge base using enhanced vector RAG."""
+    try:
+        query_text = request.get("query", "")
+        query_type = request.get("query_type", "semantic_search")
+        symbols = request.get("symbols", [])
+        time_range_hours = request.get("time_range_hours")
+        limit = request.get("limit", 10)
+        
+        # Convert query type string to enum
+        query_type_enum = QueryType(query_type)
+        
+        # Perform search
+        results = await intelligent_search(
+            query_text=query_text,
+            query_type=query_type_enum,
+            symbols=symbols,
+            time_range_hours=time_range_hours,
+            limit=limit
+        )
+        
+        # Convert results to serializable format
+        serializable_results = []
+        for result in results:
+            serializable_results.append({
+                "content": result.content,
+                "title": result.title,
+                "source_url": result.source_url,
+                "crypto_topic": result.crypto_topic,
+                "published_at": result.published_at.isoformat(),
+                "similarity_score": result.similarity_score,
+                "sentiment_score": result.sentiment_score,
+                "relevance_score": result.relevance_score,
+                "metadata": result.metadata
+            })
+        
+        return {
+            "success": True,
+            "query": query_text,
+            "query_type": query_type,
+            "results_count": len(serializable_results),
+            "results": serializable_results,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Knowledge search failed: {str(e)}")
+
+@router.post("/knowledge/insert")
+async def insert_knowledge_batch(request: Dict[str, Any]) -> Dict[str, Any]:
+    """Insert a batch of news items into the knowledge base."""
+    try:
+        news_items = request.get("news_items", [])
+        
+        if not news_items:
+            raise HTTPException(status_code=400, detail="No news items provided")
+        
+        # Insert with LangSmith tracing
+        config: Optional[RunnableConfig] = {
+            "tags": ["knowledge_insert", "batch"],
+            "metadata": {
+                "batch_size": len(news_items),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        
+        inserted, updated, errors = await insert_enhanced_news_batch(news_items, config)
+        
+        return {
+            "success": True,
+            "inserted": inserted,
+            "updated": updated,
+            "errors": errors,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Knowledge insertion failed: {str(e)}")
+
+@router.get("/knowledge/react-agent")
+async def react_agent_search(
+    query: str,
+    symbols: Optional[str] = None,
+    time_range_hours: Optional[int] = None,
+    limit: int = 10
+) -> Dict[str, Any]:
+    """Perform ReAct agent-based search on the knowledge base."""
+    try:
+        # Parse symbols
+        symbol_list = []
+        if symbols:
+            symbol_list = [s.strip() for s in symbols.split(",")]
+        
+        # Perform ReAct agent search
+        results = await intelligent_search(
+            query_text=query,
+            query_type=QueryType.REACT_AGENT,
+            symbols=symbol_list,
+            time_range_hours=time_range_hours,
+            limit=limit
+        )
+        
+        # Convert results to serializable format
+        serializable_results = []
+        for result in results:
+            serializable_results.append({
+                "content": result.content,
+                "title": result.title,
+                "source_url": result.source_url,
+                "crypto_topic": result.crypto_topic,
+                "published_at": result.published_at.isoformat(),
+                "similarity_score": result.similarity_score,
+                "sentiment_score": result.sentiment_score,
+                "relevance_score": result.relevance_score
+            })
+        
+        return {
+            "success": True,
+            "query": query,
+            "query_type": "react_agent",
+            "results_count": len(serializable_results),
+            "results": serializable_results,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ReAct agent search failed: {str(e)}")
 
 # Real-time Data Endpoints
 @router.get("/realtime/prices")
