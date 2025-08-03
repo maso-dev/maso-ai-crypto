@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Masonic - Status Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-online {
+            background-color: #10B981;
+        }
+
+        .status-offline {
+            background-color: #EF4444;
+        }
+
+        .status-degraded {
+            background-color: #F59E0B;
+        }
+
+        .status-error {
+            background-color: #DC2626;
+        }
+
+        .status-maintenance {
+            background-color: #6B7280;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-900">🏛️ Masonic Status Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">Last updated: <span id="last-update">-</span></span>
+                    <button onclick="refreshStatus()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Overall Status Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">System Overview</h2>
+                <div class="flex items-center space-x-2">
+                    <div id="overall-status-indicator" class="w-4 h-4 rounded-full"></div>
+                    <span id="overall-status-text" class="text-lg font-semibold">Loading...</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600" id="uptime">-</div>
+                    <div class="text-sm text-gray-500">Uptime</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600" id="components-online">-</div>
+                    <div class="text-sm text-gray-500">Components Online</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="health-percentage">-</div>
+                    <div class="text-sm text-gray-500">Health %</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-red-600" id="alerts-count">-</div>
+                    <div class="text-sm text-gray-500">Active Alerts</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Status Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Component Status -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Component Status</h3>
+                    <button onclick="refreshComponents()" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div id="components-grid" class="space-y-3">
+                    <!-- Components will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Recent Alerts</h3>
+                    <button onclick="refreshAlerts()" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div id="alerts-list" class="space-y-3">
+                    <!-- Alerts will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Dashboard -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Performance Metrics</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600" id="total-requests">-</div>
+                    <div class="text-sm text-gray-500">Total Requests</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600" id="success-rate">-</div>
+                    <div class="text-sm text-gray-500">Success Rate</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600" id="avg-response-time">-</div>
+                    <div class="text-sm text-gray-500">Avg Response Time (ms)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="refreshAllComponents()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md font-medium">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh All Components
+                </button>
+                <button onclick="viewAllAlerts()"
+                    class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-3 rounded-md font-medium">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>View All Alerts
+                </button>
+                <button onclick="viewMetrics()"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-md font-medium">
+                    <i class="fas fa-chart-line mr-2"></i>Detailed Metrics
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let refreshInterval;
+        let lastUpdate = new Date();
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDashboard();
+            // Auto-refresh every 30 seconds
+            refreshInterval = setInterval(loadDashboard, 30000);
+        });
+
+        // Load all dashboard data
+        async function loadDashboard() {
+            try {
+                await Promise.all([
+                    loadOverallStatus(),
+                    loadComponents(),
+                    loadAlerts(),
+                    loadMetrics()
+                ]);
+                updateLastUpdate();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        // Load overall system status
+        async function loadOverallStatus() {
+            const response = await fetch('/status/overall');
+            const data = await response.json();
+
+            document.getElementById('overall-status-text').textContent = data.status.toUpperCase();
+            document.getElementById('uptime').textContent = formatUptime(data.uptime_seconds);
+            document.getElementById('components-online').textContent = `${data.components_online}/${data.total_components}`;
+            document.getElementById('health-percentage').textContent = `${data.health_percentage.toFixed(1)}%`;
+            document.getElementById('alerts-count').textContent = data.alerts_count;
+
+            // Update status indicator
+            const indicator = document.getElementById('overall-status-indicator');
+            indicator.className = `w-4 h-4 rounded-full status-${data.status}`;
+        }
+
+        // Load component status
+        async function loadComponents() {
+            const response = await fetch('/status/components');
+            const components = await response.json();
+
+            const grid = document.getElementById('components-grid');
+            grid.innerHTML = '';
+
+            Object.entries(components).forEach(([name, component]) => {
+                const card = createComponentCard(name, component);
+                grid.appendChild(card);
+            });
+        }
+
+        // Create component status card
+        function createComponentCard(name, component) {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-3 border rounded-lg fade-in';
+
+            const statusColor = component.status === 'online' ? 'status-online' :
+                component.status === 'degraded' ? 'status-degraded' :
+                    component.status === 'error' ? 'status-error' : 'status-offline';
+
+            div.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 rounded-full ${statusColor}"></div>
+                    <div>
+                        <div class="font-medium text-gray-900">${component.name}</div>
+                        <div class="text-sm text-gray-500">${component.service_type}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-medium text-gray-900">${component.status.toUpperCase()}</div>
+                    <div class="text-xs text-gray-500">${formatTime(component.last_check)}</div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        // Load alerts
+        async function loadAlerts() {
+            const response = await fetch('/status/alerts?limit=5');
+            const alerts = await response.json();
+
+            const list = document.getElementById('alerts-list');
+            list.innerHTML = '';
+
+            if (alerts.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-center py-4">No active alerts</div>';
+                return;
+            }
+
+            alerts.forEach(alert => {
+                const item = createAlertItem(alert);
+                list.appendChild(item);
+            });
+        }
+
+        // Create alert item
+        function createAlertItem(alert) {
+            const div = document.createElement('div');
+            div.className = 'p-3 border-l-4 rounded-r-lg fade-in';
+
+            const borderColor = alert.severity === 'critical' ? 'border-red-500 bg-red-50' :
+                alert.severity === 'error' ? 'border-red-400 bg-red-50' :
+                    alert.severity === 'warning' ? 'border-yellow-400 bg-yellow-50' :
+                        'border-blue-400 bg-blue-50';
+
+            div.className += ` ${borderColor}`;
+
+            div.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-900">${alert.component}</span>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
+                    alert.severity === 'error' ? 'bg-red-100 text-red-800' :
+                        alert.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-blue-100 text-blue-800'
+                }">${alert.severity.toUpperCase()}</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-1">${alert.message}</div>
+                        <div class="text-xs text-gray-500 mt-1">${formatTime(alert.timestamp)}</div>
+                    </div>
+                    ${!alert.resolved ? `
+                        <button onclick="resolveAlert('${alert.id}')" class="text-green-600 hover:text-green-800">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            return div;
+        }
+
+        // Load metrics
+        async function loadMetrics() {
+            const response = await fetch('/status/metrics');
+            const metrics = await response.json();
+
+            document.getElementById('total-requests').textContent = metrics.total_requests.toLocaleString();
+
+            const successRate = metrics.total_requests > 0 ?
+                ((metrics.successful_requests / metrics.total_requests) * 100).toFixed(1) : 0;
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+
+            document.getElementById('avg-response-time').textContent = metrics.average_response_time_ms.toFixed(1);
+        }
+
+        // Utility functions
+        function formatUptime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+            return date.toLocaleDateString();
+        }
+
+        function updateLastUpdate() {
+            lastUpdate = new Date();
+            document.getElementById('last-update').textContent = lastUpdate.toLocaleTimeString();
+        }
+
+        // Action functions
+        function refreshStatus() {
+            loadDashboard();
+        }
+
+        function refreshComponents() {
+            loadComponents();
+        }
+
+        function refreshAlerts() {
+            loadAlerts();
+        }
+
+        async function refreshAllComponents() {
+            try {
+                await fetch('/status/control/refresh', { method: 'POST' });
+                setTimeout(loadDashboard, 2000); // Wait for refresh to complete
+                showSuccess('Component refresh triggered');
+            } catch (error) {
+                showError('Failed to refresh components');
+            }
+        }
+
+        async function resolveAlert(alertId) {
+            try {
+                await fetch(`/status/alerts/${alertId}/resolve`, { method: 'PUT' });
+                loadAlerts();
+                showSuccess('Alert resolved');
+            } catch (error) {
+                showError('Failed to resolve alert');
+            }
+        }
+
+        function viewAllAlerts() {
+            window.open('/status/alerts', '_blank');
+        }
+
+        function viewMetrics() {
+            window.open('/status/metrics', '_blank');
+        }
+
+        // Notification functions
+        function showSuccess(message) {
+            showNotification(message, 'success');
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 fade-in ${type === 'success' ? 'bg-green-600' : 'bg-red-600'
+                }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

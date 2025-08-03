@@ -601,6 +601,67 @@
             </div>
         </div>
 
+        <!-- LiveCoinWatch Management Section -->
+        <div class="liquid-card">
+            <div class="card-header">
+                <span class="card-icon">🪙</span>
+                <h3 class="card-title">LiveCoinWatch Data Management</h3>
+            </div>
+            <div class="liquid-grid grid-2">
+                <div class="service-card">
+                    <div class="service-header">
+                        <span class="service-icon">📊</span>
+                        <h4 class="service-name">Price Data Collection</h4>
+                        <span class="service-badge badge-backend">Admin</span>
+                    </div>
+                    <div class="service-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value" id="livecoinwatch-status">Checking...</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">API Key:</span>
+                            <span class="detail-value" id="livecoinwatch-key">Checking...</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="liquid-button primary" onclick="triggerLiveCoinWatchCollection()">
+                            <span>🔄</span>
+                            Collect Price Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-header">
+                        <span class="service-icon">📈</span>
+                        <h4 class="service-name">Technical Indicators</h4>
+                        <span class="service-badge badge-backend">Admin</span>
+                    </div>
+                    <div class="service-details">
+                        <div class="detail-item">
+                            <span class="detail-label">RSI:</span>
+                            <span class="detail-value">✅ Available</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">MACD:</span>
+                            <span class="detail-value">✅ Available</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Bollinger Bands:</span>
+                            <span class="detail-value">✅ Available</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="liquid-button primary" onclick="triggerTechnicalIndicators()">
+                            <span>📊</span>
+                            Calculate Indicators
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="text-center">
             <button class="liquid-button primary" onclick="loadAdminData()">
@@ -854,6 +915,98 @@
                     </div>
                 </div>
             `;
+        }
+
+        // LiveCoinWatch Management Functions
+        async function triggerLiveCoinWatchCollection() {
+            try {
+                const response = await fetch('/livecoinwatch/collect-prices', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer your_admin_secret_key'
+                    },
+                    body: JSON.stringify({
+                        symbols: ["BTC", "ETH", "SOL", "XRP", "DOGE"],
+                        include_historical: true,
+                        include_indicators: false
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('✅ Price collection triggered successfully!');
+                    loadAdminData(); // Refresh status
+                } else {
+                    alert('❌ Error: ' + result.detail);
+                }
+            } catch (error) {
+                alert('❌ Error triggering collection: ' + error.message);
+            }
+        }
+
+        async function triggerTechnicalIndicators() {
+            try {
+                const response = await fetch('/livecoinwatch/calculate-indicators', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer your_admin_secret_key'
+                    },
+                    body: JSON.stringify({
+                        symbol: "BTC",
+                        days: 30
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('✅ Technical indicators calculation triggered!');
+                    loadAdminData(); // Refresh status
+                } else {
+                    alert('❌ Error: ' + result.detail);
+                }
+            } catch (error) {
+                alert('❌ Error triggering indicators: ' + error.message);
+            }
+        }
+
+        // Update LiveCoinWatch status
+        function updateLiveCoinWatchStatus(services) {
+            const livecoinwatchService = services.livecoinwatch_processor;
+            const livecoinwatchApi = services.livecoinwatch;
+
+            const statusElement = document.getElementById('livecoinwatch-status');
+            const keyElement = document.getElementById('livecoinwatch-key');
+
+            if (livecoinwatchService) {
+                statusElement.textContent = livecoinwatchService.test_working ? '✅ Ready' : '❌ Not Ready';
+                statusElement.className = livecoinwatchService.test_working ? 'detail-value' : 'detail-value text-muted';
+            }
+
+            if (livecoinwatchApi) {
+                keyElement.textContent = livecoinwatchApi.key_set ? '✅ Configured' : '❌ Not Set';
+                keyElement.className = livecoinwatchApi.key_set ? 'detail-value' : 'detail-value text-muted';
+            }
+        }
+
+        // Enhanced loadAdminData function
+        async function loadAdminData() {
+            try {
+                const response = await fetch('/admin_conf');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    updateHealthDisplay(data);
+                    updateEnvironmentInfo(data.environment);
+                    updateServicesStatus(data.services);
+                    updateLiveCoinWatchStatus(data.services);
+                } else {
+                    showError('Failed to load admin data: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error loading admin data: ' + error.message);
+            }
         }
 
         // Load data on page load

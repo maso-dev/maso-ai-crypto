@@ -406,6 +406,30 @@ except Exception as e:
             print(f"Warning: Could not import brain_router: {e3}")
             print("Brain section will not be available (LangChain dependencies missing)")
 
+# Include status control router
+try:
+    from routers.status_control import router as status_router
+    app.include_router(status_router)
+    print("✅ Status control router loaded")
+except Exception as e:
+    print(f"Warning: Could not import status_control router: {e}")
+
+# Include context router
+try:
+    from routers.context_router import router as context_router
+    app.include_router(context_router)
+    print("✅ Context router loaded")
+except Exception as e:
+    print(f"Warning: Could not import context_router: {e}")
+
+# Include LiveCoinWatch router
+try:
+    from routers.livecoinwatch_router import router as livecoinwatch_router
+    app.include_router(livecoinwatch_router)
+    print("✅ LiveCoinWatch router loaded")
+except Exception as e:
+    print(f"Warning: Could not import livecoinwatch_router: {e}")
+
 @app.get("/api/portfolio", response_model=Dict[str, Any])
 async def get_portfolio() -> Dict[str, Any]:
     """Get portfolio data using the new async Binance client."""
@@ -558,247 +582,12 @@ async def etf_comparison() -> Dict[str, Any]:
 
 @app.get("/admin_conf")
 async def admin_configuration():
-    """Admin configuration page - shows all service statuses and API tests"""
+    """Admin configuration API endpoint - returns JSON with all service statuses"""
     try:
-        # Test all services
-        services_status = {}
+        # Import centralized config
+        from utils.config import config_manager, get_config_summary
         
-        # 1. OpenAI Service Test
-        openai_status = {
-            "name": "OpenAI",
-            "key_set": bool(os.getenv("OPENAI_API_KEY")),
-            "test_working": False,
-            "error": None
-        }
-        
-        if openai_status["key_set"]:
-            try:
-                from utils.openai_utils import get_openai_client
-                client = get_openai_client()
-                if client:
-                    # Simple test - try to create a completion
-                    response = await client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[{"role": "user", "content": "Hello"}],
-                        max_tokens=5
-                    )
-                    openai_status["test_working"] = True
-                    openai_status["model"] = "gpt-3.5-turbo"
-                else:
-                    openai_status["error"] = "Client not initialized"
-            except Exception as e:
-                openai_status["error"] = str(e)[:100]
-        
-        services_status["openai"] = openai_status
-        
-        # 2. Binance Service Test
-        binance_status = {
-            "name": "Binance",
-            "key_set": bool(os.getenv("BINANCE_API_KEY") and os.getenv("BINANCE_SECRET_KEY")),
-            "test_working": False,
-            "error": None
-        }
-        
-        if binance_status["key_set"]:
-            try:
-                from utils.binance_client import get_binance_client
-                client = get_binance_client()
-                if client:
-                    # Test account info endpoint
-                    account_info = await client.get_account_info()
-                    if account_info and "makerCommission" in account_info:
-                        binance_status["test_working"] = True
-                        binance_status["account_type"] = "Spot"
-                    else:
-                        binance_status["error"] = "Invalid account response"
-                else:
-                    binance_status["error"] = "Client not initialized"
-            except Exception as e:
-                binance_status["error"] = str(e)[:100]
-        
-        services_status["binance"] = binance_status
-        
-        # 3. NewsAPI Service Test
-        newsapi_status = {
-            "name": "NewsAPI",
-            "key_set": bool(os.getenv("NEWSAPI_KEY")),
-            "test_working": False,
-            "error": None
-        }
-        
-        if newsapi_status["key_set"]:
-            try:
-                from utils.newsapi import fetch_news_articles
-                # Test with a simple crypto news search
-                articles = await fetch_news_articles(["bitcoin"], hours_back=1)
-                if articles and len(articles) > 0:
-                    newsapi_status["test_working"] = True
-                    newsapi_status["articles_count"] = len(articles)
-                else:
-                    newsapi_status["error"] = "No articles returned"
-            except Exception as e:
-                newsapi_status["error"] = str(e)[:100]
-        
-        services_status["newsapi"] = newsapi_status
-        
-        # 4. LangSmith Service Test
-        langsmith_status = {
-            "name": "LangSmith",
-            "key_set": bool(os.getenv("LANGSMITH_API_KEY")),
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        if langsmith_status["key_set"]:
-            try:
-                # Test LangSmith connection
-                langsmith_status["test_working"] = True
-                langsmith_status["organization"] = os.getenv("LANGCHAIN_ORGANIZATION", "Unknown")
-                langsmith_status["project"] = os.getenv("LANGCHAIN_PROJECT", "masonic-brain")
-            except Exception as e:
-                langsmith_status["error"] = str(e)[:100]
-        
-        services_status["langsmith"] = langsmith_status
-        
-        # 5. Neo4j Service Test
-        neo4j_status = {
-            "name": "Neo4j",
-            "key_set": bool(os.getenv("NEO4J_URI") or os.getenv("AURA_INSTANCEI")),
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        if neo4j_status["key_set"]:
-            try:
-                from utils.graph_rag import graph_rag
-                if graph_rag.connected:
-                    neo4j_status["test_working"] = True
-                    neo4j_status["uri"] = os.getenv("NEO4J_URI", os.getenv("AURA_INSTANCEI", "Unknown"))
-                else:
-                    neo4j_status["test_working"] = False
-                    neo4j_status["error"] = "Using mock operations (not connected)"
-            except Exception as e:
-                neo4j_status["error"] = str(e)[:100]
-        
-        services_status["neo4j"] = neo4j_status
-        
-        # 6. LiveCoinWatch Service Test
-        livecoinwatch_status = {
-            "name": "LiveCoinWatch",
-            "key_set": bool(os.getenv("LIVECOINEWATCH_API_KEY")),
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        if livecoinwatch_status["key_set"]:
-            try:
-                from utils.realtime_data import realtime_manager
-                # Test with mock data for now
-                livecoinwatch_status["test_working"] = True
-                livecoinwatch_status["note"] = "API key configured, using mock data"
-            except Exception as e:
-                livecoinwatch_status["error"] = str(e)[:100]
-        
-        services_status["livecoinwatch"] = livecoinwatch_status
-        
-        # 7. AI Agent System Test
-        ai_agent_status = {
-            "name": "AI Agent System",
-            "key_set": True,  # Depends on OpenAI
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        try:
-            from utils.ai_agent import ai_agent
-            if ai_agent and ai_agent.workflow:
-                ai_agent_status["test_working"] = True
-                ai_agent_status["workflow_nodes"] = len(ai_agent.workflow.nodes)
-                ai_agent_status["langgraph"] = "Enabled"
-            else:
-                ai_agent_status["error"] = "AI Agent not initialized"
-        except Exception as e:
-            ai_agent_status["error"] = str(e)[:100]
-        
-        services_status["ai_agent"] = ai_agent_status
-        
-        # 8. Vector RAG System Test
-        vector_rag_status = {
-            "name": "Vector RAG",
-            "key_set": True,  # Depends on OpenAI
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        try:
-            from utils.vector_rag import EnhancedVectorRAG
-            vector_rag = EnhancedVectorRAG()
-            if vector_rag:
-                vector_rag_status["test_working"] = True
-                vector_rag_status["milvus"] = "Connected"
-                vector_rag_status["embedding_model"] = "OpenAI"
-            else:
-                vector_rag_status["error"] = "Vector RAG not initialized"
-        except Exception as e:
-            vector_rag_status["error"] = str(e)[:100]
-        
-        services_status["vector_rag"] = vector_rag_status
-        
-        # 9. Hybrid RAG System Test
-        hybrid_rag_status = {
-            "name": "Hybrid RAG",
-            "key_set": True,  # Combines Vector + Graph
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        try:
-            from utils.hybrid_rag import hybrid_rag
-            if hybrid_rag:
-                hybrid_rag_status["test_working"] = True
-                hybrid_rag_status["vector_rag"] = "✅" if hybrid_rag.vector_rag else "❌"
-                hybrid_rag_status["graph_rag"] = "✅" if hybrid_rag.graph_rag.connected else "❌ (mock)"
-            else:
-                hybrid_rag_status["error"] = "Hybrid RAG not initialized"
-        except Exception as e:
-            hybrid_rag_status["error"] = str(e)[:100]
-        
-        services_status["hybrid_rag"] = hybrid_rag_status
-        
-        # 10. Real-time Data System Test
-        realtime_data_status = {
-            "name": "Real-time Data",
-            "key_set": True,  # Can work with mock data
-            "test_working": False,
-            "error": None,
-            "tag": "backend"
-        }
-        
-        try:
-            from utils.realtime_data import realtime_manager
-            if realtime_manager:
-                realtime_data_status["test_working"] = True
-                realtime_data_status["sources"] = ["mock", "coingecko", "binance", "livecoinwatch"]
-                realtime_data_status["status"] = "Ready"
-            else:
-                realtime_data_status["error"] = "Real-time manager not initialized"
-        except Exception as e:
-            realtime_data_status["error"] = str(e)[:100]
-        
-        services_status["realtime_data"] = realtime_data_status
-        
-        # Add tags to existing services
-        services_status["openai"]["tag"] = "backend"
-        services_status["binance"]["tag"] = "backend"
-        services_status["newsapi"]["tag"] = "backend"
-        
-        # 4. Environment Information
+        # 1. Environment Information
         env_info = {
             "platform": "Unknown",
             "deployment": "Unknown",
@@ -817,6 +606,183 @@ async def admin_configuration():
             env_info["platform"] = "Local"
             env_info["deployment"] = "development"
         
+        # 2. Get centralized configuration summary
+        config_summary = get_config_summary()
+        
+        # 3. Test all services and APIs
+        services_status = {}
+        
+        # Test APIs from centralized config
+        for api_name, api_info in config_summary["apis"].items():
+            api_status = {
+                "name": api_info["name"],
+                "key_set": api_info["configured"],
+                "test_working": False,
+                "error": None,
+                "category": api_info["category"],
+                "icon": api_info["icon"],
+                "description": api_info["description"],
+                "tag": "backend" if api_info["category"] in ["ai", "trading", "pricing", "database", "monitoring"] else "primary"
+            }
+            
+            # Test specific APIs
+            if api_name == "openai" and api_status["key_set"]:
+                try:
+                    from utils.openai_utils import get_openai_client
+                    client = get_openai_client()
+                    if client:
+                        response = await client.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role": "user", "content": "Hello"}],
+                            max_tokens=5
+                        )
+                        api_status["test_working"] = True
+                        api_status["model"] = "gpt-3.5-turbo"
+                    else:
+                        api_status["error"] = "Client not initialized"
+                except Exception as e:
+                    api_status["error"] = str(e)[:100]
+            
+            elif api_name == "binance" and api_status["key_set"]:
+                try:
+                    from utils.binance_client import get_binance_client
+                    client = get_binance_client()
+                    if client:
+                        account_info = await client.get_account_info()
+                        if account_info and "makerCommission" in account_info:
+                            api_status["test_working"] = True
+                            api_status["account_type"] = "Spot"
+                        else:
+                            api_status["error"] = "Invalid account response"
+                    else:
+                        api_status["error"] = "Client not initialized"
+                except Exception as e:
+                    api_status["error"] = str(e)[:100]
+            
+            elif api_name == "newsapi" and api_status["key_set"]:
+                try:
+                    from utils.newsapi import fetch_news_articles
+                    articles = await fetch_news_articles(["bitcoin"], hours_back=1)
+                    if articles and len(articles) > 0:
+                        api_status["test_working"] = True
+                        api_status["articles_count"] = len(articles)
+                    else:
+                        api_status["error"] = "No articles returned"
+                except Exception as e:
+                    api_status["error"] = str(e)[:100]
+            
+            elif api_name == "livecoinwatch" and api_status["key_set"]:
+                try:
+                    from utils.livecoinwatch_processor import livecoinwatch_processor
+                    if livecoinwatch_processor:
+                        api_status["test_working"] = True
+                        api_status["note"] = "API key configured, processor ready"
+                    else:
+                        api_status["error"] = "Processor not initialized"
+                except Exception as e:
+                    api_status["error"] = str(e)[:100]
+            
+            elif api_name == "langsmith" and api_status["key_set"]:
+                try:
+                    api_status["test_working"] = True
+                    api_status["organization"] = os.getenv("LANGCHAIN_ORGANIZATION", "Unknown")
+                    api_status["project"] = os.getenv("LANGCHAIN_PROJECT", "masonic-brain")
+                except Exception as e:
+                    api_status["error"] = str(e)[:100]
+            
+            elif api_name == "neo4j" and api_status["key_set"]:
+                try:
+                    from utils.graph_rag import graph_rag
+                    if graph_rag.connected:
+                        api_status["test_working"] = True
+                        api_status["uri"] = os.getenv("NEO4J_URI", os.getenv("AURA_INSTANCEI", "Unknown"))
+                    else:
+                        api_status["test_working"] = False
+                        api_status["error"] = "Using mock operations (not connected)"
+                except Exception as e:
+                    api_status["error"] = str(e)[:100]
+            
+            services_status[api_name] = api_status
+        
+        # Test Services from centralized config
+        for service_name, service_info in config_summary["services"].items():
+            service_status = {
+                "name": service_info["name"],
+                "key_set": True,  # Services don't have keys, they depend on APIs
+                "test_working": False,
+                "error": None,
+                "category": service_info["category"],
+                "icon": service_info["icon"],
+                "description": service_info["description"],
+                "tag": "backend",
+                "endpoints": service_info["endpoints"],
+                "dependencies": service_info["dependencies"]
+            }
+            
+            # Test specific services
+            if service_name == "ai_agent":
+                try:
+                    from utils.ai_agent import ai_agent
+                    if ai_agent and ai_agent.workflow:
+                        service_status["test_working"] = True
+                        service_status["workflow_nodes"] = len(ai_agent.workflow.nodes)
+                        service_status["langgraph"] = "Enabled"
+                    else:
+                        service_status["error"] = "AI Agent not initialized"
+                except Exception as e:
+                    service_status["error"] = str(e)[:100]
+            
+            elif service_name == "vector_rag":
+                try:
+                    from utils.vector_rag import EnhancedVectorRAG
+                    vector_rag = EnhancedVectorRAG()
+                    if vector_rag:
+                        service_status["test_working"] = True
+                        service_status["milvus"] = "Connected"
+                        service_status["embedding_model"] = "OpenAI"
+                    else:
+                        service_status["error"] = "Vector RAG not initialized"
+                except Exception as e:
+                    service_status["error"] = str(e)[:100]
+            
+            elif service_name == "hybrid_rag":
+                try:
+                    from utils.hybrid_rag import hybrid_rag
+                    if hybrid_rag:
+                        service_status["test_working"] = True
+                        service_status["vector_rag"] = "✅" if hybrid_rag.vector_rag else "❌"
+                        service_status["graph_rag"] = "✅" if hybrid_rag.graph_rag.connected else "❌ (mock)"
+                    else:
+                        service_status["error"] = "Hybrid RAG not initialized"
+                except Exception as e:
+                    service_status["error"] = str(e)[:100]
+            
+            elif service_name == "livecoinwatch_processor":
+                try:
+                    from utils.livecoinwatch_processor import livecoinwatch_processor
+                    if livecoinwatch_processor:
+                        service_status["test_working"] = True
+                        service_status["status"] = "Ready"
+                        service_status["database"] = "brain_data.db"
+                    else:
+                        service_status["error"] = "Processor not initialized"
+                except Exception as e:
+                    service_status["error"] = str(e)[:100]
+            
+            elif service_name == "realtime_data":
+                try:
+                    from utils.realtime_data import realtime_manager
+                    if realtime_manager:
+                        service_status["test_working"] = True
+                        service_status["sources"] = ["mock", "coingecko", "binance", "livecoinwatch"]
+                        service_status["status"] = "Ready"
+                    else:
+                        service_status["error"] = "Real-time manager not initialized"
+                except Exception as e:
+                    service_status["error"] = str(e)[:100]
+            
+            services_status[service_name] = service_status
+        
         # Calculate overall health
         total_services = len(services_status)
         working_services = sum(1 for service in services_status.values() if service["test_working"])
@@ -827,6 +793,7 @@ async def admin_configuration():
             "overall_health": overall_health,
             "environment": env_info,
             "services": services_status,
+            "config_summary": config_summary,
             "timestamp": datetime.now().isoformat()
         }
         
@@ -869,6 +836,24 @@ def brain_dashboard(request: Request):
                 <p><a href="/">← Back to Welcome</a></p>
                 <p><a href="/admin">Admin</a></p>
                 <p>Error loading brain dashboard: {str(e)}</p>
+            </body>
+        </html>
+        """)
+
+@app.get("/status-dashboard")
+def status_dashboard(request: Request):
+    """Status dashboard page - HTML interface"""
+    try:
+        return templates.TemplateResponse("status_dashboard.html", {"request": request})
+    except Exception as e:
+        return HTMLResponse(content=f"""
+        <html>
+            <head><title>Status Dashboard - Masonic</title></head>
+            <body>
+                <h1>Status Dashboard</h1>
+                <p><a href="/">← Back to Welcome</a></p>
+                <p><a href="/admin">Admin</a></p>
+                <p>Error loading status dashboard: {str(e)}</p>
             </body>
         </html>
         """)
