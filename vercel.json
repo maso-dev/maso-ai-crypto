@@ -11,5 +11,14 @@
             "src": "/(.*)",
             "dest": "/main.py"
         }
-    ]
+    ],
+    "functions": {
+        "main.py": {
+            "maxDuration": 30
+        }
+    },
+    "public": true,
+    "protection": {
+        "enabled": false
+    }
 }
