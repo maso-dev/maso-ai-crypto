@@ -73,6 +73,15 @@ class ConfigManager:
                 icon="🪙",
                 category="pricing"
             ),
+            "tavily": APIConfig(
+                name="Tavily",
+                key_name="TAVILY_API_KEY",
+                key_value=os.getenv("TAVILY_API_KEY"),
+                base_url="https://api.tavily.com",
+                description="Real-time web search and news aggregation",
+                icon="🔍",
+                category="search"
+            ),
             "langsmith": APIConfig(
                 name="LangSmith",
                 key_name="LANGSMITH_API_KEY",
@@ -138,6 +147,33 @@ class ConfigManager:
                 endpoints=["/api/portfolio", "/api/top-movers"],
                 dependencies=["binance"],
                 health_check_url="/api/health"
+            ),
+            "data_quality_filter": ServiceConfig(
+                name="Data Quality Filter",
+                description="AI-powered news quality filtering",
+                icon="🔍",
+                category="backend",
+                endpoints=["/api/news-briefing"],
+                dependencies=["openai"],
+                health_check_url="/api/health"
+            ),
+            "refresh_processor": ServiceConfig(
+                name="Refresh Process Engine",
+                description="Flexible data processing with configurable intervals",
+                icon="🔄",
+                category="backend",
+                endpoints=["/refresh/quick", "/refresh/hourly", "/refresh/daily", "/refresh/manual"],
+                dependencies=["livecoinwatch", "openai", "newsapi", "tavily"],
+                health_check_url="/refresh/status"
+            ),
+            "tavily_search": ServiceConfig(
+                name="Tavily Search",
+                description="Real-time web search and news aggregation",
+                icon="🔍",
+                category="backend",
+                endpoints=["/api/tavily/news", "/api/tavily/finance", "/api/tavily/web"],
+                dependencies=["tavily"],
+                health_check_url="/api/tavily/status"
             )
         }
     

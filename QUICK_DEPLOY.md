@@ -37,7 +37,7 @@ In the Vercel dashboard, go to your project settings:
    BINANCE_API_KEY=your_binance_api_key
    BINANCE_SECRET_KEY=your_binance_secret_key
    OPENAI_API_KEY=your_openai_api_key
-   NEWS_API_KEY=your_news_api_key
+   NEWSAPI_KEY=your_newsapi_key
    TAVILY_API_KEY=your_tavily_api_key
    ```
 

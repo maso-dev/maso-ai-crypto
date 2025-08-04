@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from utils.newsapi import fetch_news_articles
 from utils.enrichment import enrich_news_articles
 from utils.cost_tracker import track_newsapi_call, track_openai_call
+from utils.data_quality_filter import filter_news_articles, data_quality_filter
 
 # LangSmith configuration
 LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
@@ -83,12 +84,32 @@ class EnhancedNewsPipeline:
                 "metadata": {}
             }
         
-        # Step 2: Filter and limit articles
+        # Step 2: Data Quality Filtering
+        filtered_articles = None
+        try:
+            print("\n🔍 Filtering articles for quality...")
+            filtered_articles = await filter_news_articles(articles, symbols)
+            
+            # Separate approved and rejected articles
+            approved_articles = [fa.original_article for fa in filtered_articles if fa.is_approved]
+            rejected_articles = [fa.original_article for fa in filtered_articles if not fa.is_approved]
+            
+            print(f"   ✅ Quality filtering complete: {len(approved_articles)}/{len(articles)} articles approved")
+            print(f"   ❌ Rejected {len(rejected_articles)} articles for quality issues")
+            
+            # Use approved articles for further processing
+            articles = approved_articles
+            
+        except Exception as e:
+            print(f"   ⚠️ Quality filtering failed: {e}")
+            print(f"   📊 Proceeding with original {len(articles)} articles")
+        
+        # Step 3: Limit articles (if needed)
         if len(articles) > max_articles:
             articles = articles[:max_articles]
             print(f"   📊 Limited to {max_articles} articles")
         
-        # Step 3: AI Enrichment (if enabled)
+        # Step 4: AI Enrichment (if enabled)
         if enable_enrichment and self.openai_key:
             try:
                 print("\n🧠 Enriching articles with AI...")
@@ -111,17 +132,44 @@ class EnhancedNewsPipeline:
                 print(f"   ⚠️ Enrichment failed: {e}")
                 print("   Continuing with unenriched articles...")
         
-        # Step 4: Analyze and summarize
+        # Step 5: Analyze and summarize
         metadata = self._analyze_articles(articles)
+        
+        # Add quality filtering metadata
+        quality_metadata = {}
+        try:
+            if filtered_articles is not None:
+                quality_metadata = {
+                    "quality_filtering_enabled": True,
+                    "articles_before_filtering": len(filtered_articles),
+                    "articles_after_filtering": len(articles),
+                    "approval_rate": len(articles) / len(filtered_articles) if filtered_articles else 0,
+                    "rejected_count": len([fa for fa in filtered_articles if not fa.is_approved])
+                }
+            else:
+                quality_metadata = {
+                    "quality_filtering_enabled": False,
+                    "articles_before_filtering": len(articles),
+                    "articles_after_filtering": len(articles),
+                    "approval_rate": 1.0,
+                    "rejected_count": 0
+                }
+        except Exception as e:
+            quality_metadata = {
+                "quality_filtering_enabled": False,
+                "error": str(e)
+            }
         
         return {
             "success": True,
             "articles": articles,
             "metadata": metadata,
+            "quality_metadata": quality_metadata,
             "processing_info": {
                 "symbols_searched": symbols,
                 "hours_back": hours_back,
                 "enrichment_enabled": enable_enrichment,
+                "quality_filtering_enabled": quality_metadata.get("quality_filtering_enabled", False),
                 "langsmith_enabled": bool(self.langsmith_key),
                 "processing_time": datetime.now(timezone.utc).isoformat()
             }

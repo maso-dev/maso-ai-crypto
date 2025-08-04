@@ -18,7 +18,7 @@
 Set these in Vercel dashboard:
 ```env
 OPENAI_API_KEY=your_openai_key
-NEWSAPI_API_KEY=your_newsapi_key
+NEWSAPI_KEY=your_newsapi_key
 TAVILY_API_KEY=your_tavily_key
 BINANCE_API_KEY=your_binance_key (optional)
 BINANCE_SECRET_KEY=your_binance_secret (optional)

@@ -1,0 +1,44 @@
+[
+  {
+    "pattern": ".*\\.(py|pyi)$",
+    "rules": [
+      "Use type hints for all function and method signatures.",
+      "Use `def` for pure functions and `async def` for I/O operations.",
+      "Prefer functional, declarative programming over class-based design unless state is essential.",
+      "Use Pydantic models for request validation and response schemas — avoid raw dictionaries.",
+      "Apply the RORO (Receive an Object, Return an Object) pattern consistently.",
+      "Favor iteration and modular functions over code duplication.",
+      "Use descriptive variable names with auxiliary verbs like `is_active`, `has_permission`.",
+      "Avoid unnecessary curly braces; for single-line conditionals, use one-line syntax (e.g., `if x: do()` ).",
+      "Follow naming conventions: lowercase with underscores for files and directories (e.g., `routers/user_routes.py`).",
+      "Use named exports for routers, endpoints, and utility functions.",
+      "Avoid heavy use of `@app.on_event`; use FastAPI’s `lifespan` context manager instead.",
+      "Define routes declaratively and include clear return type annotations.",
+      "Use `HTTPException` for predictable client-side errors, with well-typed response models.",
+      "Use middleware for global concerns like logging, error handling, and performance monitoring.",
+      "Use caching (e.g., Redis, in-memory) for expensive or static data.",
+      "Avoid blocking I/O — use async libraries like `asyncpg`, `aiomysql`, or `httpx`.",
+      "Use lazy loading for large datasets and response payloads.",
+      "Optimize serialization and deserialization using Pydantic’s `model_config` or `model_dump` settings.",
+      "Use consistent, scalable file structure: routers, subroutes, types, static, utils."
+    ]
+  },
+  {
+    "pattern": ".*\\.(md|txt)$",
+    "rules": [
+      "Document API routes, inputs, and outputs using real examples.",
+      "Include FastAPI startup instructions with environment setup and dependencies.",
+      "Link to FastAPI official docs for models, middleware, and route patterns.",
+      "Clearly list any dependencies (async drivers, ORMs, cache backends) with version info."
+    ]
+  },
+  {
+    "pattern": ".*",
+    "rules": [
+      "Prioritize readability, simplicity, and modular design across all files.",
+      "Organize your repo as if it's a public-facing microservice someone else will scale.",
+      "Avoid mixing concerns in modules — separate business logic from HTTP layer.",
+      "Name directories semantically: `routers/`, `schemas/`, `utils/`, `services/`, `config/`, `types/`."
+    ]
+  }
+]

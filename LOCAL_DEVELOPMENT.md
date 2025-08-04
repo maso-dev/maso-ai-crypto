@@ -55,7 +55,7 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload --log-level deb
 |----------|-------------|---------|
 | `http://localhost:8000/` | Welcome page | ✅ Working |
 | `http://localhost:8000/dashboard` | Smart dashboard (auto-detects real data) | ✅ Working |
-| `http://localhost:8000/v1` | Demo dashboard (static) | ✅ Working |
+| `http://localhost:8000/dashboard` | Smart dashboard (auto-detect) | ✅ Working |
 | `http://localhost:8000/admin` | Admin interface | ✅ Working |
 | `http://localhost:8000/admin_conf` | Admin API (JSON) | ✅ Working |
 
@@ -85,7 +85,7 @@ curl http://localhost:8000/dashboard | grep -i "demo"
 ### **Smart Dashboard Detection**
 The `/dashboard` endpoint automatically detects:
 - **Real Binance data** → Live dashboard with API calls
-- **Mock/No data** → Demo dashboard with static data
+- **Mock/No data** → Smart dashboard with mock data
 
 ### **Hot Reload**
 The development server automatically reloads when you make changes to:
@@ -109,7 +109,7 @@ Local development includes comprehensive logging:
 templates/
 ├── welcome.html          # Welcome page
 ├── dashboard.html        # Live dashboard (API calls)
-├── dashboard_demo.html   # Demo dashboard (static)
+├── dashboard.html        # Smart dashboard (auto-detect)
 └── admin.html           # Admin interface
 ```
 
