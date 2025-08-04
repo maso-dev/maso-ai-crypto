@@ -284,11 +284,11 @@ Be specific about personal context (cost basis, ROI) and provide actionable advi
     ) -> AgentAnalysis:
         """Generate complete agent analysis with recommendations."""
         try:
-                    # Get relevant market news
-        if symbols is None:
-            symbols = [asset.asset for asset in portfolio_data.assets]
-        
-        market_news = await query_news_for_symbols(symbols) if symbols else []
+            # Get relevant market news
+            if symbols is None:
+                symbols = [asset.asset for asset in portfolio_data.assets]
+            
+            market_news = await query_news_for_symbols(symbols) if symbols else []
             
             # Analyze portfolio
             portfolio_analysis = await self.analyze_portfolio(portfolio_data, market_news)

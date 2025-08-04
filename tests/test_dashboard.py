@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 
-client = TestClient(app)
+client = TestClient(app=app)
 
 def test_dashboard_loads():
     """Test that the welcome page loads successfully."""
