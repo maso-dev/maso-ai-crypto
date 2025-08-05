@@ -1,6 +1,6 @@
 /**
- * Enhanced Dashboard JavaScript
- * Real-time data updates and enhanced UI components
+ * Enhanced Dashboard JavaScript - Phase 6 MVP UI Polish
+ * Real-time data updates and enhanced UI components with Phase 4 & 5 integration
  */
 
 class EnhancedDashboard {
@@ -8,7 +8,9 @@ class EnhancedDashboard {
         this.updateInterval = 30000; // 30 seconds
         this.marketUpdateInterval = 15000; // 15 seconds
         this.newsUpdateInterval = 60000; // 1 minute
+        this.adminUpdateInterval = 120000; // 2 minutes
         this.isUpdating = false;
+        this.currentPhase = "6";
         
         // Initialize when DOM is ready
         if (document.readyState === 'loading') {
@@ -19,19 +21,57 @@ class EnhancedDashboard {
     }
     
     init() {
-        console.log('🚀 Enhanced Dashboard initializing...');
+        console.log('🚀 Enhanced Dashboard Phase 6 initializing...');
         this.startRealTimeUpdates();
         this.loadInitialData();
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Add refresh buttons
+        this.addRefreshButtons();
+        
+        // Add phase indicator
+        this.updatePhaseIndicator();
+    }
+    
+    addRefreshButtons() {
+        const cards = document.querySelectorAll('.liquid-card');
+        cards.forEach(card => {
+            const header = card.querySelector('h3');
+            if (header) {
+                const refreshBtn = document.createElement('button');
+                refreshBtn.className = 'refresh-btn';
+                refreshBtn.innerHTML = '🔄';
+                refreshBtn.title = 'Refresh data';
+                refreshBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.refreshCardData(card.id || card.className);
+                };
+                header.appendChild(refreshBtn);
+            }
+        });
+    }
+    
+    updatePhaseIndicator() {
+        const header = document.querySelector('.liquid-header');
+        if (header) {
+            const phaseBadge = document.createElement('div');
+            phaseBadge.className = 'phase-badge';
+            phaseBadge.innerHTML = `Phase ${this.currentPhase}`;
+            header.appendChild(phaseBadge);
+        }
     }
     
     async loadInitialData() {
         try {
             await Promise.all([
                 this.updatePortfolioData(),
-                this.updateMarketData(),
-                this.updateNewsData()
+                this.updateOpportunitiesData(),
+                this.updateNewsData(),
+                this.updateAdminStatus()
             ]);
-            console.log('✅ Initial data loaded successfully');
+            console.log('✅ Phase 6 initial data loaded successfully');
         } catch (error) {
             console.error('❌ Error loading initial data:', error);
         }
@@ -45,10 +85,10 @@ class EnhancedDashboard {
             }
         }, this.updateInterval);
         
-        // Market data updates
+        // Opportunities updates (Phase 4)
         setInterval(async () => {
             if (!this.isUpdating) {
-                await this.updateMarketData();
+                await this.updateOpportunitiesData();
             }
         }, this.marketUpdateInterval);
         
@@ -59,7 +99,35 @@ class EnhancedDashboard {
             }
         }, this.newsUpdateInterval);
         
-        console.log('🔄 Real-time updates started');
+        // Admin status updates (Phase 5)
+        setInterval(async () => {
+            if (!this.isUpdating) {
+                await this.updateAdminStatus();
+            }
+        }, this.adminUpdateInterval);
+        
+        console.log('🔄 Phase 6 real-time updates started');
+    }
+    
+    async refreshCardData(cardType) {
+        console.log(`🔄 Refreshing ${cardType} data...`);
+        
+        switch (cardType) {
+            case 'portfolio-summary':
+                await this.updatePortfolioData();
+                break;
+            case 'agent-insights':
+                await this.updateOpportunitiesData();
+                break;
+            case 'market-analysis':
+                await this.updateOpportunitiesData();
+                break;
+            case 'news-insights':
+                await this.updateNewsData();
+                break;
+            default:
+                await this.updatePortfolioData();
+        }
     }
     
     async updatePortfolioData() {
@@ -75,22 +143,25 @@ class EnhancedDashboard {
             
         } catch (error) {
             console.error('❌ Error updating portfolio data:', error);
+            this.showError('portfolio-summary-content', 'Portfolio data temporarily unavailable');
         } finally {
             this.isUpdating = false;
         }
     }
     
-    async updateMarketData() {
+    async updateOpportunitiesData() {
         try {
             this.isUpdating = true;
             const response = await fetch('/api/opportunities');
             const data = await response.json();
             
             this.updateOpportunitiesUI(data);
-            this.updateTechnicalAnalysis(data.technical_data);
+            this.updateMarketAnalysis(data);
+            this.updateAgentIntelligence(data);
             
         } catch (error) {
-            console.error('❌ Error updating market data:', error);
+            console.error('❌ Error updating opportunities data:', error);
+            this.showError('market-summary-content', 'Market analysis temporarily unavailable');
         } finally {
             this.isUpdating = false;
         }
@@ -107,6 +178,22 @@ class EnhancedDashboard {
             
         } catch (error) {
             console.error('❌ Error updating news data:', error);
+            this.showError('news-insights-content', 'News data temporarily unavailable');
+        } finally {
+            this.isUpdating = false;
+        }
+    }
+    
+    async updateAdminStatus() {
+        try {
+            this.isUpdating = true;
+            const response = await fetch('/api/admin/mvp-status');
+            const data = await response.json();
+            
+            this.updateSystemStatus(data);
+            
+        } catch (error) {
+            console.error('❌ Error updating admin status:', error);
         } finally {
             this.isUpdating = false;
         }
@@ -123,37 +210,63 @@ class EnhancedDashboard {
         
         let html = `
             <div class="portfolio-overview">
-                <div class="total-value">
-                    <span class="value">${this.formatCurrency(totalValue)}</span>
-                    <span class="label">Total Portfolio Value</span>
-                </div>
-                <div class="data-source">
-                    <span class="source-badge ${dataSource}">${dataSource.toUpperCase()}</span>
-                    ${enhancedFeatures ? '<span class="enhanced-badge">Enhanced</span>' : ''}
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${this.formatCurrency(totalValue)}</div>
+                        <div class="stat-label">Total Value</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${assets.length}</div>
+                        <div class="stat-label">Assets</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${dataSource.toUpperCase()}</div>
+                        <div class="stat-label">Data Source</div>
+                    </div>
+                    ${enhancedFeatures ? `
+                    <div class="stat-item">
+                        <div class="stat-value">🚀</div>
+                        <div class="stat-label">Enhanced</div>
+                    </div>
+                    ` : ''}
                 </div>
             </div>
         `;
         
         if (assets.length > 0) {
-            html += '<div class="assets-list">';
+            html += `
+                <div class="table-container">
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Amount</th>
+                                <th>Value (USDT)</th>
+                                <th>ROI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
             assets.forEach(asset => {
                 const roi = asset.roi_percentage || 0;
-                const roiClass = roi > 0 ? 'positive' : roi < 0 ? 'negative' : 'neutral';
+                const roiClass = roi > 0 ? 'roi-positive' : roi < 0 ? 'roi-negative' : 'roi-neutral';
                 
                 html += `
-                    <div class="asset-item">
-                        <div class="asset-info">
-                            <span class="symbol">${asset.asset}</span>
-                            <span class="amount">${asset.total}</span>
-                        </div>
-                        <div class="asset-value">
-                            <span class="usdt-value">${this.formatCurrency(asset.usdt_value)}</span>
-                            <span class="roi ${roiClass}">${this.formatROI(roi)}</span>
-                        </div>
-                    </div>
+                    <tr>
+                        <td><strong>${asset.asset}</strong></td>
+                        <td>${asset.total}</td>
+                        <td>${this.formatCurrency(asset.usdt_value)}</td>
+                        <td class="${roiClass}">${this.formatROI(roi)}</td>
+                    </tr>
                 `;
             });
-            html += '</div>';
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
         
         summaryDiv.innerHTML = html;
@@ -227,36 +340,60 @@ class EnhancedDashboard {
     }
     
     updateOpportunitiesUI(data) {
-        const opportunitiesDiv = document.getElementById('opportunities-content');
+        const opportunitiesDiv = document.getElementById('market-summary-content');
         if (!opportunitiesDiv) return;
         
         const opportunities = data.opportunities || [];
-        const technicalData = data.technical_data || {};
-        const aiAnalysis = data.ai_analysis || {};
+        const marketRegime = data.market_regime || 'neutral';
+        const statistics = data.statistics || {};
         
         let html = `
-            <div class="opportunities-header">
-                <span class="total">${data.total_opportunities || 0} opportunities</span>
-                <span class="indicators">${data.indicators_available || 0} indicators</span>
-                ${data.ai_available ? '<span class="ai-badge">AI Powered</span>' : ''}
+            <div class="market-overview">
+                <div class="market-regime">
+                    <span class="regime-badge ${marketRegime}">${marketRegime.toUpperCase()}</span>
+                    <span class="regime-label">Market Regime</span>
+                </div>
+                <div class="opportunities-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${statistics.total_opportunities || 0}</div>
+                        <div class="stat-label">Opportunities</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${statistics.buy_opportunities || 0}</div>
+                        <div class="stat-label">Buy Signals</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${statistics.sell_opportunities || 0}</div>
+                        <div class="stat-label">Sell Signals</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${(statistics.average_confidence * 100).toFixed(0)}%</div>
+                        <div class="stat-label">Avg Confidence</div>
+                    </div>
+                </div>
             </div>
         `;
         
         if (opportunities.length > 0) {
             html += '<div class="opportunities-list">';
-            opportunities.forEach(opp => {
-                const actionClass = opp.action === 'buy' ? 'buy' : opp.action === 'sell' ? 'sell' : 'hold';
+            opportunities.slice(0, 5).forEach(opp => {
+                const typeClass = opp.type === 'BUY' ? 'type-buy' : opp.type === 'SELL' ? 'type-sell' : 'type-hold';
                 
                 html += `
-                    <div class="opportunity-item ${actionClass}">
-                        <div class="opportunity-header">
+                    <div class="recommendation-item">
+                        <div class="recommendation-type ${typeClass}">${opp.type}</div>
+                        <div class="recommendation-header">
                             <span class="symbol">${opp.symbol}</span>
-                            <span class="action ${actionClass}">${opp.action.toUpperCase()}</span>
+                            <span class="score">Score: ${opp.score}</span>
                             <span class="confidence">${(opp.confidence * 100).toFixed(0)}%</span>
                         </div>
-                        <div class="opportunity-reason">${opp.reason}</div>
-                        <div class="technical-summary">
-                            ${this.formatTechnicalSummary(opp.technical_indicators)}
+                        <div class="recommendation-reasons">
+                            ${opp.reasons ? opp.reasons.slice(0, 2).map(reason => `<div class="reason">• ${reason}</div>`).join('') : ''}
+                        </div>
+                        <div class="recommendation-metrics">
+                            <span class="metric">Price: ${this.formatCurrency(opp.price)}</span>
+                            <span class="metric">24h: ${this.formatROI(opp.change_24h)}</span>
+                            <span class="metric">Vol: ${this.formatVolume(opp.volume_24h)}</span>
                         </div>
                     </div>
                 `;
@@ -269,29 +406,100 @@ class EnhancedDashboard {
         opportunitiesDiv.innerHTML = html;
     }
     
-    updateTechnicalAnalysis(technicalData) {
-        const analysisContainer = document.querySelector('.technical-analysis');
-        if (!analysisContainer || !technicalData) return;
+    updateMarketAnalysis(data) {
+        const analysisDiv = document.getElementById('market-analysis-content');
+        if (!analysisDiv) return;
         
-        let html = '';
-        Object.entries(technicalData).forEach(([symbol, data]) => {
-            const rsi = data.rsi_14 || 50;
-            const macd = data.macd || {};
-            const bb = data.bollinger_bands || {};
-            
+        const marketInsights = data.market_insights || [];
+        const aiAnalysis = data.ai_analysis || {};
+        
+        let html = `
+            <div class="market-analysis-header">
+                <h4>Market Intelligence</h4>
+                <span class="analysis-source">AI Powered</span>
+            </div>
+        `;
+        
+        if (marketInsights.length > 0) {
+            html += '<div class="insights-list">';
+            marketInsights.forEach(insight => {
+                html += `
+                    <div class="insight-item">
+                        <div class="insight-type">${insight.type}</div>
+                        <div class="insight-content">
+                            <strong>${insight.symbol}</strong>: ${insight.insight}
+                        </div>
+                        <div class="insight-confidence">${(insight.confidence * 100).toFixed(0)}% confidence</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        if (aiAnalysis.market_regime) {
             html += `
-                <div class="analysis-item" data-symbol="${symbol}">
-                    <span class="symbol">${symbol}</span>
-                    <div class="indicators">
-                        <span class="indicator rsi">RSI: ${rsi.toFixed(1)}</span>
-                        <span class="indicator macd">MACD: ${macd.signal || 'neutral'}</span>
-                        <span class="indicator bb">BB: ${bb.position || 'middle'}</span>
+                <div class="ai-analysis">
+                    <div class="ai-header">AI Market Analysis</div>
+                    <div class="ai-content">${aiAnalysis.market_regime.current_regime || 'neutral'} market conditions detected</div>
+                </div>
+            `;
+        }
+        
+        analysisDiv.innerHTML = html;
+    }
+    
+    updateAgentIntelligence(data) {
+        const intelligenceDiv = document.getElementById('agent-intelligence-content');
+        if (!intelligenceDiv) return;
+        
+        const opportunities = data.opportunities || [];
+        const statistics = data.statistics || {};
+        
+        let html = `
+            <div class="intelligence-header">
+                <h4>Brotherhood Intelligence</h4>
+                <span class="intelligence-phase">Phase ${data.phase || '4'}</span>
+            </div>
+        `;
+        
+        if (opportunities.length > 0) {
+            html += `
+                <div class="intelligence-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${statistics.total_analyzed || 0}</div>
+                        <div class="stat-label">Symbols Analyzed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${statistics.total_opportunities || 0}</div>
+                        <div class="stat-label">Opportunities Found</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${(statistics.average_confidence * 100).toFixed(0)}%</div>
+                        <div class="stat-label">AI Confidence</div>
                     </div>
                 </div>
             `;
-        });
+            
+            html += '<div class="intelligence-insights">';
+            opportunities.slice(0, 3).forEach(opp => {
+                html += `
+                    <div class="insight-item">
+                        <div class="insight-type">${opp.type} OPPORTUNITY</div>
+                        <div class="insight-content">
+                            <strong>${opp.symbol}</strong> shows strong ${opp.type.toLowerCase()} signals with ${(opp.confidence * 100).toFixed(0)}% confidence
+                        </div>
+                        <div class="insight-reasons">
+                            ${opp.reasons ? opp.reasons.slice(0, 1).map(reason => `<div class="reason">• ${reason}</div>`).join('') : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else {
+            html += '<div class="no-insights">AI analysis in progress...</div>';
+        }
         
-        analysisContainer.innerHTML = html;
+        intelligenceDiv.innerHTML = html;
     }
     
     updateNewsUI(data) {
@@ -317,11 +525,18 @@ class EnhancedDashboard {
         if (articles.length > 0) {
             html += '<div class="news-list">';
             articles.slice(0, 5).forEach(article => {
+                const sentiment = article.sentiment || 'neutral';
+                const sentimentClass = sentiment === 'positive' ? 'positive' : 
+                                      sentiment === 'negative' ? 'negative' : 'neutral';
+                
                 html += `
                     <div class="news-item">
                         <div class="news-title">${article.title}</div>
-                        <div class="news-source">${article.source?.name || 'Unknown'}</div>
-                        <div class="news-time">${this.formatTime(article.publishedAt)}</div>
+                        <div class="news-meta">
+                            <span class="news-source">${article.source?.name || 'Unknown'}</span>
+                            <span class="news-time">${this.formatTime(article.publishedAt)}</span>
+                            <span class="news-sentiment ${sentimentClass}">${sentiment}</span>
+                        </div>
                     </div>
                 `;
             });
@@ -354,7 +569,48 @@ class EnhancedDashboard {
         sentimentContainer.innerHTML = html;
     }
     
+    updateSystemStatus(data) {
+        // Update system status in a subtle way
+        const systemHealth = data.system_health || 'unknown';
+        const currentPhase = data.current_phase || '5';
+        
+        // Add system status to header if not already present
+        let statusIndicator = document.querySelector('.system-status');
+        if (!statusIndicator) {
+            const header = document.querySelector('.liquid-header');
+            if (header) {
+                statusIndicator = document.createElement('div');
+                statusIndicator.className = 'system-status';
+                header.appendChild(statusIndicator);
+            }
+        }
+        
+        if (statusIndicator) {
+            const healthClass = systemHealth === 'healthy' ? 'healthy' : 
+                               systemHealth === 'degraded' ? 'degraded' : 'unhealthy';
+            
+            statusIndicator.innerHTML = `
+                <span class="status-badge ${healthClass}">
+                    ${systemHealth.toUpperCase()} | Phase ${currentPhase}
+                </span>
+            `;
+        }
+    }
+    
+    showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `
+                <div class="error-message">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text">${message}</span>
+                </div>
+            `;
+        }
+    }
+    
     formatCurrency(amount) {
+        if (!amount || amount === 0) return '$0.00';
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
@@ -369,27 +625,24 @@ class EnhancedDashboard {
         return (roi > 0 ? '+' : '') + val + '%';
     }
     
+    formatVolume(volume) {
+        if (!volume) return '-';
+        if (volume >= 1e9) return (volume / 1e9).toFixed(1) + 'B';
+        if (volume >= 1e6) return (volume / 1e6).toFixed(1) + 'M';
+        if (volume >= 1e3) return (volume / 1e3).toFixed(1) + 'K';
+        return volume.toFixed(0);
+    }
+    
     formatTime(timestamp) {
         if (!timestamp) return 'Unknown';
         const date = new Date(timestamp);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    }
-    
-    formatTechnicalSummary(indicators) {
-        if (!indicators) return '';
+        const now = new Date();
+        const diffMs = now - date;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
         
-        const parts = [];
-        if (indicators.rsi) {
-            parts.push(`RSI: ${indicators.rsi.signal}`);
-        }
-        if (indicators.macd) {
-            parts.push(`MACD: ${indicators.macd.signal}`);
-        }
-        if (indicators.bollinger_bands) {
-            parts.push(`BB: ${indicators.bollinger_bands.position}`);
-        }
-        
-        return parts.join(', ');
+        if (diffHours < 1) return 'Just now';
+        if (diffHours < 24) return `${diffHours}h ago`;
+        return date.toLocaleDateString();
     }
 }
 
