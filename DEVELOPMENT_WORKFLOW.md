@@ -1,297 +1,194 @@
-# Development Workflow & CI/CD Safety Guidelines
+# 🚀 Development Workflow - Fast & Efficient
 
-## 🎯 Overview
-This document establishes a structured, CI/CD-safe development workflow that ensures:
-- **Plan adherence**: Each development step follows the established roadmap
-- **Branch safety**: Isolated development with proper validation
-- **Quality gates**: Automated testing and validation at each step
-- **Rollback capability**: Safe merging with ability to revert if needed
+## 🎯 **Lightweight Development Strategy**
 
-## 🌿 Branching Strategy
+For faster development cycles, we use **lightweight validation** that focuses on essential checks without heavy AI/LLM operations.
 
-### Main Branches
-- **`main`**: Production-ready code, always deployable
-- **`develop`**: Integration branch for completed features
+### **Quick Development Commands**
 
-### Feature Branches
-- **`feature/step-{X}-{description}`**: Individual development steps
-- **`hotfix/urgent-fix`**: Critical production fixes
-- **`release/v{major}.{minor}.{patch}`**: Release preparation
-
-## 📋 Development Workflow
-
-### 1. Step Planning & Branch Creation
 ```bash
-# 1. Create feature branch for current step
-git checkout develop
-git pull origin develop
-git checkout -b feature/step-{X}-{description}
+# Fast validation (30 seconds)
+python scripts/validate_light.py
 
-# 2. Update step status in plan documents
-# 3. Create step-specific test plan
+# Lightweight tests (no AI calls)
+python scripts/test_light.py
+
+# Full validation (only for final checks)
+python scripts/validate_step.py
 ```
 
-### 2. Development Phase
+## 📋 **Development Phases**
+
+### **Phase 1: Core Integration** ✅ COMPLETED
+- **Branch**: `feature/mvp-integration-phase1`
+- **Status**: ✅ **COMPLETED**
+- **What**: Enhanced API endpoints with existing systems
+- **Validation**: Lightweight checks only
+
+### **Phase 2: MVP Portfolio Enhancement** 🔄 NEXT
+- **Branch**: `feature/mvp-portfolio-enhancement`
+- **Focus**: LiveCoinWatch integration, technical indicators
+- **Validation**: Lightweight validation
+
+### **Phase 3: MVP News Integration** 📅 PLANNED
+- **Branch**: `feature/mvp-news-integration`
+- **Focus**: Multi-source news, quality filtering
+- **Validation**: Lightweight validation
+
+### **Phase 4: MVP Opportunities Dashboard** 📅 PLANNED
+- **Branch**: `feature/mvp-opportunities`
+- **Focus**: Technical analysis, opportunity generation
+- **Validation**: Lightweight validation
+
+### **Phase 5: MVP Admin Controls** 📅 PLANNED
+- **Branch**: `feature/mvp-admin-controls`
+- **Focus**: Admin dashboard, refresh controls
+- **Validation**: Lightweight validation
+
+### **Phase 6: MVP UI Polish** 📅 PLANNED
+- **Branch**: `feature/mvp-ui-polish`
+- **Focus**: Dashboard UI, dynamic content
+- **Validation**: Lightweight validation
+
+## 🔄 **Daily Development Workflow**
+
+### **1. Start Development**
 ```bash
-# 1. Implement step requirements
-# 2. Follow coding standards (see repo rules)
-# 3. Add/update tests for new functionality
-# 4. Update documentation
+# Activate environment
+source .venv/bin/activate
+
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Quick validation
+python scripts/validate_light.py
 ```
 
-### 3. Pre-Merge Validation
+### **2. Development Cycle**
 ```bash
-# 1. Run local tests
-python -m pytest tests/ -v
-python -m pytest test_*.py -v
+# Make changes
+# ... edit files ...
 
-# 2. Check linting
-python -m flake8 . --max-line-length=120
-python -m black . --check
+# Quick validation (every few changes)
+python scripts/validate_light.py
 
-# 3. Validate API endpoints
-curl -s http://localhost:8000/health | python -m json.tool
-curl -s http://localhost:8000/admin_conf | python -m json.tool
-
-# 4. Test core functionality
-python test_enhanced_pipeline.py
-python test_livecoinwatch.py
-python test_tavily.py
+# Lightweight tests
+python scripts/test_light.py
 ```
 
-### 4. Pull Request & Review
+### **3. Commit & Push**
 ```bash
-# 1. Push branch and create PR
-git push origin feature/step-{X}-{description}
+# Add changes
+git add .
 
-# 2. PR Requirements:
-#    - Clear description of changes
-#    - Link to step in plan document
-#    - Test results summary
-#    - Screenshots for UI changes
-#    - API endpoint validation results
+# Commit with descriptive message
+git commit -m "🚀 Feature: description of changes"
+
+# Push to feature branch
+git push origin feature/your-feature-name
 ```
 
-### 5. CI/CD Pipeline Validation
-```yaml
-# Automated checks (GitHub Actions or similar):
-- Code linting (flake8, black)
-- Unit tests (pytest)
-- Integration tests (API endpoints)
-- Security scan (bandit)
-- Dependency check (safety)
-- Build validation (uvicorn startup)
-```
-
-### 6. Merge & Integration
+### **4. Final Validation (Before PR)**
 ```bash
-# 1. Merge to develop after approval
-git checkout develop
-git merge feature/step-{X}-{description}
-git push origin develop
-
-# 2. Update step status in plan documents
-# 3. Create next step branch
-git checkout -b feature/step-{X+1}-{description}
+# Full validation (only when ready for PR)
+python scripts/validate_step.py
 ```
 
-## 🔄 Step Validation Checklist
+## 🎯 **Validation Levels**
 
-### Before Creating PR
-- [ ] All tests pass locally
-- [ ] Code follows style guidelines
-- [ ] Documentation updated
-- [ ] Plan documents updated
-- [ ] No hardcoded secrets
-- [ ] Environment variables properly configured
-- [ ] API endpoints tested
-- [ ] Error handling implemented
-- [ ] Logging added for debugging
+### **Level 1: Lightweight (Development)**
+- ✅ Syntax checking
+- ✅ Import validation
+- ✅ Environment variables
+- ✅ Git status
+- ⏱️ **Time**: ~30 seconds
+- 🎯 **Use**: During development
 
-### Before Merging
-- [ ] CI/CD pipeline passes
-- [ ] Code review approved
-- [ ] Integration tests pass
-- [ ] Performance impact assessed
-- [ ] Rollback plan documented
-- [ ] Step completion documented
+### **Level 2: Standard (Pre-PR)**
+- ✅ All lightweight checks
+- ✅ Unit tests (simplified)
+- ✅ Integration tests (core only)
+- ✅ API endpoint checks
+- ⏱️ **Time**: ~2-3 minutes
+- 🎯 **Use**: Before creating PR
 
-## 📊 Current Development Status
+### **Level 3: Full (Release)**
+- ✅ All standard checks
+- ✅ Complete test suite
+- ✅ Security scans
+- ✅ Documentation checks
+- ⏱️ **Time**: ~5-10 minutes
+- 🎯 **Use**: Before release
 
-### Completed Steps
-- ✅ Step 1: LiveCoinWatch Integration
-- ✅ Step 2: Data Quality Filtering
-- ✅ Step 3: Refresh Process Engine
-- ✅ Step 4: Tavily Integration
-- ✅ Step 5: Frontend Integration
+## 🚨 **When to Use Each Level**
 
-### Current Step
-- 🔄 Step 6: CI/CD Workflow Implementation
+### **Lightweight Validation** (Most Common)
+- ✅ During active development
+- ✅ After small changes
+- ✅ Before commits
+- ✅ Quick sanity checks
 
-### Next Steps
-- ⏳ Step 7: Vercel Integration (cron jobs)
-- ⏳ Step 8: Lightweight AI Engine
-- ⏳ Step 9: A/B Testing Engine
-- ⏳ Step 10: LangSmith Evaluators
+### **Standard Validation** (Pre-PR)
+- ✅ Before creating pull requests
+- ✅ After completing a feature
+- ✅ Before merging to main
 
-## 🛡️ Safety Measures
+### **Full Validation** (Release)
+- ✅ Before releases
+- ✅ Before deploying to production
+- ✅ When adding new dependencies
 
-### Plan Protection
-- **No direct main branch commits**
-- **Plan documents are read-only in main**
-- **Step changes require plan updates**
-- **Breaking changes require plan review**
+## 🎯 **Current Status**
 
-### Rollback Strategy
-```bash
-# Quick rollback to previous step
-git checkout develop
-git revert HEAD
-git push origin develop
+### **Phase 1: Core Integration** ✅ **COMPLETED**
+- **Enhanced API endpoints**: `/api/portfolio`, `/api/news-briefing`, `/api/opportunities`
+- **Existing systems integration**: Hybrid RAG, AI Agent, LiveCoinWatch
+- **Lightweight validation**: 100% success rate
+- **Ready for**: Phase 2 development
 
-# Full rollback to specific step
-git checkout develop
-git reset --hard step-{X}-commit-hash
-git push --force origin develop
-```
+### **Next Steps**
+1. **Create Phase 2 branch**: `feature/mvp-portfolio-enhancement`
+2. **Focus on**: LiveCoinWatch technical indicators
+3. **Use**: Lightweight validation for fast iteration
+4. **Goal**: Enhanced portfolio with real-time data
 
-### Emergency Procedures
-```bash
-# Hotfix for production issues
-git checkout main
-git checkout -b hotfix/critical-issue
-# Fix and test
-git checkout main
-git merge hotfix/critical-issue
-git tag v{major}.{minor}.{patch}
-```
+## 🚀 **Benefits of Lightweight Approach**
 
-## 📝 Step Documentation Template
+### **Speed**
+- ⚡ 30-second validation vs 5+ minutes
+- 🔄 Faster iteration cycles
+- 🎯 Focus on essential checks
 
-### Step {X}: {Description}
+### **Efficiency**
+- 💰 Lower token usage
+- 🔋 Reduced API calls
+- 🎯 Development-focused validation
 
-**Branch**: `feature/step-{X}-{description}`
+### **Quality**
+- ✅ Still catches critical issues
+- 🎯 Prevents broken builds
+- 📈 Maintains code quality
 
-**Objectives**:
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+## 📝 **Best Practices**
 
-**Implementation**:
-- Files modified: `list of files`
-- New files: `list of new files`
-- API changes: `endpoint modifications`
+### **During Development**
+1. Use lightweight validation frequently
+2. Run tests after each significant change
+3. Commit often with descriptive messages
+4. Keep feature branches focused
 
-**Testing**:
-- Unit tests: `test files`
-- Integration tests: `API endpoints`
-- Manual tests: `user scenarios`
+### **Before PR**
+1. Run standard validation
+2. Ensure all tests pass
+3. Update documentation if needed
+4. Review code changes
 
-**Validation Results**:
-- Linting: ✅/❌
-- Unit tests: ✅/❌
-- Integration tests: ✅/❌
-- Performance: ✅/❌
-
-**Dependencies**:
-- Environment variables: `list`
-- External APIs: `list`
-- Database changes: `list`
-
-**Rollback Plan**:
-- Files to revert: `list`
-- Database rollback: `commands`
-- Configuration changes: `list`
-
-## 🚀 Getting Started
-
-### For New Developers
-```bash
-# 1. Clone repository
-git clone https://github.com/your-org/maso-ai-crypto.git
-cd maso-ai-crypto
-
-# 2. Setup environment
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
-
-# 3. Configure environment variables
-cp env.example .env
-# Edit .env with your API keys
-
-# 4. Run initial tests
-python -m pytest tests/ -v
-
-# 5. Start development server
-python -m uvicorn main:app --reload --port 8000
-```
-
-### For Current Step Development
-```bash
-# 1. Check current step status
-git checkout develop
-git pull origin develop
-
-# 2. Create step branch
-git checkout -b feature/step-{X}-{description}
-
-# 3. Follow step validation checklist
-# 4. Create PR when ready
-```
-
-## 📚 Resources
-
-- **Plan Documents**: 
-  - `OPTIMIZED_BRAIN_ARCHITECTURE_PLAN.md`
-  - `FRONTEND_INTEGRATION_PLAN.md`
-  - `CURRENT_IMPLEMENTATION_STATUS.md`
-- **Testing**: `tests/` directory
-- **API Documentation**: `http://localhost:8000/docs`
-- **Admin Dashboard**: `http://localhost:8000/admin`
-
-## 🔧 Tools & Commands
-
-### Development Commands
-```bash
-# Start development server
-python -m uvicorn main:app --reload --port 8000
-
-# Run all tests
-python -m pytest tests/ -v
-
-# Run specific test
-python -m pytest test_enhanced_pipeline.py -v
-
-# Check code style
-python -m flake8 . --max-line-length=120
-
-# Format code
-python -m black .
-
-# Security check
-python -m bandit -r .
-
-# Dependency check
-python -m safety check
-```
-
-### Git Workflow Commands
-```bash
-# Create step branch
-git checkout -b feature/step-{X}-{description}
-
-# Commit with conventional message
-git commit -m "feat: implement step {X} - {description}"
-
-# Push and create PR
-git push origin feature/step-{X}-{description}
-
-# Update develop
-git checkout develop
-git pull origin develop
-```
+### **Before Release**
+1. Run full validation
+2. Test all integrations
+3. Verify security
+4. Update release notes
 
 ---
 
-**Remember**: Always follow the plan, validate thoroughly, and maintain the safety of the main branch. Each step should be atomic and independently testable. 
+**🎯 Goal**: Fast, efficient development with quality assurance at the right level for each stage. 

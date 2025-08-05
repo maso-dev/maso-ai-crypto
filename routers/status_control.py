@@ -11,21 +11,23 @@ from pydantic import BaseModel
 
 # Import status control system
 from utils.status_control import (
-    status_control, 
-    get_system_status, 
-    get_component_status, 
+    status_control,
+    get_system_status,
+    get_component_status,
     get_all_components_status,
     create_status_alert,
     ComponentHealth,
     ComponentStatus,
-    ServiceType
+    ServiceType,
 )
 
 router = APIRouter(prefix="/status", tags=["status"])
 
+
 # Pydantic models for API responses
 class SystemStatusResponse(BaseModel):
     """System status response model."""
+
     status: str
     uptime_seconds: float
     components_online: int
@@ -34,8 +36,10 @@ class SystemStatusResponse(BaseModel):
     last_check: str
     alerts_count: int
 
+
 class ComponentStatusResponse(BaseModel):
     """Component status response model."""
+
     name: str
     service_type: str
     status: str
@@ -44,8 +48,10 @@ class ComponentStatusResponse(BaseModel):
     error_message: Optional[str] = None
     metadata: Dict[str, Any]
 
+
 class AlertResponse(BaseModel):
     """Alert response model."""
+
     id: str
     component: str
     severity: str
@@ -54,8 +60,10 @@ class AlertResponse(BaseModel):
     resolved: bool
     metadata: Dict[str, Any]
 
+
 class MetricsResponse(BaseModel):
     """System metrics response model."""
+
     total_requests: int
     successful_requests: int
     failed_requests: int
@@ -65,9 +73,11 @@ class MetricsResponse(BaseModel):
     cpu_usage_percent: float
     uptime_seconds: float
 
+
 # ============================================================================
 # STATUS ENDPOINTS
 # ============================================================================
+
 
 @router.get("/overall", response_model=SystemStatusResponse)
 async def get_overall_system_status() -> SystemStatusResponse:
@@ -76,7 +86,10 @@ async def get_overall_system_status() -> SystemStatusResponse:
         status = await get_system_status()
         return SystemStatusResponse(**status)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting system status: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting system status: {str(e)}"
+        )
+
 
 @router.get("/components", response_model=Dict[str, ComponentStatusResponse])
 async def get_all_components() -> Dict[str, ComponentStatusResponse]:
@@ -91,12 +104,15 @@ async def get_all_components() -> Dict[str, ComponentStatusResponse]:
                 last_check=comp.last_check.isoformat(),
                 response_time_ms=comp.response_time_ms,
                 error_message=comp.error_message,
-                metadata=comp.metadata
+                metadata=comp.metadata,
             )
             for name, comp in components.items()
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting component status: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting component status: {str(e)}"
+        )
+
 
 @router.get("/components/{component_name}", response_model=ComponentStatusResponse)
 async def get_component_status_endpoint(component_name: str) -> ComponentStatusResponse:
@@ -104,8 +120,10 @@ async def get_component_status_endpoint(component_name: str) -> ComponentStatusR
     try:
         component = await get_component_status(component_name)
         if not component:
-            raise HTTPException(status_code=404, detail=f"Component {component_name} not found")
-        
+            raise HTTPException(
+                status_code=404, detail=f"Component {component_name} not found"
+            )
+
         return ComponentStatusResponse(
             name=component.name,
             service_type=component.service_type.value,
@@ -113,31 +131,40 @@ async def get_component_status_endpoint(component_name: str) -> ComponentStatusR
             last_check=component.last_check.isoformat(),
             response_time_ms=component.response_time_ms,
             error_message=component.error_message,
-            metadata=component.metadata
+            metadata=component.metadata,
         )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting component status: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting component status: {str(e)}"
+        )
+
 
 @router.post("/components/{component_name}/check")
-async def check_component_health(component_name: str, background_tasks: BackgroundTasks) -> Dict[str, Any]:
+async def check_component_health(
+    component_name: str, background_tasks: BackgroundTasks
+) -> Dict[str, Any]:
     """Manually trigger a health check for a specific component."""
     try:
         # Trigger immediate health check
         background_tasks.add_task(status_control.check_all_components)
-        
+
         return {
             "message": f"Health check triggered for {component_name}",
             "component": component_name,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error triggering health check: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error triggering health check: {str(e)}"
+        )
+
 
 # ============================================================================
 # ALERTS ENDPOINTS
 # ============================================================================
+
 
 @router.get("/alerts", response_model=List[AlertResponse])
 async def get_recent_alerts(limit: int = 10) -> List[AlertResponse]:
@@ -152,19 +179,20 @@ async def get_recent_alerts(limit: int = 10) -> List[AlertResponse]:
                 message=alert.message,
                 timestamp=alert.timestamp.isoformat(),
                 resolved=alert.resolved,
-                metadata=alert.metadata
+                metadata=alert.metadata,
             )
             for alert in alerts
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting alerts: {str(e)}")
 
+
 @router.post("/alerts")
 async def create_alert(
     component: str,
     severity: str,
     message: str,
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Create a new system alert."""
     try:
@@ -173,10 +201,11 @@ async def create_alert(
             "message": "Alert created successfully",
             "component": component,
             "severity": severity,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating alert: {str(e)}")
+
 
 @router.put("/alerts/{alert_id}/resolve")
 async def resolve_alert(alert_id: str) -> Dict[str, Any]:
@@ -186,14 +215,16 @@ async def resolve_alert(alert_id: str) -> Dict[str, Any]:
         return {
             "message": "Alert resolved successfully",
             "alert_id": alert_id,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error resolving alert: {str(e)}")
 
+
 # ============================================================================
 # METRICS ENDPOINTS
 # ============================================================================
+
 
 @router.get("/metrics", response_model=MetricsResponse)
 async def get_system_metrics() -> MetricsResponse:
@@ -208,10 +239,11 @@ async def get_system_metrics() -> MetricsResponse:
             active_connections=metrics.active_connections,
             memory_usage_mb=metrics.memory_usage_mb,
             cpu_usage_percent=metrics.cpu_usage_percent,
-            uptime_seconds=metrics.uptime_seconds
+            uptime_seconds=metrics.uptime_seconds,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting metrics: {str(e)}")
+
 
 @router.post("/metrics/update")
 async def update_metrics(
@@ -221,7 +253,7 @@ async def update_metrics(
     average_response_time_ms: Optional[float] = None,
     active_connections: Optional[int] = None,
     memory_usage_mb: Optional[float] = None,
-    cpu_usage_percent: Optional[float] = None
+    cpu_usage_percent: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Update system metrics."""
     try:
@@ -240,41 +272,46 @@ async def update_metrics(
             update_data["memory_usage_mb"] = memory_usage_mb
         if cpu_usage_percent is not None:
             update_data["cpu_usage_percent"] = cpu_usage_percent
-        
+
         status_control.update_metrics(**update_data)
-        
+
         return {
             "message": "Metrics updated successfully",
             "updated_fields": list(update_data.keys()),
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating metrics: {str(e)}")
 
+
 # ============================================================================
 # CONTROL ENDPOINTS
 # ============================================================================
+
 
 @router.post("/control/refresh")
 async def refresh_all_components(background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """Manually refresh all component statuses."""
     try:
         background_tasks.add_task(status_control.check_all_components)
-        
+
         return {
             "message": "Component refresh triggered",
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "components": list(status_control.health_checkers.keys())
+            "components": list(status_control.health_checkers.keys()),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error refreshing components: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error refreshing components: {str(e)}"
+        )
+
 
 @router.get("/control/health")
 async def health_check() -> Dict[str, Any]:
     """Health check endpoint for the status control system."""
     try:
         overall_status = await get_system_status()
-        
+
         return {
             "status": "healthy",
             "service": "Status Control System",
@@ -283,14 +320,18 @@ async def health_check() -> Dict[str, Any]:
             "components_online": overall_status["components_online"],
             "total_components": overall_status["total_components"],
             "uptime_seconds": overall_status["uptime_seconds"],
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Status control system error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Status control system error: {str(e)}"
+        )
+
 
 # ============================================================================
 # UTILITY ENDPOINTS
 # ============================================================================
+
 
 @router.get("/info")
 async def get_status_info() -> Dict[str, Any]:
@@ -301,7 +342,7 @@ async def get_status_info() -> Dict[str, Any]:
         "description": "Comprehensive monitoring and status management for crypto trading platform",
         "monitored_components": [
             "ai_agent",
-            "vector_rag", 
+            "vector_rag",
             "hybrid_rag",
             "realtime_data",
             "news_pipeline",
@@ -310,7 +351,7 @@ async def get_status_info() -> Dict[str, Any]:
             "binance_api",
             "newsapi",
             "database",
-            "websocket"
+            "websocket",
         ],
         "features": [
             "Real-time component monitoring",
@@ -318,7 +359,7 @@ async def get_status_info() -> Dict[str, Any]:
             "Alert system",
             "Performance metrics",
             "Status history",
-            "Manual refresh capabilities"
+            "Manual refresh capabilities",
         ],
         "endpoints": [
             "/status/overall",
@@ -326,6 +367,6 @@ async def get_status_info() -> Dict[str, Any]:
             "/status/components/{component_name}",
             "/status/alerts",
             "/status/metrics",
-            "/status/control/refresh"
-        ]
-    } 
+            "/status/control/refresh",
+        ],
+    }

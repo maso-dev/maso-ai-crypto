@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from typing import Dict, Any
 from pathlib import Path
 import os
@@ -10,6 +9,7 @@ from datetime import datetime
 app = FastAPI(title="🏛️ Masonic - Alpha Strategy Advisor")
 
 templates = Jinja2Templates(directory="templates")
+
 
 # Custom static files handling for Vercel (similar to working example)
 @app.get("/static/{path:path}")
@@ -21,26 +21,30 @@ async def static_files(path: str):
         return FileResponse(str(file_path))
     return {"error": "File not found"}, 404
 
+
 @app.get("/favicon.ico")
 async def favicon():
     """Handle favicon requests to prevent 404 errors."""
     from fastapi.responses import Response
+
     return Response(status_code=204)  # No content
+
 
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint for Vercel deployment"""
     return {
-        "status": "healthy", 
+        "status": "healthy",
         "service": "🏛️ Masonic - Alpha Strategy Advisor",
         "deployment": "Vercel",
         "version": "2.0.0",
         "environment_vars": {
             "binance_key_set": bool(os.getenv("BINANCE_API_KEY")),
             "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
-            "news_key_set": bool(os.getenv("NEWSAPI_KEY"))
-        }
+            "news_key_set": bool(os.getenv("NEWSAPI_KEY")),
+        },
     }
+
 
 @app.get("/api/test")
 async def test_endpoint():
@@ -49,8 +53,9 @@ async def test_endpoint():
         "message": "FastAPI is working!",
         "timestamp": "2024",
         "status": "success",
-        "endpoints": ["/", "/dashboard", "/api/health", "/api/portfolio"]
+        "endpoints": ["/", "/dashboard", "/api/health", "/api/portfolio"],
     }
+
 
 # NEW: Welcome section for non-logged users
 @app.get("/")
@@ -58,9 +63,10 @@ async def welcome_page(request: Request):
     """Welcome page for non-logged users - shows market overview and opportunities"""
     try:
         return templates.TemplateResponse("welcome.html", {"request": request})
-    except Exception as e:
+    except Exception:
         # Fallback to simple HTML if template fails
-        return HTMLResponse(content=f"""
+        return HTMLResponse(
+            content="""
         <html>
             <head><title>Welcome - Portfolio Analyzer</title></head>
             <body>
@@ -68,10 +74,11 @@ async def welcome_page(request: Request):
                 <p>Your AI-powered crypto portfolio assistant</p>
                 <p><a href="/dashboard">View Full Dashboard</a></p>
                 <p><a href="/api/health">Health Check</a></p>
-                <p>Error loading welcome page: {str(e)}</p>
             </body>
         </html>
-        """)
+        """
+        )
+
 
 # NEW: Alpha portfolio API
 @app.get("/api/dream-team")
@@ -82,206 +89,258 @@ async def get_dream_team_portfolio():
         try:
             from utils.enhanced_agent import get_enhanced_agent
             from utils.binance_client import get_portfolio_data
-            
+
             # Get portfolio data (will use mock if no API keys)
             portfolio_data = await get_portfolio_data()
-            
+
             # Get enhanced agent analysis
             agent = get_enhanced_agent()
             if portfolio_data:
-                analysis = await agent.generate_complete_analysis(portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
+                analysis = await agent.generate_complete_analysis(
+                    portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"]
+                )
             else:
                 # Use mock portfolio data for analysis
                 from utils.binance_client import PortfolioData, PortfolioAsset
+
                 mock_portfolio = PortfolioData(
                     total_value_usdt=100000.0,
                     total_cost_basis=60000.0,
                     total_roi_percentage=66.67,
                     assets=[
-                        PortfolioAsset(asset="BTC", free=1.0, locked=0.0, total=1.0, usdt_value=40000.0, cost_basis=35000.0, roi_percentage=14.29, avg_buy_price=35000.0),
-                        PortfolioAsset(asset="ETH", free=10.0, locked=0.0, total=10.0, usdt_value=30000.0, cost_basis=25000.0, roi_percentage=20.0, avg_buy_price=2500.0),
+                        PortfolioAsset(
+                            asset="BTC",
+                            free=1.0,
+                            locked=0.0,
+                            total=1.0,
+                            usdt_value=50000.0,
+                            cost_basis=40000.0,
+                            roi_percentage=25.0,
+                            avg_buy_price=40000.0,
+                        ),
+                        PortfolioAsset(
+                            asset="ETH",
+                            free=5.0,
+                            locked=0.0,
+                            total=5.0,
+                            usdt_value=25000.0,
+                            cost_basis=20000.0,
+                            roi_percentage=25.0,
+                            avg_buy_price=4000.0,
+                        ),
                     ],
                     last_updated=datetime.now(),
-                    trade_history=[]
                 )
-                analysis = await agent.generate_complete_analysis(mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
-        except ImportError:
-            # Fallback when LangChain dependencies are missing
-            analysis = None
-        
-        # Extract alpha portfolio from analysis
-        alpha_portfolio = [
-            {"symbol": "BTC", "name": "Bitcoin", "weight": 0.4, "analysis": "Core store of value"},
-            {"symbol": "ETH", "name": "Ethereum", "weight": 0.3, "analysis": "Smart contract platform"},
-            {"symbol": "XRP", "name": "Ripple", "weight": 0.15, "analysis": "Cross-border payments"},
-            {"symbol": "SOL", "name": "Solana", "weight": 0.1, "analysis": "High-performance blockchain"},
-            {"symbol": "DOGE", "name": "Dogecoin", "weight": 0.05, "analysis": "Meme coin with utility"}
-        ]
-        
-        return {
-            "portfolio_name": "Masonic Alpha Portfolio",
-            "description": analysis.agent_insights[:100] + "..." if analysis and analysis.agent_insights else "Our brotherhood's most trusted allocation strategy",
-            "assets": alpha_portfolio,
-            "total_weight": 1.0,
-            "risk_level": analysis.portfolio_analysis.portfolio_risk_score if analysis else "Moderate",
-            "market_regime": analysis.portfolio_analysis.market_regime.value if analysis else "bullish",
-            "confidence": analysis.confidence_overall if analysis else 0.75,
-            "last_updated": analysis.timestamp.isoformat() if analysis else datetime.now().isoformat()
-        }
-    except Exception as e:
-        # Fallback to static data if AI analysis fails
-        alpha_portfolio = [
-            {"symbol": "BTC", "name": "Bitcoin", "weight": 0.4},
-            {"symbol": "ETH", "name": "Ethereum", "weight": 0.3},
-            {"symbol": "XRP", "name": "Ripple", "weight": 0.15},
-            {"symbol": "SOL", "name": "Solana", "weight": 0.1},
-            {"symbol": "DOGE", "name": "Dogecoin", "weight": 0.05}
-        ]
-        
-        return {
-            "portfolio_name": "Masonic Alpha Portfolio",
-            "description": "Our brotherhood's most trusted allocation strategy",
-            "assets": alpha_portfolio,
-            "total_weight": 1.0,
-            "risk_level": "Moderate",
-            "last_updated": "2024"
-        }
+                analysis = await agent.generate_complete_analysis(
+                    mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"]
+                )
+
+            return {
+                "portfolio": analysis.portfolio_analysis if analysis else None,
+                "market_analysis": analysis.market_analysis if analysis else None,
+                "recommendations": analysis.recommendations if analysis else [],
+                "risk_assessment": analysis.risk_assessment if analysis else {},
+                "last_updated": datetime.now().isoformat(),
+            }
+        except Exception:
+            # Fallback to static data
+            return {
+                "portfolio": {
+                    "total_value": 100000.0,
+                    "total_roi": 66.67,
+                    "assets": ["BTC", "ETH", "XRP", "SOL", "DOGE"],
+                },
+                "market_analysis": {
+                    "trend": "bullish",
+                    "confidence": 0.75,
+                    "key_levels": {"BTC": 40000, "ETH": 3000},
+                },
+                "recommendations": [
+                    {
+                        "action": "HOLD",
+                        "asset": "BTC",
+                        "reason": "Strong support at $40K",
+                    },
+                    {"action": "BUY", "asset": "ETH", "reason": "Breakout potential"},
+                ],
+                "risk_assessment": {"overall_risk": "medium", "volatility": "high"},
+                "last_updated": datetime.now().isoformat(),
+            }
+    except Exception:
+        return {"error": "Portfolio analysis failed"}
+
 
 # NEW: Alpha signals API
 @app.get("/api/opportunities")
-async def get_todays_opportunities():
-    """Get today's trading opportunities"""
+async def get_enhanced_opportunities():
+    """Enhanced opportunities using existing AI agent and technical analysis."""
     try:
-        # Try to get AI analysis
-        try:
-            from utils.ai_agent import ai_agent, AgentTask
-            analysis = await ai_agent.execute_task(
-                AgentTask.MARKET_ANALYSIS,
-                query="Test health check",
-                symbols=["BTC"]
-            )
-            signals = [
-                {
-                    "type": "strong_buy",
-                    "asset": "BTC",
-                    "reason": "Key support level reached, institutional accumulation detected",
-                    "confidence": 0.85,
-                    "timeframe": "short-term",
-                    "brotherhood_insight": "Smart money positioning for accumulation"
-                },
-                {
-                    "type": "hold",
-                    "asset": "ETH",
-                    "reason": "Consolidation phase, wait for breakout signal",
-                    "confidence": 0.75,
-                    "timeframe": "medium-term",
-                    "brotherhood_insight": "Technical analysis shows consolidation pattern"
-                },
-                {
-                    "type": "watch",
-                    "asset": "SOL",
-                    "reason": "Potential breakout candidate, monitor closely",
-                    "confidence": 0.65,
-                    "timeframe": "short-term",
-                    "brotherhood_insight": "Volume analysis suggests accumulation"
-                }
-            ]
-        except Exception as e:
-            # Fallback to static data if AI analysis fails
-            signals = [
-                {
-                    "type": "strong_buy",
-                    "asset": "BTC",
-                    "reason": "Key support level reached, institutional accumulation detected",
-                    "confidence": 0.85,
-                    "timeframe": "short-term",
-                    "brotherhood_insight": "Smart money positioning for accumulation"
-                },
-                {
-                    "type": "hold",
-                    "asset": "ETH",
-                    "reason": "Consolidation phase, wait for breakout signal",
-                    "confidence": 0.75,
-                    "timeframe": "medium-term",
-                    "brotherhood_insight": "Technical analysis shows consolidation pattern"
-                },
-                {
-                    "type": "watch",
-                    "asset": "SOL",
-                    "reason": "Potential breakout candidate, monitor closely",
-                    "confidence": 0.65,
-                    "timeframe": "short-term",
-                    "brotherhood_insight": "Volume analysis suggests accumulation"
-                }
-            ]
-        
+        # Import existing systems
+        from utils.enhanced_context_rag import get_symbol_context
+        from utils.livecoinwatch_processor import LiveCoinWatchProcessor
+        from utils.ai_agent import CryptoAIAgent, AgentTask
+
+        # Initialize systems
+        livecoinwatch_processor = LiveCoinWatchProcessor()
+        ai_agent = CryptoAIAgent()  # Uses LangGraph + LangSmith
+
+        # 1. Get symbol context for major tokens
+        symbols = ["BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "DOT", "LINK"]
+        opportunities = []
+
+        for symbol in symbols:
+            try:
+                # Get symbol context (existing system)
+                await get_symbol_context(symbol)
+
+                # Get LiveCoinWatch data
+                latest_prices = await livecoinwatch_processor.get_latest_prices(
+                    [symbol]
+                )
+                price_data = latest_prices.get(symbol)
+
+                # Get technical indicators
+                indicators = (
+                    await livecoinwatch_processor.calculate_technical_indicators(symbol)
+                )
+
+                # Generate opportunity using LangGraph agent
+                ai_analysis = await ai_agent.execute_task(
+                    AgentTask.TRADING_SIGNAL,
+                    query=f"Analyze {symbol} for trading opportunities",
+                    symbols=[symbol],
+                )
+
+                if ai_analysis and ai_analysis.recommendations:
+                    for rec in ai_analysis.recommendations:
+                        opportunities.append(
+                            {
+                                "symbol": symbol,
+                                "type": rec.get("action", "HOLD"),
+                                "reason": rec.get("reasoning", "No specific reason"),
+                                "confidence": rec.get("confidence", 0.5),
+                                "price": price_data.price_usd if price_data else 0,
+                                "change_24h": (
+                                    price_data.change_24h if price_data else 0
+                                ),
+                                "technical_indicators": indicators,
+                                "ai_insights": rec.get("insights", []),
+                            }
+                        )
+            except Exception as e:
+                print(f"Opportunity analysis failed for {symbol}: {e}")
+                continue
+
+        # Sort by confidence
+        opportunities.sort(key=lambda x: x["confidence"], reverse=True)
+
         return {
-            "date": datetime.now().isoformat(),
-            "signals": signals,
-            "market_regime": "bullish",
-            "confidence_overall": 0.75
+            "opportunities": opportunities[:5],  # Top 5
+            "total_analyzed": len(symbols),
+            "last_updated": datetime.now().isoformat(),
+            "status": "success",
         }
-        
     except Exception as e:
-        # Fallback to static data if AI analysis fails
+        print(f"Opportunities API error: {e}")
         return {
-            "date": "2024",
-            "signals": [
-                {
-                    "type": "strong_buy",
-                    "asset": "BTC",
-                    "reason": "Key support level reached, institutional accumulation detected",
-                    "confidence": 0.85,
-                    "timeframe": "short-term",
-                    "brotherhood_insight": "Smart money positioning for accumulation"
-                },
-                {
-                    "type": "hold",
-                    "asset": "ETH",
-                    "reason": "Consolidation phase, wait for breakout signal",
-                    "confidence": 0.75,
-                    "timeframe": "medium-term",
-                    "brotherhood_insight": "Technical analysis shows consolidation pattern"
-                },
-                {
-                    "type": "watch",
-                    "asset": "SOL",
-                    "reason": "Potential breakout candidate, monitor closely",
-                    "confidence": 0.65,
-                    "timeframe": "short-term",
-                    "brotherhood_insight": "Volume analysis suggests accumulation"
-                }
-            ]
+            "opportunities": [],
+            "total_analyzed": 0,
+            "last_updated": datetime.now().isoformat(),
+            "status": "fallback",
+            "error": str(e),
         }
+
 
 # NEW: Brotherhood intelligence API
 @app.get("/api/news-briefing")
-async def get_news_briefing():
-    """Get brotherhood intelligence for welcome page"""
-    return {
-        "date": "2024",
-        "summary": "Market showing institutional accumulation with Bitcoin holding key support levels",
-        "intelligence": [
-            {
-                "title": "Bitcoin maintains $40K support - institutional accumulation detected",
-                "sentiment": "bullish",
-                "impact": "high",
-                "brotherhood_insight": "Smart money positioning for accumulation phase"
-            },
-            {
-                "title": "Ethereum upgrade progress - smart money positioning",
-                "sentiment": "neutral",
-                "impact": "medium",
-                "brotherhood_insight": "Technical analysis shows consolidation pattern"
-            },
-            {
-                "title": "Regulatory clarity - institutional adoption accelerating",
-                "sentiment": "bullish",
-                "impact": "high",
-                "brotherhood_insight": "Market intelligence suggests institutional inflow"
-            }
-        ]
-    }
+async def get_enhanced_news():
+    """Enhanced news using existing intelligent cache and hybrid RAG systems."""
+    try:
+        # Import existing systems
+        from utils.intelligent_news_cache import (
+            get_portfolio_news,
+            get_cache_statistics,
+        )
+        from utils.hybrid_rag import HybridRAGSystem, HybridQuery, HybridQueryType
+        from utils.ai_agent import CryptoAIAgent, AgentTask
+
+        # Initialize systems
+        hybrid_rag = HybridRAGSystem()
+        ai_agent = CryptoAIAgent()  # Uses LangGraph + LangSmith
+
+        # 1. Get portfolio-aware news (existing system)
+        news_data = await get_portfolio_news(
+            include_alpha_portfolio=True,
+            include_opportunity_tokens=True,
+            include_personal_portfolio=True,
+            hours_back=24,
+        )
+
+        # 2. Use hybrid RAG for enhanced search
+        hybrid_query = HybridQuery(
+            query_text="crypto market news analysis",
+            query_type=HybridQueryType.SENTIMENT_ANALYSIS,
+            symbols=["BTC", "ETH", "SOL", "XRP", "DOGE"],
+            time_range_hours=24,
+            limit=15,
+        )
+
+        hybrid_results = await hybrid_rag.hybrid_search(hybrid_query)
+
+        # 3. Combine with existing news data
+        combined_news = []
+
+        # Add cached news
+        for category, articles in news_data.get("news_by_category", {}).items():
+            combined_news.extend(articles[:5])  # Top 5 per category
+
+        # Add hybrid RAG results
+        for result in hybrid_results:
+            combined_news.append(
+                {
+                    "title": result.title,
+                    "content": result.content,
+                    "source_url": result.source_url,
+                    "published_at": result.published_at.isoformat(),
+                    "sentiment_score": result.sentiment_score,
+                    "relevance_score": result.relevance_score,
+                    "source": "hybrid_rag",
+                }
+            )
+
+        # 4. Get AI sentiment analysis using LangGraph agent
+        sentiment_analysis = await ai_agent.execute_task(
+            AgentTask.NEWS_SENTIMENT_ANALYSIS,
+            query="Analyze overall crypto market sentiment",
+            symbols=["BTC", "ETH", "SOL", "XRP", "DOGE"],
+        )
+
+        return {
+            "news": combined_news[:20],  # Top 20 for MVP
+            "sentiment": (
+                sentiment_analysis.analysis_results
+                if sentiment_analysis
+                else {"overall": "neutral", "score": 0.5}
+            ),
+            "sources": ["newsapi", "tavily", "hybrid_rag"],
+            "total_articles": len(combined_news),
+            "cache_stats": get_cache_statistics(),
+            "last_updated": datetime.now().isoformat(),
+            "status": "success",
+        }
+    except Exception as e:
+        print(f"News API error: {e}")
+        return {
+            "news": [],
+            "sentiment": {"overall": "neutral", "score": 0.5},
+            "sources": [],
+            "total_articles": 0,
+            "cache_stats": {},
+            "last_updated": datetime.now().isoformat(),
+            "status": "fallback",
+            "error": str(e),
+        }
+
 
 @app.get("/dashboard")
 def smart_dashboard(request: Request):
@@ -289,176 +348,348 @@ def smart_dashboard(request: Request):
     try:
         # Test Binance API connectivity
         from utils.binance_client import get_binance_client, get_portfolio_data
-        
+
         # Check if we have API keys configured
         binance_client = get_binance_client()
         api_keys_configured = binance_client is not None
-        
+
         print(f"🏛️ Smart Dashboard: API keys configured: {api_keys_configured}")
-        
+
         # Try to get real portfolio data
         import asyncio
+
         portfolio_data = asyncio.run(get_portfolio_data())
-        
-        print(f"🏛️ Smart Dashboard: Portfolio data received: {portfolio_data is not None}")
-        
+
+        print(
+            f"🏛️ Smart Dashboard: Portfolio data received: {portfolio_data is not None}"
+        )
+
         # Determine if we're using real or mock data
         is_real_data = False
         if portfolio_data and api_keys_configured:
             # Check if this looks like real data (not our mock data)
             total_value = portfolio_data.total_value_usdt
             asset_count = len(portfolio_data.assets)
-            
-            print(f"🏛️ Smart Dashboard: Total value: {total_value}, Asset count: {asset_count}")
-            
+
+            print(
+                f"🏛️ Smart Dashboard: Total value: {total_value}, Asset count: {asset_count}"
+            )
+
             # Check for mock data characteristics
             is_mock_data = (
-                total_value == 36500.0 and 
-                asset_count == 4 and 
-                any(asset.asset == "BTC" and asset.usdt_value == 25000.0 for asset in portfolio_data.assets)
+                total_value == 36500.0
+                and asset_count == 4
+                and any(
+                    asset.asset == "BTC" and asset.usdt_value == 25000.0
+                    for asset in portfolio_data.assets
+                )
             )
-            
+
             print(f"🏛️ Smart Dashboard: Is mock data: {is_mock_data}")
-            
+
             # If it's NOT mock data, then it's real data
             if not is_mock_data:
                 is_real_data = True
                 print("🏛️ Smart Dashboard: Detected REAL data!")
-        
+
         # Always show the main dashboard with appropriate data mode
         data_mode = "real" if is_real_data else "mock"
         api_status = "connected" if is_real_data else "demo"
-        
-        print(f"🏛️ Smart Dashboard: Using {data_mode.upper()} data - showing main dashboard")
-        return templates.TemplateResponse("dashboard.html", {
-            "request": request,
-            "data_mode": data_mode,
-            "api_status": api_status
-        })
-            
+
+        print(
+            f"🏛️ Smart Dashboard: Using {data_mode.upper()} data - showing main dashboard"
+        )
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {"request": request, "data_mode": data_mode, "api_status": api_status},
+        )
+
     except Exception as e:
         print(f"🏛️ Smart Dashboard Error: {e} - showing main dashboard with error mode")
-        return templates.TemplateResponse("dashboard.html", {
-            "request": request,
-            "data_mode": "error",
-            "api_status": "error"
-        })
+        return templates.TemplateResponse(
+            "dashboard.html",
+            {"request": request, "data_mode": "error", "api_status": "error"},
+        )
+
 
 # Import routers with error handling
 try:
     from routers.crypto_news_rag import router as crypto_news_rag_router
+
     app.include_router(crypto_news_rag_router)
 except ImportError as e:
     print(f"Warning: Could not import crypto_news_rag_router: {e}")
 
 try:
     from routers.portfolio_user import router as portfolio_router
+
     app.include_router(portfolio_router)
 except ImportError as e:
     print(f"Warning: Could not import portfolio_router: {e}")
 
 try:
-    from routers.crypto_news import router as crypto_news_router
-    app.include_router(crypto_news_router)
+    from routers.agent import router as agent_router
+
+    app.include_router(agent_router)
 except ImportError as e:
-    print(f"Warning: Could not import crypto_news_router: {e}")
+    print(f"Warning: Could not import agent_router: {e}")
+
+try:
+    from routers.cost_tracking import router as cost_tracking_router
+
+    app.include_router(cost_tracking_router)
+except ImportError as e:
+    print(f"Warning: Could not import cost_tracking_router: {e}")
 
 try:
     from routers.admin import router as admin_router
+
     app.include_router(admin_router)
 except ImportError as e:
     print(f"Warning: Could not import admin_router: {e}")
 
 try:
-    from routers.agent import router as agent_router
-    app.include_router(agent_router)
+    from routers.brain_enhanced import router as brain_enhanced_router
+
+    app.include_router(brain_enhanced_router)
 except ImportError as e:
-    print(f"Warning: Could not import agent_router: {e}")
+    print(f"Warning: Could not import brain_enhanced_router: {e}")
 
-# Include enhanced brain router (with LangChain dependency handling)
 try:
-    from routers.brain_enhanced import router as brain_router
-    app.include_router(brain_router)
-    print("✅ Enhanced brain router loaded with LangSmith integration")
-except Exception as e:
-    print(f"Warning: Could not import enhanced brain_router (LangChain dependencies missing): {e}")
-    try:
-        from routers.brain import router as brain_router
-        app.include_router(brain_router)
-        print("✅ Full brain router loaded with LangGraph support")
-    except Exception as e2:
-        print(f"Warning: Could not import full brain_router: {e2}")
-        try:
-            from routers.brain_simple import router as brain_router
-            app.include_router(brain_router)
-            print("✅ Simple brain router loaded (LangGraph not available)")
-        except Exception as e3:
-            print(f"Warning: Could not import brain_router: {e3}")
-            print("Brain section will not be available (LangChain dependencies missing)")
+    from routers.brain_simple import router as brain_simple_router
 
-# Include status control router
-try:
-    from routers.status_control import router as status_router
-    app.include_router(status_router)
-    print("✅ Status control router loaded")
-except Exception as e:
-    print(f"Warning: Could not import status_control router: {e}")
+    app.include_router(brain_simple_router)
+except ImportError as e:
+    print(f"Warning: Could not import brain_simple_router: {e}")
 
-# Include context router
-try:
-    from routers.context_router import router as context_router
-    app.include_router(context_router)
-    print("✅ Context router loaded")
-except Exception as e:
-    print(f"Warning: Could not import context_router: {e}")
-
-# Include LiveCoinWatch router
-try:
-    from routers.livecoinwatch_router import router as livecoinwatch_router
-    app.include_router(livecoinwatch_router)
-    print("✅ LiveCoinWatch router loaded")
-except Exception as e:
-    print(f"Warning: Could not import livecoinwatch_router: {e}")
-
-# Include Tavily router
-try:
-    from routers.tavily_router import router as tavily_router
-    app.include_router(tavily_router)
-    print("✅ Tavily router loaded")
-except Exception as e:
-    print(f"Warning: Could not import tavily_router: {e}")
 
 @app.get("/api/portfolio", response_model=Dict[str, Any])
-async def get_portfolio() -> Dict[str, Any]:
-    """Get portfolio data using the new async Binance client."""
+async def get_enhanced_portfolio() -> Dict[str, Any]:
+    """Enhanced portfolio using existing systems - Hybrid RAG, AI Agent, LiveCoinWatch."""
     try:
+        # Import all existing systems
         from utils.binance_client import get_portfolio_data
+        from utils.enhanced_context_rag import get_portfolio_context
+        from utils.livecoinwatch_processor import LiveCoinWatchProcessor
+        from utils.ai_agent import CryptoAIAgent, AgentTask
+
+        # Initialize systems
+        livecoinwatch_processor = LiveCoinWatchProcessor()
+        ai_agent = CryptoAIAgent()  # Uses LangGraph + LangSmith
+
+        # 1. Get portfolio context (existing enhanced system)
+        context = await get_portfolio_context(
+            include_news=True, include_analysis=True, include_opportunities=True
+        )
+
+        # 2. Get portfolio data (existing)
         portfolio_data = await get_portfolio_data()
-        
-        # Always return data (either real or mock)
+
+        # 3. Add LiveCoinWatch real-time prices with enhanced data
+        livecoinwatch_data = {}
+        if portfolio_data and portfolio_data.assets:
+            symbols = [asset.asset for asset in portfolio_data.assets]
+            try:
+                latest_prices = await livecoinwatch_processor.get_latest_prices(symbols)
+                for symbol, price_data in latest_prices.items():
+                    livecoinwatch_data[symbol] = {
+                        "price": price_data.price_usd,
+                        "change_24h": price_data.change_24h,
+                        "change_7d": price_data.change_7d,
+                        "volume_24h": price_data.volume_24h,
+                        "market_cap": price_data.market_cap,
+                        "circulating_supply": price_data.circulating_supply,
+                        "total_supply": price_data.total_supply,
+                        "rank": price_data.rank,
+                        "dominance": price_data.dominance,
+                        "timestamp": price_data.timestamp.isoformat(),
+                    }
+            except Exception as e:
+                print(f"LiveCoinWatch failed: {e}")
+
+        # 4. Add comprehensive technical indicators (Phase 2 enhancement)
+        technical_indicators = {}
+        technical_summary = {
+            "overall_sentiment": "neutral",
+            "trending_assets": [],
+            "oversold_assets": [],
+            "overbought_assets": [],
+            "volatile_assets": [],
+            "stable_assets": [],
+        }
+
+        if portfolio_data and portfolio_data.assets:
+            for asset in portfolio_data.assets:
+                try:
+                    # Get comprehensive technical indicators
+                    indicators = (
+                        await livecoinwatch_processor.calculate_technical_indicators(
+                            asset.asset, days=30
+                        )
+                    )
+                    technical_indicators[asset.asset] = indicators
+
+                    # Analyze indicators for sentiment
+                    if indicators:
+                        sentiment = _analyze_technical_sentiment(
+                            asset.asset, indicators
+                        )
+                        technical_indicators[asset.asset]["sentiment"] = sentiment
+
+                        # Categorize assets based on technical analysis
+                        if sentiment.get("trend") == "bullish":
+                            technical_summary["trending_assets"].append(asset.asset)
+                        elif indicators.get("rsi_14", 50) < 30:
+                            technical_summary["oversold_assets"].append(asset.asset)
+                        elif indicators.get("rsi_14", 50) > 70:
+                            technical_summary["overbought_assets"].append(asset.asset)
+                        elif indicators.get("volatility", 0) > 0.05:
+                            technical_summary["volatile_assets"].append(asset.asset)
+                        else:
+                            technical_summary["stable_assets"].append(asset.asset)
+
+                except Exception as e:
+                    print(f"Technical indicators failed for {asset.asset}: {e}")
+                    continue
+
+        # 5. Get AI market analysis using LangGraph agent
+        ai_analysis = None
+        if portfolio_data and portfolio_data.assets:
+            try:
+                symbols = [asset.asset for asset in portfolio_data.assets]
+                ai_analysis = await ai_agent.execute_task(
+                    AgentTask.MARKET_ANALYSIS,
+                    query="Analyze portfolio performance and market conditions",
+                    symbols=symbols,
+                )
+            except Exception as e:
+                print(f"AI analysis failed: {e}")
+
+        # 6. Prepare enhanced response with Phase 2 improvements
         if portfolio_data:
             return {
-                "total_value_usdt": portfolio_data.total_value_usdt,
-                "assets": [
-                    {
-                        "asset": asset.asset,
-                        "free": asset.free,
-                        "locked": asset.locked,
-                        "total": asset.total,
-                        "usdt_value": asset.usdt_value,
-                        "cost_basis": asset.cost_basis,
-                        "roi_percentage": asset.roi_percentage,
-                        "avg_buy_price": asset.avg_buy_price
-                    }
-                    for asset in portfolio_data.assets
-                ],
-                "last_updated": portfolio_data.last_updated.isoformat(),
-                "data_source": "binance"
+                "portfolio": {
+                    "total_value_usdt": portfolio_data.total_value_usdt,
+                    "total_cost_basis": portfolio_data.total_cost_basis,
+                    "total_roi_percentage": portfolio_data.total_roi_percentage,
+                    "assets": [
+                        {
+                            "asset": asset.asset,
+                            "free": asset.free,
+                            "locked": asset.locked,
+                            "total": asset.total,
+                            "usdt_value": asset.usdt_value,
+                            "cost_basis": asset.cost_basis,
+                            "roi_percentage": asset.roi_percentage,
+                            "avg_buy_price": asset.avg_buy_price,
+                        }
+                        for asset in portfolio_data.assets
+                    ],
+                    "last_updated": portfolio_data.last_updated.isoformat(),
+                    "data_source": "binance",
+                },
+                "insights": context.get("portfolio_insights", []),
+                "opportunities": context.get("trading_opportunities", []),
+                "risk_assessment": context.get("risk_assessment", {}),
+                "live_prices": livecoinwatch_data,
+                "technical_indicators": technical_indicators,
+                "technical_summary": technical_summary,  # Phase 2 addition
+                "ai_analysis": ai_analysis.analysis_results if ai_analysis else None,
+                "last_updated": datetime.now().isoformat(),
+                "status": "success",
             }
         else:
-            # Return mock data if portfolio_data is None
+            # Return enhanced mock data with technical indicators
+            mock_technical_indicators = {
+                "BTC": {
+                    "rsi_14": 65.2,
+                    "macd": {"macd": 1250.5, "signal": 1200.0, "histogram": 50.5},
+                    "bollinger_bands": {
+                        "upper": 45000,
+                        "middle": 42000,
+                        "lower": 39000,
+                    },
+                    "moving_averages": {
+                        "sma_20": 41500,
+                        "sma_50": 40000,
+                        "ema_12": 41800,
+                    },
+                    "volatility": 0.045,
+                    "sentiment": {
+                        "trend": "bullish",
+                        "strength": "moderate",
+                        "confidence": 0.7,
+                    },
+                },
+                "ETH": {
+                    "rsi_14": 58.7,
+                    "macd": {"macd": 85.2, "signal": 80.0, "histogram": 5.2},
+                    "bollinger_bands": {"upper": 3200, "middle": 3000, "lower": 2800},
+                    "moving_averages": {"sma_20": 3050, "sma_50": 2950, "ema_12": 3080},
+                    "volatility": 0.052,
+                    "sentiment": {
+                        "trend": "neutral",
+                        "strength": "weak",
+                        "confidence": 0.5,
+                    },
+                },
+            }
+
             return {
+                "portfolio": {
+                    "total_value_usdt": 36500.0,
+                    "total_cost_basis": 22000.0,
+                    "total_roi_percentage": 66.67,
+                    "assets": [
+                        {
+                            "asset": "BTC",
+                            "free": 0.5,
+                            "locked": 0.0,
+                            "total": 0.5,
+                            "usdt_value": 25000.0,
+                            "cost_basis": 20000.0,
+                            "roi_percentage": 25.0,
+                            "avg_buy_price": 40000.0,
+                        },
+                        {
+                            "asset": "ETH",
+                            "free": 2.0,
+                            "locked": 0.0,
+                            "total": 2.0,
+                            "usdt_value": 8000.0,
+                            "cost_basis": 6000.0,
+                            "roi_percentage": 33.3,
+                            "avg_buy_price": 3000.0,
+                        },
+                    ],
+                    "last_updated": datetime.now().isoformat(),
+                    "data_source": "mock",
+                },
+                "insights": context.get("portfolio_insights", []),
+                "opportunities": context.get("trading_opportunities", []),
+                "risk_assessment": context.get("risk_assessment", {}),
+                "live_prices": livecoinwatch_data,
+                "technical_indicators": mock_technical_indicators,
+                "technical_summary": {
+                    "overall_sentiment": "bullish",
+                    "trending_assets": ["BTC"],
+                    "oversold_assets": [],
+                    "overbought_assets": [],
+                    "volatile_assets": ["ETH"],
+                    "stable_assets": [],
+                },
+                "ai_analysis": ai_analysis.analysis_results if ai_analysis else None,
+                "last_updated": datetime.now().isoformat(),
+                "status": "success",
+            }
+    except Exception as e:
+        print(f"Portfolio API error: {e}")
+        # Return enhanced fallback data
+        return {
+            "portfolio": {
                 "total_value_usdt": 36500.0,
+                "total_cost_basis": 22000.0,
+                "total_roi_percentage": 66.67,
                 "assets": [
                     {
                         "asset": "BTC",
@@ -468,7 +699,7 @@ async def get_portfolio() -> Dict[str, Any]:
                         "usdt_value": 25000.0,
                         "cost_basis": 20000.0,
                         "roi_percentage": 25.0,
-                        "avg_buy_price": 40000.0
+                        "avg_buy_price": 40000.0,
                     },
                     {
                         "asset": "ETH",
@@ -478,427 +709,358 @@ async def get_portfolio() -> Dict[str, Any]:
                         "usdt_value": 8000.0,
                         "cost_basis": 6000.0,
                         "roi_percentage": 33.3,
-                        "avg_buy_price": 3000.0
-                    }
+                        "avg_buy_price": 3000.0,
+                    },
                 ],
                 "last_updated": datetime.now().isoformat(),
-                "data_source": "mock"
-            }
-    except Exception as e:
-        # Return mock data as fallback
-        return {
-            "total_value_usdt": 36500.0,
-            "assets": [
-                {
-                    "asset": "BTC",
-                    "free": 0.5,
-                    "locked": 0.0,
-                    "total": 0.5,
-                    "usdt_value": 25000.0,
-                    "cost_basis": 20000.0,
-                    "roi_percentage": 25.0,
-                    "avg_buy_price": 40000.0
-                },
-                {
-                    "asset": "ETH",
-                    "free": 2.0,
-                    "locked": 0.0,
-                    "total": 2.0,
-                    "usdt_value": 8000.0,
-                    "cost_basis": 6000.0,
-                    "roi_percentage": 33.3,
-                    "avg_buy_price": 3000.0
-                }
-            ],
+                "data_source": "fallback",
+            },
+            "insights": [],
+            "opportunities": [],
+            "risk_assessment": {},
+            "live_prices": {},
+            "technical_indicators": {},
+            "technical_summary": {
+                "overall_sentiment": "neutral",
+                "trending_assets": [],
+                "oversold_assets": [],
+                "overbought_assets": [],
+                "volatile_assets": [],
+                "stable_assets": [],
+            },
+            "ai_analysis": None,
             "last_updated": datetime.now().isoformat(),
-            "data_source": "fallback",
-            "note": "Using fallback data due to API restrictions"
+            "status": "fallback",
+            "error": str(e),
         }
+
+
+def _analyze_technical_sentiment(
+    symbol: str, indicators: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Analyze technical indicators to determine sentiment."""
+    sentiment = {
+        "trend": "neutral",
+        "strength": "weak",
+        "confidence": 0.5,
+        "signals": [],
+    }
+
+    try:
+        # RSI Analysis
+        rsi = indicators.get("rsi_14", 50)
+        if rsi > 70:
+            sentiment["signals"].append("RSI overbought")
+            sentiment["trend"] = "bearish"
+        elif rsi < 30:
+            sentiment["signals"].append("RSI oversold")
+            sentiment["trend"] = "bullish"
+
+        # MACD Analysis
+        macd_data = indicators.get("macd", {})
+        if macd_data:
+            macd = macd_data.get("macd", 0)
+            signal = macd_data.get("signal", 0)
+            histogram = macd_data.get("histogram", 0)
+
+            if macd > signal and histogram > 0:
+                sentiment["signals"].append("MACD bullish crossover")
+                if sentiment["trend"] == "neutral":
+                    sentiment["trend"] = "bullish"
+            elif macd < signal and histogram < 0:
+                sentiment["signals"].append("MACD bearish crossover")
+                if sentiment["trend"] == "neutral":
+                    sentiment["trend"] = "bearish"
+
+        # Bollinger Bands Analysis
+        bb_data = indicators.get("bollinger_bands", {})
+        if bb_data:
+            upper = bb_data.get("upper", 0)
+            lower = bb_data.get("lower", 0)
+            middle = bb_data.get("middle", 0)
+
+            # This would need current price to be meaningful
+            # For now, just note if bands are wide (volatile) or narrow (stable)
+            band_width = (upper - lower) / middle if middle > 0 else 0
+            if band_width > 0.1:
+                sentiment["signals"].append("High volatility (wide Bollinger Bands)")
+
+        # Moving Averages Analysis
+        ma_data = indicators.get("moving_averages", {})
+        if ma_data:
+            sma_20 = ma_data.get("sma_20", 0)
+            sma_50 = ma_data.get("sma_50", 0)
+
+            if sma_20 > sma_50:
+                sentiment["signals"].append("Short-term trend above long-term")
+                if sentiment["trend"] == "neutral":
+                    sentiment["trend"] = "bullish"
+            elif sma_20 < sma_50:
+                sentiment["signals"].append("Short-term trend below long-term")
+                if sentiment["trend"] == "neutral":
+                    sentiment["trend"] = "bearish"
+
+        # Volatility Analysis
+        volatility = indicators.get("volatility", 0)
+        if volatility > 0.05:
+            sentiment["signals"].append("High volatility detected")
+
+        # Calculate confidence based on number of confirming signals
+        signal_count = len(sentiment["signals"])
+        if signal_count >= 3:
+            sentiment["strength"] = "strong"
+            sentiment["confidence"] = 0.8
+        elif signal_count >= 2:
+            sentiment["strength"] = "moderate"
+            sentiment["confidence"] = 0.6
+        elif signal_count >= 1:
+            sentiment["strength"] = "weak"
+            sentiment["confidence"] = 0.4
+        else:
+            sentiment["confidence"] = 0.2
+
+    except Exception as e:
+        print(f"Error analyzing technical sentiment for {symbol}: {e}")
+
+    return sentiment
+
+
+@app.get("/api/technical-analysis/{symbol}", response_model=Dict[str, Any])
+async def get_technical_analysis(symbol: str, days: int = 30) -> Dict[str, Any]:
+    """Get comprehensive technical analysis for a specific symbol (Phase 2)."""
+    try:
+        from utils.livecoinwatch_processor import LiveCoinWatchProcessor
+
+        processor = LiveCoinWatchProcessor()
+
+        # Get latest price data
+        latest_prices = await processor.get_latest_prices([symbol])
+        price_data = latest_prices.get(symbol)
+
+        # Get comprehensive technical indicators
+        indicators = await processor.calculate_technical_indicators(symbol, days)
+
+        # Analyze sentiment
+        sentiment = _analyze_technical_sentiment(symbol, indicators)
+
+        # Get historical data for charting
+        historical_data = await processor.collect_historical_data(symbol, days)
+
+        return {
+            "symbol": symbol,
+            "current_price": price_data.price_usd if price_data else None,
+            "price_change_24h": price_data.change_24h if price_data else None,
+            "technical_indicators": indicators,
+            "sentiment_analysis": sentiment,
+            "historical_data": (
+                [
+                    {
+                        "date": data.date.isoformat(),
+                        "open": data.open_price,
+                        "high": data.high_price,
+                        "low": data.low_price,
+                        "close": data.close_price,
+                        "volume": data.volume,
+                    }
+                    for data in historical_data
+                ]
+                if historical_data
+                else []
+            ),
+            "analysis_period": f"{days} days",
+            "last_updated": datetime.now().isoformat(),
+            "status": "success",
+        }
+
+    except Exception as e:
+        print(f"Technical analysis error for {symbol}: {e}")
+        return {
+            "symbol": symbol,
+            "error": str(e),
+            "status": "error",
+            "last_updated": datetime.now().isoformat(),
+        }
+
 
 @app.get("/api/asset/{symbol}", response_model=Dict[str, Any])
 async def get_asset_details(symbol: str) -> Dict[str, Any]:
     """Get asset details using the new async Binance client."""
     try:
         from utils.binance_client import get_portfolio_data
+
         portfolio_data = await get_portfolio_data()
         if portfolio_data:
             for asset in portfolio_data.assets:
                 if asset.asset == symbol:
                     return {
-                        'symbol': symbol,
-                        'free': asset.free,
-                        'locked': asset.locked,
-                        'total': asset.total,
-                        'usdt_value': asset.usdt_value,
-                        'cost_basis': asset.cost_basis,
-                        'roi_percentage': asset.roi_percentage,
-                        'avg_buy_price': asset.avg_buy_price
+                        "symbol": symbol,
+                        "free": asset.free,
+                        "locked": asset.locked,
+                        "total": asset.total,
+                        "usdt_value": asset.usdt_value,
+                        "cost_basis": asset.cost_basis,
+                        "roi_percentage": asset.roi_percentage,
+                        "avg_buy_price": asset.avg_buy_price,
                     }
         return {"error": f"Asset {symbol} not found"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error for {symbol}: {str(e)}")
 
+
 @app.get("/api/top-movers", response_model=Dict[str, Any])
 async def get_top_movers() -> Dict[str, Any]:
-    """Get top movers - simplified for Vercel compatibility."""
+    """Get top movers using LiveCoinWatch data."""
     try:
-        # Return mock data for now to avoid complex API calls
-        return {
-            'top_gainers': [
-                {'symbol': 'BTCUSDT', 'priceChangePercent': 2.5, 'lastPrice': 45000.0},
-                {'symbol': 'ETHUSDT', 'priceChangePercent': 1.8, 'lastPrice': 3200.0},
-                {'symbol': 'BNBUSDT', 'priceChangePercent': 1.2, 'lastPrice': 850.0}
-            ],
-            'top_losers': [
-                {'symbol': 'DOGEUSDT', 'priceChangePercent': -1.5, 'lastPrice': 0.08},
-                {'symbol': 'ADAUSDT', 'priceChangePercent': -1.2, 'lastPrice': 0.45},
-                {'symbol': 'SOLUSDT', 'priceChangePercent': -0.8, 'lastPrice': 95.0}
-            ]
-        }
+        from utils.livecoinwatch_processor import LiveCoinWatchProcessor
+
+        processor = LiveCoinWatchProcessor()
+        latest_prices = await processor.get_latest_prices()
+        return {"top_movers": list(latest_prices.values())[:10]}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching top movers: {str(e)}")
+        return {"error": str(e)}
+
 
 @app.get("/api/etf-comparison", response_model=Dict[str, Any])
 async def etf_comparison() -> Dict[str, Any]:
-    """Get ETF comparison - simplified for Vercel compatibility."""
-    try:
-        # Return mock ETF data for now
-        return {
-            'etf_allocation': {
-                'BTC': 0.20, 'ETH': 0.20, 'BNB': 0.15, 'DOGE': 0.15,
-                'SOL': 0.10, 'ADA': 0.10, 'NEXO': 0.10
-            },
-            'initial_investment': 1000.0,
-            'current_value': 1050.0,
-            'total_return': 5.0,
-            'performance': {
-                '24h': 1.2, '7d': 3.5, '28d': 8.2, '90d': 15.0
-            }
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching ETF comparison: {str(e)}")
+    """Get ETF comparison data."""
+    return {
+        "etfs": [
+            {"name": "BITO", "performance": "+15.2%", "volume": "2.1B"},
+            {"name": "BITX", "performance": "+12.8%", "volume": "1.8B"},
+        ]
+    }
+
 
 @app.get("/admin_conf")
 async def admin_configuration():
-    """Admin configuration API endpoint - returns JSON with all service statuses"""
+    """Admin configuration endpoint for API status and settings."""
     try:
-        # Import centralized config
-        from utils.config import config_manager, get_config_summary
-        
-        # 1. Environment Information
-        env_info = {
-            "platform": "Unknown",
-            "deployment": "Unknown",
-            "python_version": "3.x",
-            "timestamp": datetime.now().isoformat()
+        from utils.config import get_api_key
+
+        # Get API configurations
+        api_configs = {
+            "binance": {
+                "key_set": bool(get_api_key("binance")),
+                "status": "configured" if get_api_key("binance") else "not_configured",
+            },
+            "openai": {
+                "key_set": bool(get_api_key("openai")),
+                "status": "configured" if get_api_key("openai") else "not_configured",
+            },
+            "newsapi": {
+                "key_set": bool(get_api_key("newsapi")),
+                "status": "configured" if get_api_key("newsapi") else "not_configured",
+            },
+            "livecoinwatch": {
+                "key_set": bool(get_api_key("livecoinwatch")),
+                "status": (
+                    "configured" if get_api_key("livecoinwatch") else "not_configured"
+                ),
+            },
+            "tavily": {
+                "key_set": bool(get_api_key("tavily")),
+                "status": "configured" if get_api_key("tavily") else "not_configured",
+            },
+            "milvus": {
+                "key_set": bool(get_api_key("milvus")),
+                "status": "configured" if get_api_key("milvus") else "not_configured",
+            },
+            "neo4j": {
+                "key_set": bool(get_api_key("neo4j")),
+                "status": "configured" if get_api_key("neo4j") else "not_configured",
+            },
+            "langsmith": {
+                "key_set": bool(get_api_key("langsmith")),
+                "status": (
+                    "configured" if get_api_key("langsmith") else "not_configured"
+                ),
+            },
         }
-        
-        # Detect platform
-        if os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV"):
-            env_info["platform"] = "Vercel"
-            env_info["deployment"] = os.getenv("VERCEL_ENV", "production")
-        elif os.getenv("REPL_ID") or os.getenv("REPL_OWNER"):
-            env_info["platform"] = "Replit"
-            env_info["deployment"] = "replit"
-        else:
-            env_info["platform"] = "Local"
-            env_info["deployment"] = "development"
-        
-        # 2. Get centralized configuration summary
-        config_summary = get_config_summary()
-        
-        # 3. Test all services and APIs
-        services_status = {}
-        
-        # Test APIs from centralized config
-        for api_name, api_info in config_summary["apis"].items():
-            api_status = {
-                "name": api_info["name"],
-                "key_set": api_info["configured"],
-                "test_working": False,
-                "error": None,
-                "category": api_info["category"],
-                "icon": api_info["icon"],
-                "description": api_info["description"],
-                "tag": "backend" if api_info["category"] in ["ai", "trading", "pricing", "database", "monitoring"] else "primary"
-            }
-            
-            # Test specific APIs
-            if api_name == "openai" and api_status["key_set"]:
-                try:
-                    from utils.openai_utils import get_openai_client
-                    client = get_openai_client()
-                    if client:
-                        response = await client.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            messages=[{"role": "user", "content": "Hello"}],
-                            max_tokens=5
-                        )
-                        api_status["test_working"] = True
-                        api_status["model"] = "gpt-3.5-turbo"
-                    else:
-                        api_status["error"] = "Client not initialized"
-                except Exception as e:
-                    api_status["error"] = str(e)[:100]
-            
-            elif api_name == "binance" and api_status["key_set"]:
-                try:
-                    from utils.binance_client import get_binance_client
-                    client = get_binance_client()
-                    if client:
-                        account_info = await client.get_account_info()
-                        if account_info and "makerCommission" in account_info:
-                            api_status["test_working"] = True
-                            api_status["account_type"] = "Spot"
-                        else:
-                            api_status["error"] = "Invalid account response"
-                    else:
-                        api_status["error"] = "Client not initialized"
-                except Exception as e:
-                    api_status["error"] = str(e)[:100]
-            
-            elif api_name == "newsapi" and api_status["key_set"]:
-                try:
-                    from utils.newsapi import fetch_news_articles
-                    articles = await fetch_news_articles(["bitcoin"], hours_back=1)
-                    if articles and len(articles) > 0:
-                        api_status["test_working"] = True
-                        api_status["articles_count"] = len(articles)
-                    else:
-                        api_status["error"] = "No articles returned"
-                except Exception as e:
-                    api_status["error"] = str(e)[:100]
-            
-            elif api_name == "livecoinwatch" and api_status["key_set"]:
-                try:
-                    from utils.livecoinwatch_processor import livecoinwatch_processor
-                    if livecoinwatch_processor:
-                        api_status["test_working"] = True
-                        api_status["note"] = "API key configured, processor ready"
-                    else:
-                        api_status["error"] = "Processor not initialized"
-                except Exception as e:
-                    api_status["error"] = str(e)[:100]
-            
-            elif api_name == "langsmith" and api_status["key_set"]:
-                try:
-                    api_status["test_working"] = True
-                    api_status["organization"] = os.getenv("LANGCHAIN_ORGANIZATION", "Unknown")
-                    api_status["project"] = os.getenv("LANGCHAIN_PROJECT", "masonic-brain")
-                except Exception as e:
-                    api_status["error"] = str(e)[:100]
-            
-            elif api_name == "neo4j" and api_status["key_set"]:
-                try:
-                    from utils.graph_rag import graph_rag
-                    if graph_rag.connected:
-                        api_status["test_working"] = True
-                        api_status["uri"] = os.getenv("NEO4J_URI", os.getenv("AURA_INSTANCEI", "Unknown"))
-                    else:
-                        api_status["test_working"] = False
-                        api_status["error"] = "Using mock operations (not connected)"
-                except Exception as e:
-                    api_status["error"] = str(e)[:100]
-            
-            services_status[api_name] = api_status
-        
-        # Test Services from centralized config
-        for service_name, service_info in config_summary["services"].items():
-            service_status = {
-                "name": service_info["name"],
-                "key_set": True,  # Services don't have keys, they depend on APIs
-                "test_working": False,
-                "error": None,
-                "category": service_info["category"],
-                "icon": service_info["icon"],
-                "description": service_info["description"],
-                "tag": "backend",
-                "endpoints": service_info["endpoints"],
-                "dependencies": service_info["dependencies"]
-            }
-            
-            # Test specific services
-            if service_name == "ai_agent":
-                try:
-                    from utils.ai_agent import ai_agent
-                    if ai_agent and ai_agent.workflow:
-                        service_status["test_working"] = True
-                        service_status["workflow_nodes"] = len(ai_agent.workflow.nodes)
-                        service_status["langgraph"] = "Enabled"
-                    else:
-                        service_status["error"] = "AI Agent not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "vector_rag":
-                try:
-                    from utils.vector_rag import EnhancedVectorRAG
-                    vector_rag = EnhancedVectorRAG()
-                    if vector_rag:
-                        service_status["test_working"] = True
-                        service_status["milvus"] = "Connected"
-                        service_status["embedding_model"] = "OpenAI"
-                    else:
-                        service_status["error"] = "Vector RAG not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "hybrid_rag":
-                try:
-                    from utils.hybrid_rag import hybrid_rag
-                    if hybrid_rag:
-                        service_status["test_working"] = True
-                        service_status["vector_rag"] = "✅" if hybrid_rag.vector_rag else "❌"
-                        service_status["graph_rag"] = "✅" if hybrid_rag.graph_rag.connected else "❌ (mock)"
-                    else:
-                        service_status["error"] = "Hybrid RAG not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "livecoinwatch_processor":
-                try:
-                    from utils.livecoinwatch_processor import livecoinwatch_processor
-                    if livecoinwatch_processor:
-                        service_status["test_working"] = True
-                        service_status["status"] = "Ready"
-                        service_status["database"] = "brain_data.db"
-                    else:
-                        service_status["error"] = "Processor not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "realtime_data":
-                try:
-                    from utils.realtime_data import realtime_manager
-                    if realtime_manager:
-                        service_status["test_working"] = True
-                        service_status["sources"] = ["mock", "coingecko", "binance", "livecoinwatch"]
-                        service_status["status"] = "Ready"
-                    else:
-                        service_status["error"] = "Real-time manager not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "data_quality_filter":
-                try:
-                    from utils.data_quality_filter import data_quality_filter
-                    if data_quality_filter:
-                        service_status["test_working"] = True
-                        service_status["quality_threshold"] = data_quality_filter.quality_threshold
-                        service_status["clickbait_threshold"] = data_quality_filter.clickbait_threshold
-                        service_status["relevance_threshold"] = data_quality_filter.relevance_threshold
-                        service_status["ai_analysis"] = data_quality_filter.openai_available
-                        service_status["status"] = "Ready"
-                    else:
-                        service_status["error"] = "Data quality filter not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "refresh_processor":
-                try:
-                    from utils.refresh_processor import refresh_processor
-                    if refresh_processor:
-                        status = await refresh_processor.get_system_status()
-                        service_status["test_working"] = True
-                        service_status["processor_status"] = status["processor_status"]
-                        service_status["success_rate"] = f"{status['success_rate']:.1%}"
-                        service_status["average_duration"] = f"{status['average_duration']:.2f}s"
-                        service_status["total_runs"] = status.get("total_runs", 0)
-                        service_status["last_run"] = status.get("last_run")
-                        service_status["status"] = "Ready"
-                    else:
-                        service_status["error"] = "Refresh processor not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            elif service_name == "tavily_search":
-                try:
-                    from utils.tavily_search import tavily_client
-                    if tavily_client:
-                        status = await tavily_client.get_system_status()
-                        service_status["test_working"] = True
-                        service_status["status"] = status["status"]
-                        service_status["api_key_available"] = status["api_key_available"]
-                        service_status["features"] = status["features"]
-                        service_status["base_url"] = status["base_url"]
-                    else:
-                        service_status["error"] = "Tavily client not initialized"
-                except Exception as e:
-                    service_status["error"] = str(e)[:100]
-            
-            services_status[service_name] = service_status
-        
-        # Calculate overall health
-        total_services = len(services_status)
-        working_services = sum(1 for service in services_status.values() if service["test_working"])
-        overall_health = f"{working_services}/{total_services} services working"
-        
+
+        # Check overall configuration
+        configured_apis = sum(1 for config in api_configs.values() if config["key_set"])
+        api_keys_configured = configured_apis >= 2  # At least 2 keys needed
+
         return {
-            "status": "success",
-            "overall_health": overall_health,
-            "environment": env_info,
-            "services": services_status,
-            "config_summary": config_summary,
-            "timestamp": datetime.now().isoformat()
+            "api_configurations": api_configs,
+            "api_keys_configured": api_keys_configured,
+            "configured_count": configured_apis,
+            "total_apis": len(api_configs),
+            "status": "ready" if api_keys_configured else "needs_configuration",
+            "last_updated": datetime.now().isoformat(),
         }
-        
     except Exception as e:
         return {
-            "status": "error",
             "error": str(e),
-            "timestamp": datetime.now().isoformat()
+            "status": "error",
+            "last_updated": datetime.now().isoformat(),
         }
+
+
+# Import routers with error handling
+try:
+    from routers.crypto_news_rag import router as crypto_news_rag_router
+
+    app.include_router(crypto_news_rag_router)
+except ImportError as e:
+    print(f"Warning: Could not import crypto_news_rag_router: {e}")
+
+try:
+    from routers.portfolio_user import router as portfolio_router
+
+    app.include_router(portfolio_router)
+except ImportError as e:
+    print(f"Warning: Could not import portfolio_router: {e}")
+
+try:
+    from routers.agent import router as agent_router
+
+    app.include_router(agent_router)
+except ImportError as e:
+    print(f"Warning: Could not import agent_router: {e}")
+
+try:
+    from routers.cost_tracking import router as cost_tracking_router
+
+    app.include_router(cost_tracking_router)
+except ImportError as e:
+    print(f"Warning: Could not import cost_tracking_router: {e}")
+
+try:
+    from routers.admin import router as admin_router
+
+    app.include_router(admin_router)
+except ImportError as e:
+    print(f"Warning: Could not import admin_router: {e}")
+
+try:
+    from routers.brain_enhanced import router as brain_enhanced_router
+
+    app.include_router(brain_enhanced_router)
+except ImportError as e:
+    print(f"Warning: Could not import brain_enhanced_router: {e}")
+
+try:
+    from routers.brain_simple import router as brain_simple_router
+
+    app.include_router(brain_simple_router)
+except ImportError as e:
+    print(f"Warning: Could not import brain_simple_router: {e}")
+
 
 @app.get("/admin")
 def admin_page(request: Request):
-    """Admin configuration page - HTML interface"""
-    try:
-        return templates.TemplateResponse("admin.html", {"request": request})
-    except Exception as e:
-        return HTMLResponse(content=f"""
-        <html>
-            <head><title>Admin - Masonic</title></head>
-            <body>
-                <h1>Admin Configuration</h1>
-                <p><a href="/">← Back to Welcome</a></p>
-                <p><a href="/admin_conf">View JSON API</a></p>
-                <p>Error loading admin page: {str(e)}</p>
-            </body>
-        </html>
-        """)
+    """Admin dashboard for system monitoring and configuration."""
+    return templates.TemplateResponse("admin.html", {"request": request})
+
 
 @app.get("/brain-dashboard")
 def brain_dashboard(request: Request):
-    """Brain dashboard page - HTML interface"""
-    try:
-        return templates.TemplateResponse("brain_dashboard.html", {"request": request})
-    except Exception as e:
-        return HTMLResponse(content=f"""
-        <html>
-            <head><title>Brain Dashboard - Masonic</title></head>
-            <body>
-                <h1>Brain Dashboard</h1>
-                <p><a href="/">← Back to Welcome</a></p>
-                <p><a href="/admin">Admin</a></p>
-                <p>Error loading brain dashboard: {str(e)}</p>
-            </body>
-        </html>
-        """)
+    """Brain dashboard for AI system monitoring."""
+    return templates.TemplateResponse("brain_dashboard.html", {"request": request})
+
 
 @app.get("/status-dashboard")
 def status_dashboard(request: Request):
-    """Status dashboard page - HTML interface"""
-    try:
-        return templates.TemplateResponse("status_dashboard.html", {"request": request})
-    except Exception as e:
-        return HTMLResponse(content=f"""
-        <html>
-            <head><title>Status Dashboard - Masonic</title></head>
-            <body>
-                <h1>Status Dashboard</h1>
-                <p><a href="/">← Back to Welcome</a></p>
-                <p><a href="/admin">Admin</a></p>
-                <p>Error loading status dashboard: {str(e)}</p>
-            </body>
-        </html>
-        """)
+    """Status dashboard for system health monitoring."""
+    return templates.TemplateResponse("status_dashboard.html", {"request": request})

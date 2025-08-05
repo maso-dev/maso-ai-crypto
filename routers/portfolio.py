@@ -6,10 +6,16 @@ from utils.openai_utils import get_market_summary
 
 router = APIRouter()
 
+
 class MarketSummaryRequest(BaseModel):
-    symbols: List[str] = Field(..., description="Portfolio coin symbols, e.g. ['BTC', 'ETH', 'BITO']")
+    symbols: List[str] = Field(
+        ..., description="Portfolio coin symbols, e.g. ['BTC', 'ETH', 'BITO']"
+    )
     limit: int = Field(10, description="Number of news items to return")
-    always_include_base_coins: bool = Field(True, description="Always include BTC and ETH in the query")
+    always_include_base_coins: bool = Field(
+        True, description="Always include BTC and ETH in the query"
+    )
+
 
 class NewsItem(BaseModel):
     title: str
@@ -18,13 +24,17 @@ class NewsItem(BaseModel):
     source_url: str
     published_at: int
 
+
 class MarketSummaryResponse(BaseModel):
     summary: str
     recommended_actions: str
     news: List[NewsItem]
 
+
 @router.post("/portfolio/market_summary", response_model=MarketSummaryResponse)
-async def portfolio_market_summary(req: MarketSummaryRequest = Body(...)) -> MarketSummaryResponse:
+async def portfolio_market_summary(
+    req: MarketSummaryRequest = Body(...),
+) -> MarketSummaryResponse:
     try:
         symbols = set(req.symbols)
         if req.always_include_base_coins:
@@ -37,15 +47,13 @@ async def portfolio_market_summary(req: MarketSummaryRequest = Body(...)) -> Mar
                 chunk_text=item.get("chunk_text", ""),
                 crypto_topic=item.get("crypto_topic", ""),
                 source_url=item.get("source_url", ""),
-                published_at=item.get("published_at", 0)
+                published_at=item.get("published_at", 0),
             )
             for item in news
         ]
         summary, actions = await get_market_summary(news, symbols)
         return MarketSummaryResponse(
-            summary=summary,
-            recommended_actions=actions,
-            news=news_items
+            summary=summary, recommended_actions=actions, news=news_items
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))

@@ -16,6 +16,7 @@ if LANGSMITH_API_KEY:
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+
 # Define the output schema using Pydantic
 class NewsEnrichment(BaseModel):
     sentiment: float = Field(description="Sentiment score between 0.01 and 1.0")
@@ -23,9 +24,16 @@ class NewsEnrichment(BaseModel):
     categories: List[str] = Field(description="List of relevant categories")
     macro_category: str = Field(description="Primary macro category")
     summary: str = Field(description="Brief summary of the article")
-    urgency_score: float = Field(description="Urgency score between 0.01 and 1.0 based on time sensitivity")
-    market_impact: str = Field(description="Expected market impact: 'high', 'medium', 'low'")
-    time_relevance: str = Field(description="Time relevance: 'breaking', 'recent', 'historical'")
+    urgency_score: float = Field(
+        description="Urgency score between 0.01 and 1.0 based on time sensitivity"
+    )
+    market_impact: str = Field(
+        description="Expected market impact: 'high', 'medium', 'low'"
+    )
+    time_relevance: str = Field(
+        description="Time relevance: 'breaking', 'recent', 'historical'"
+    )
+
 
 # Define the prompt template for enrichment
 ENRICHMENT_PROMPT = """
@@ -53,6 +61,7 @@ Do not include any explanation or text before or after the JSON.
 
 prompt = ChatPromptTemplate.from_template(ENRICHMENT_PROMPT)
 
+
 def get_enrichment_chain():
     """
     Returns a LangChain chain for news enrichment using modern patterns.
@@ -62,39 +71,42 @@ def get_enrichment_chain():
     if not OPENAI_API_KEY:
         print("⚠️ OpenAI API key not configured - enrichment disabled")
         return None
-    
+
     llm = ChatOpenAI(
         api_key=SecretStr(OPENAI_API_KEY),
         model="gpt-4-turbo",
         temperature=0.4,
-        tags=["enrichment", "news", "crypto"] if LANGSMITH_API_KEY else None
+        tags=["enrichment", "news", "crypto"] if LANGSMITH_API_KEY else None,
     )
-    
+
     parser = JsonOutputParser(pydantic_object=NewsEnrichment)
-    
+
     # Create the chain using the modern pipe syntax with LangSmith metadata
     chain = prompt | llm | parser
-    
+
     # Add LangSmith metadata if available
     if LANGSMITH_API_KEY:
-        chain = chain.with_config({
-            "tags": ["enrichment", "news", "crypto"],
-            "metadata": {
-                "component": "news_enrichment",
-                "version": "1.0.0",
-                "model": "gpt-4-turbo"
+        chain = chain.with_config(
+            {
+                "tags": ["enrichment", "news", "crypto"],
+                "metadata": {
+                    "component": "news_enrichment",
+                    "version": "1.0.0",
+                    "model": "gpt-4-turbo",
+                },
             }
-        })
-    
+        )
+
     return chain
+
 
 async def enrich_news_articles(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Enrich a list of news articles with AI-generated metadata.
-    
+
     Args:
         articles: List of article dictionaries with 'title', 'content', 'source_name', 'published_at'
-    
+
     Returns:
         List of enriched articles with additional metadata
     """
@@ -102,43 +114,48 @@ async def enrich_news_articles(articles: List[Dict[str, Any]]) -> List[Dict[str,
     if not chain:
         print("⚠️ Enrichment chain not available - returning original articles")
         return articles
-    
+
     enriched_articles = []
-    
+
     for i, article in enumerate(articles):
         try:
-            print(f"   Enriching article {i+1}/{len(articles)}: {article.get('title', 'Unknown')[:50]}...")
-            
+            print(
+                f"   Enriching article {i+1}/{len(articles)}: {article.get('title', 'Unknown')[:50]}..."
+            )
+
             # Add default published_at if not present
-            if 'published_at' not in article:
-                article['published_at'] = "2024-01-15T00:00:00Z"
-            
+            if "published_at" not in article:
+                article["published_at"] = "2024-01-15T00:00:00Z"
+
             # Run enrichment with LangSmith tracing
             enrichment_result = chain.invoke(article)
-            
+
             # Combine original article with enrichment data
             enriched_article = {
                 **article,
                 "enrichment": {
-                    "sentiment": enrichment_result.get('sentiment', 0.5),
-                    "trust": enrichment_result.get('trust', 0.5),
-                    "categories": enrichment_result.get('categories', []),
-                    "macro_category": enrichment_result.get('macro_category', 'Unknown'),
-                    "summary": enrichment_result.get('summary', ''),
-                    "urgency_score": enrichment_result.get('urgency_score', 0.5),
-                    "market_impact": enrichment_result.get('market_impact', 'medium'),
-                    "time_relevance": enrichment_result.get('time_relevance', 'recent')
-                }
+                    "sentiment": enrichment_result.get("sentiment", 0.5),
+                    "trust": enrichment_result.get("trust", 0.5),
+                    "categories": enrichment_result.get("categories", []),
+                    "macro_category": enrichment_result.get(
+                        "macro_category", "Unknown"
+                    ),
+                    "summary": enrichment_result.get("summary", ""),
+                    "urgency_score": enrichment_result.get("urgency_score", 0.5),
+                    "market_impact": enrichment_result.get("market_impact", "medium"),
+                    "time_relevance": enrichment_result.get("time_relevance", "recent"),
+                },
             }
-            
+
             enriched_articles.append(enriched_article)
-            
+
         except Exception as e:
             print(f"   ⚠️ Failed to enrich article {i+1}: {e}")
             # Add article without enrichment
             enriched_articles.append(article)
-    
+
     return enriched_articles
+
 
 # Example usage (for testing):
 if __name__ == "__main__":
@@ -147,9 +164,9 @@ if __name__ == "__main__":
         article = {
             "title": "Bitcoin surges as ETF inflows hit record highs",
             "content": "Bitcoin price jumped 10% today after several major ETFs reported record inflows. Analysts say this could signal a new bull run...",
-            "source_name": "CoinDesk"
+            "source_name": "CoinDesk",
         }
         result = chain.invoke(article)
         print("Enrichment result:", result)
     else:
-        print("OpenAI API key not configured - cannot test enrichment") 
+        print("OpenAI API key not configured - cannot test enrichment")

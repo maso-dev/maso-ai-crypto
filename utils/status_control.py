@@ -19,8 +19,10 @@ from pydantic import BaseModel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class ComponentStatus(Enum):
     """Status enumeration for system components."""
+
     ONLINE = "online"
     OFFLINE = "offline"
     DEGRADED = "degraded"
@@ -28,8 +30,10 @@ class ComponentStatus(Enum):
     ERROR = "error"
     UNKNOWN = "unknown"
 
+
 class ServiceType(Enum):
     """Types of services in the system."""
+
     AI_AGENT = "ai_agent"
     VECTOR_RAG = "vector_rag"
     HYBRID_RAG = "hybrid_rag"
@@ -42,9 +46,11 @@ class ServiceType(Enum):
     DATABASE = "database"
     WEBSOCKET = "websocket"
 
+
 @dataclass
 class ComponentHealth:
     """Health status for a system component."""
+
     name: str
     service_type: ServiceType
     status: ComponentStatus
@@ -54,9 +60,11 @@ class ComponentHealth:
     metadata: Dict[str, Any] = field(default_factory=dict)
     dependencies: List[str] = field(default_factory=list)
 
+
 @dataclass
 class SystemMetrics:
     """System-wide metrics and performance data."""
+
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
@@ -66,8 +74,10 @@ class SystemMetrics:
     cpu_usage_percent: float = 0.0
     uptime_seconds: float = 0.0
 
+
 class StatusAlert(BaseModel):
     """Alert model for status notifications."""
+
     id: str
     component: str
     severity: str  # "info", "warning", "error", "critical"
@@ -76,11 +86,12 @@ class StatusAlert(BaseModel):
     resolved: bool = False
     metadata: Dict[str, Any] = {}
 
+
 class StatusControl:
     """
     Centralized status control system for monitoring all platform components.
     """
-    
+
     def __init__(self):
         self.components: Dict[str, ComponentHealth] = {}
         self.metrics = SystemMetrics()
@@ -88,14 +99,14 @@ class StatusControl:
         self.start_time = datetime.now(timezone.utc)
         self.health_checkers: Dict[str, Callable] = {}
         self.status_callbacks: List[Callable] = []
-        
+
         # Initialize component health checkers
         self._initialize_health_checkers()
-        
+
         # Start background monitoring
         self._monitoring_task: Optional[asyncio.Task] = None
         self._start_monitoring()
-    
+
     def _initialize_health_checkers(self):
         """Initialize health check functions for each component."""
         self.health_checkers = {
@@ -109,26 +120,29 @@ class StatusControl:
             "binance_api": self._check_binance_api_health,
             "newsapi": self._check_newsapi_health,
             "database": self._check_database_health,
-            "websocket": self._check_websocket_health
+            "websocket": self._check_websocket_health,
         }
-    
+
     async def _check_ai_agent_health(self) -> ComponentHealth:
         """Check AI agent health status."""
         start_time = datetime.now(timezone.utc)
         try:
             # Import and check AI agent
             from .ai_agent import CryptoAIAgent, AgentTask
+
             agent = CryptoAIAgent()
-            
+
             # Test basic functionality
             test_result = await agent.execute_task(
                 task=AgentTask.MARKET_ANALYSIS,
                 query="Test health check",
-                symbols=["BTC"]
+                symbols=["BTC"],
             )
-            
-            response_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            
+
+            response_time = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
+
             return ComponentHealth(
                 name="AI Agent",
                 service_type=ServiceType.AI_AGENT,
@@ -138,8 +152,8 @@ class StatusControl:
                 metadata={
                     "agent_id": "masonic-ai-agent",
                     "model": "gpt-4o",
-                    "workflow_nodes": len(agent.workflow.nodes)
-                }
+                    "workflow_nodes": len(agent.workflow.nodes),
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -147,26 +161,29 @@ class StatusControl:
                 service_type=ServiceType.AI_AGENT,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_vector_rag_health(self) -> ComponentHealth:
         """Check Vector RAG health status."""
         start_time = datetime.now(timezone.utc)
         try:
             from .vector_rag import EnhancedVectorRAG, VectorQuery, QueryType
+
             rag = EnhancedVectorRAG()
-            
+
             # Test search functionality
             test_query = VectorQuery(
                 query_text="test health check",
                 query_type=QueryType.SEMANTIC_SEARCH,
-                limit=1
+                limit=1,
             )
             results = await rag.intelligent_search(test_query)
-            
-            response_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            
+
+            response_time = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
+
             return ComponentHealth(
                 name="Vector RAG",
                 service_type=ServiceType.VECTOR_RAG,
@@ -175,8 +192,8 @@ class StatusControl:
                 response_time_ms=response_time,
                 metadata={
                     "collection_size": len(results) if results else 0,
-                    "embedding_model": "text-embedding-3-small"
-                }
+                    "embedding_model": "text-embedding-3-small",
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -184,26 +201,29 @@ class StatusControl:
                 service_type=ServiceType.VECTOR_RAG,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_hybrid_rag_health(self) -> ComponentHealth:
         """Check Hybrid RAG health status."""
         start_time = datetime.now(timezone.utc)
         try:
             from .hybrid_rag import HybridRAGSystem, HybridQuery, HybridQueryType
+
             hybrid_rag = HybridRAGSystem()
-            
+
             # Test hybrid search
             test_query = HybridQuery(
                 query_text="test health check",
                 query_type=HybridQueryType.HYBRID,
-                limit=1
+                limit=1,
             )
             results = await hybrid_rag.hybrid_search(test_query)
-            
-            response_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            
+
+            response_time = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
+
             return ComponentHealth(
                 name="Hybrid RAG",
                 service_type=ServiceType.HYBRID_RAG,
@@ -213,8 +233,12 @@ class StatusControl:
                 metadata={
                     "total_results": len(results) if results else 0,
                     "vector_rag_available": True,
-                    "graph_rag_available": hybrid_rag.graph_rag.connected if hasattr(hybrid_rag.graph_rag, 'connected') else False
-                }
+                    "graph_rag_available": (
+                        hybrid_rag.graph_rag.connected
+                        if hasattr(hybrid_rag.graph_rag, "connected")
+                        else False
+                    ),
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -222,14 +246,14 @@ class StatusControl:
                 service_type=ServiceType.HYBRID_RAG,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_realtime_data_health(self) -> ComponentHealth:
         """Check real-time data health status."""
         try:
             from .realtime_data import realtime_manager
-            
+
             # Simple check if realtime_manager exists
             if realtime_manager:
                 return ComponentHealth(
@@ -237,10 +261,7 @@ class StatusControl:
                     service_type=ServiceType.REALTIME_DATA,
                     status=ComponentStatus.ONLINE,
                     last_check=datetime.now(timezone.utc),
-                    metadata={
-                        "manager_available": True,
-                        "status": "operational"
-                    }
+                    metadata={"manager_available": True, "status": "operational"},
                 )
             else:
                 return ComponentHealth(
@@ -248,7 +269,7 @@ class StatusControl:
                     service_type=ServiceType.REALTIME_DATA,
                     status=ComponentStatus.OFFLINE,
                     last_check=datetime.now(timezone.utc),
-                    error_message="Realtime manager not available"
+                    error_message="Realtime manager not available",
                 )
         except Exception as e:
             return ComponentHealth(
@@ -256,25 +277,22 @@ class StatusControl:
                 service_type=ServiceType.REALTIME_DATA,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_news_pipeline_health(self) -> ComponentHealth:
         """Check news pipeline health status."""
         try:
             from .enhanced_news_pipeline import EnhancedNewsPipeline
-            
+
             pipeline = EnhancedNewsPipeline()
-            
+
             return ComponentHealth(
                 name="News Pipeline",
                 service_type=ServiceType.NEWS_PIPELINE,
                 status=ComponentStatus.ONLINE,
                 last_check=datetime.now(timezone.utc),
-                metadata={
-                    "pipeline_available": True,
-                    "status": "operational"
-                }
+                metadata={"pipeline_available": True, "status": "operational"},
             )
         except Exception as e:
             return ComponentHealth(
@@ -282,23 +300,20 @@ class StatusControl:
                 service_type=ServiceType.NEWS_PIPELINE,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_cost_tracking_health(self) -> ComponentHealth:
         """Check cost tracking health status."""
         try:
             from .cost_tracker import cost_tracker
-            
+
             return ComponentHealth(
                 name="Cost Tracking",
                 service_type=ServiceType.COST_TRACKING,
                 status=ComponentStatus.ONLINE,
                 last_check=datetime.now(timezone.utc),
-                metadata={
-                    "tracker_available": True,
-                    "status": "operational"
-                }
+                metadata={"tracker_available": True, "status": "operational"},
             )
         except Exception as e:
             return ComponentHealth(
@@ -306,41 +321,46 @@ class StatusControl:
                 service_type=ServiceType.COST_TRACKING,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_langsmith_health(self) -> ComponentHealth:
         """Check LangSmith health status."""
         langsmith_key = os.getenv("LANGSMITH_API_KEY")
-        
+
         if not langsmith_key:
             return ComponentHealth(
                 name="LangSmith",
                 service_type=ServiceType.LANGSMITH,
                 status=ComponentStatus.OFFLINE,
                 last_check=datetime.now(timezone.utc),
-                error_message="LANGSMITH_API_KEY not configured"
+                error_message="LANGSMITH_API_KEY not configured",
             )
-        
+
         try:
             # Test LangSmith connection
             import httpx
+
             async with httpx.AsyncClient() as client:
                 response = await client.get(
                     "https://api.smith.langchain.com/runs",
                     headers={"Authorization": f"Bearer {langsmith_key}"},
-                    timeout=5.0
+                    timeout=5.0,
                 )
-                
+
             return ComponentHealth(
                 name="LangSmith",
                 service_type=ServiceType.LANGSMITH,
-                status=ComponentStatus.ONLINE if response.status_code == 200 else ComponentStatus.DEGRADED,
+                status=(
+                    ComponentStatus.ONLINE
+                    if response.status_code == 200
+                    else ComponentStatus.DEGRADED
+                ),
                 last_check=datetime.now(timezone.utc),
                 metadata={
                     "project": os.getenv("LANGCHAIN_PROJECT", "masonic-brain"),
-                    "organization": os.getenv("LANGCHAIN_ORGANIZATION", "")
-                }
+                    "organization": os.getenv("LANGCHAIN_ORGANIZATION", ""),
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -348,26 +368,27 @@ class StatusControl:
                 service_type=ServiceType.LANGSMITH,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_binance_api_health(self) -> ComponentHealth:
         """Check Binance API health status."""
         binance_key = os.getenv("BINANCE_API_KEY")
-        
+
         if not binance_key:
             return ComponentHealth(
                 name="Binance API",
                 service_type=ServiceType.BINANCE_API,
                 status=ComponentStatus.OFFLINE,
                 last_check=datetime.now(timezone.utc),
-                error_message="BINANCE_API_KEY not configured"
+                error_message="BINANCE_API_KEY not configured",
             )
-        
+
         try:
             from .binance_client import get_portfolio_data
+
             portfolio = await get_portfolio_data()
-            
+
             return ComponentHealth(
                 name="Binance API",
                 service_type=ServiceType.BINANCE_API,
@@ -375,8 +396,8 @@ class StatusControl:
                 last_check=datetime.now(timezone.utc),
                 metadata={
                     "portfolio_connected": portfolio is not None,
-                    "total_assets": len(portfolio.assets) if portfolio else 0
-                }
+                    "total_assets": len(portfolio.assets) if portfolio else 0,
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -384,40 +405,47 @@ class StatusControl:
                 service_type=ServiceType.BINANCE_API,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_newsapi_health(self) -> ComponentHealth:
         """Check NewsAPI health status."""
         newsapi_key = os.getenv("NEWSAPI_KEY")
-        
+
         if not newsapi_key:
             return ComponentHealth(
                 name="NewsAPI",
                 service_type=ServiceType.NEWSAPI,
                 status=ComponentStatus.OFFLINE,
                 last_check=datetime.now(timezone.utc),
-                error_message="NEWSAPI_KEY not configured"
+                error_message="NEWSAPI_KEY not configured",
             )
-        
+
         try:
             import httpx
+
             async with httpx.AsyncClient() as client:
                 response = await client.get(
                     "https://newsapi.org/v2/top-headlines",
                     params={"country": "us", "apiKey": newsapi_key},
-                    timeout=5.0
+                    timeout=5.0,
                 )
-                
+
             return ComponentHealth(
                 name="NewsAPI",
                 service_type=ServiceType.NEWSAPI,
-                status=ComponentStatus.ONLINE if response.status_code == 200 else ComponentStatus.DEGRADED,
+                status=(
+                    ComponentStatus.ONLINE
+                    if response.status_code == 200
+                    else ComponentStatus.DEGRADED
+                ),
                 last_check=datetime.now(timezone.utc),
                 metadata={
                     "status": response.status_code,
-                    "remaining_requests": response.headers.get("X-RateLimit-Remaining", "unknown")
-                }
+                    "remaining_requests": response.headers.get(
+                        "X-RateLimit-Remaining", "unknown"
+                    ),
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -425,15 +453,15 @@ class StatusControl:
                 service_type=ServiceType.NEWSAPI,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_database_health(self) -> ComponentHealth:
         """Check database health status."""
         try:
             import sqlite3
             from pathlib import Path
-            
+
             db_path = Path("cost_tracking.db")
             if not db_path.exists():
                 return ComponentHealth(
@@ -441,16 +469,16 @@ class StatusControl:
                     service_type=ServiceType.DATABASE,
                     status=ComponentStatus.OFFLINE,
                     last_check=datetime.now(timezone.utc),
-                    error_message="Database file not found"
+                    error_message="Database file not found",
                 )
-            
+
             # Test database connection
             conn = sqlite3.connect(str(db_path))
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM api_calls")
             count = cursor.fetchone()[0]
             conn.close()
-            
+
             return ComponentHealth(
                 name="Database",
                 service_type=ServiceType.DATABASE,
@@ -458,8 +486,8 @@ class StatusControl:
                 last_check=datetime.now(timezone.utc),
                 metadata={
                     "total_records": count,
-                    "file_size_mb": db_path.stat().st_size / (1024 * 1024)
-                }
+                    "file_size_mb": db_path.stat().st_size / (1024 * 1024),
+                },
             )
         except Exception as e:
             return ComponentHealth(
@@ -467,23 +495,20 @@ class StatusControl:
                 service_type=ServiceType.DATABASE,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     async def _check_websocket_health(self) -> ComponentHealth:
         """Check WebSocket health status."""
         try:
             from .realtime_data import realtime_manager
-            
+
             return ComponentHealth(
                 name="WebSocket",
                 service_type=ServiceType.WEBSOCKET,
                 status=ComponentStatus.ONLINE,
                 last_check=datetime.now(timezone.utc),
-                metadata={
-                    "websocket_available": True,
-                    "status": "operational"
-                }
+                metadata={"websocket_available": True, "status": "operational"},
             )
         except Exception as e:
             return ComponentHealth(
@@ -491,14 +516,14 @@ class StatusControl:
                 service_type=ServiceType.WEBSOCKET,
                 status=ComponentStatus.ERROR,
                 last_check=datetime.now(timezone.utc),
-                error_message=str(e)
+                error_message=str(e),
             )
-    
+
     def _start_monitoring(self):
         """Start background monitoring task."""
         if self._monitoring_task is None or self._monitoring_task.done():
             self._monitoring_task = asyncio.create_task(self._monitor_components())
-    
+
     async def _monitor_components(self):
         """Background task to monitor all components."""
         while True:
@@ -508,17 +533,17 @@ class StatusControl:
             except Exception as e:
                 logger.error(f"Error in component monitoring: {e}")
                 await asyncio.sleep(60)  # Wait longer on error
-    
+
     async def check_all_components(self):
         """Check health of all components."""
         for component_name, health_checker in self.health_checkers.items():
             try:
                 health = await health_checker()
                 self.components[component_name] = health
-                
+
                 # Check for status changes and trigger alerts
                 await self._check_status_changes(component_name, health)
-                
+
             except Exception as e:
                 logger.error(f"Error checking {component_name}: {e}")
                 self.components[component_name] = ComponentHealth(
@@ -526,9 +551,9 @@ class StatusControl:
                     service_type=ServiceType(component_name),
                     status=ComponentStatus.ERROR,
                     last_check=datetime.now(timezone.utc),
-                    error_message=str(e)
+                    error_message=str(e),
                 )
-    
+
     async def _check_status_changes(self, component_name: str, health: ComponentHealth):
         """Check for status changes and create alerts."""
         # This is a simplified version - you could add more sophisticated change detection
@@ -536,16 +561,22 @@ class StatusControl:
             await self.create_alert(
                 component=component_name,
                 severity="error",
-                message=f"Component {component_name} is in error state: {health.error_message}"
+                message=f"Component {component_name} is in error state: {health.error_message}",
             )
         elif health.status == ComponentStatus.DEGRADED:
             await self.create_alert(
                 component=component_name,
                 severity="warning",
-                message=f"Component {component_name} is in degraded state"
+                message=f"Component {component_name} is in degraded state",
             )
-    
-    async def create_alert(self, component: str, severity: str, message: str, metadata: Optional[Dict[str, Any]] = None):
+
+    async def create_alert(
+        self,
+        component: str,
+        severity: str,
+        message: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
         """Create a new status alert."""
         alert = StatusAlert(
             id=f"alert_{len(self.alerts) + 1}_{int(datetime.now().timestamp())}",
@@ -553,89 +584,110 @@ class StatusControl:
             severity=severity,
             message=message,
             timestamp=datetime.now(timezone.utc),
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
-        
+
         self.alerts.append(alert)
-        
+
         # Trigger callbacks
         for callback in self.status_callbacks:
             try:
                 await callback(alert)
             except Exception as e:
                 logger.error(f"Error in status callback: {e}")
-    
+
     def add_status_callback(self, callback: Callable):
         """Add a callback function to be called when status changes."""
         self.status_callbacks.append(callback)
-    
+
     def get_overall_status(self) -> Dict[str, Any]:
         """Get overall system status."""
-        online_count = sum(1 for c in self.components.values() if c.status == ComponentStatus.ONLINE)
+        online_count = sum(
+            1 for c in self.components.values() if c.status == ComponentStatus.ONLINE
+        )
         total_count = len(self.components)
-        
+
         # Calculate uptime
         uptime = (datetime.now(timezone.utc) - self.start_time).total_seconds()
-        
+
         return {
-            "status": "healthy" if online_count == total_count else "degraded" if online_count > total_count // 2 else "unhealthy",
+            "status": (
+                "healthy"
+                if online_count == total_count
+                else "degraded" if online_count > total_count // 2 else "unhealthy"
+            ),
             "uptime_seconds": uptime,
             "components_online": online_count,
             "total_components": total_count,
-            "health_percentage": (online_count / total_count * 100) if total_count > 0 else 0,
+            "health_percentage": (
+                (online_count / total_count * 100) if total_count > 0 else 0
+            ),
             "last_check": datetime.now(timezone.utc).isoformat(),
-            "alerts_count": len([a for a in self.alerts if not a.resolved])
+            "alerts_count": len([a for a in self.alerts if not a.resolved]),
         }
-    
+
     def get_component_status(self, component_name: str) -> Optional[ComponentHealth]:
         """Get status of a specific component."""
         return self.components.get(component_name)
-    
+
     def get_all_components_status(self) -> Dict[str, ComponentHealth]:
         """Get status of all components."""
         return self.components.copy()
-    
+
     def get_recent_alerts(self, limit: int = 10) -> List[StatusAlert]:
         """Get recent alerts."""
         return sorted(self.alerts, key=lambda x: x.timestamp, reverse=True)[:limit]
-    
+
     def resolve_alert(self, alert_id: str):
         """Mark an alert as resolved."""
         for alert in self.alerts:
             if alert.id == alert_id:
                 alert.resolved = True
                 break
-    
+
     def get_system_metrics(self) -> SystemMetrics:
         """Get current system metrics."""
-        self.metrics.uptime_seconds = (datetime.now(timezone.utc) - self.start_time).total_seconds()
+        self.metrics.uptime_seconds = (
+            datetime.now(timezone.utc) - self.start_time
+        ).total_seconds()
         return self.metrics
-    
+
     def update_metrics(self, **kwargs):
         """Update system metrics."""
         for key, value in kwargs.items():
             if hasattr(self.metrics, key):
                 setattr(self.metrics, key, value)
 
+
 # Global status control instance
 status_control = StatusControl()
+
 
 # Convenience functions
 async def get_system_status() -> Dict[str, Any]:
     """Get overall system status."""
     return status_control.get_overall_status()
 
+
 async def get_component_status(component_name: str) -> Optional[ComponentHealth]:
     """Get status of a specific component."""
     return status_control.get_component_status(component_name)
+
 
 async def get_all_components_status() -> Dict[str, ComponentHealth]:
     """Get status of all components."""
     return status_control.get_all_components_status()
 
-async def create_status_alert(component: str, severity: str, message: str, metadata: Optional[Dict[str, Any]] = None):
+
+async def create_status_alert(
+    component: str,
+    severity: str,
+    message: str,
+    metadata: Optional[Dict[str, Any]] = None,
+):
     """Create a status alert."""
     await status_control.create_alert(component, severity, message, metadata)
+
 
 @asynccontextmanager
 async def status_monitor(component_name: str, operation: str):
@@ -651,6 +703,10 @@ async def status_monitor(component_name: str, operation: str):
             component=component_name,
             severity="error",
             message=f"Operation {operation} failed: {str(e)}",
-            metadata={"operation": operation, "duration_ms": (datetime.now(timezone.utc) - start_time).total_seconds() * 1000}
+            metadata={
+                "operation": operation,
+                "duration_ms": (datetime.now(timezone.utc) - start_time).total_seconds()
+                * 1000,
+            },
         )
-        raise 
+        raise
