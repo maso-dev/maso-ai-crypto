@@ -254,7 +254,7 @@ async def get_enhanced_opportunities():
 # NEW: Brotherhood intelligence API
 @app.get("/api/news-briefing")
 async def get_enhanced_news():
-    """Enhanced news using existing intelligent cache and hybrid RAG systems."""
+    """Enhanced news using multi-source integration and quality filtering (Phase 3)."""
     try:
         # Import existing systems
         from utils.intelligent_news_cache import (
@@ -263,10 +263,14 @@ async def get_enhanced_news():
         )
         from utils.hybrid_rag import HybridRAGSystem, HybridQuery, HybridQueryType
         from utils.ai_agent import CryptoAIAgent, AgentTask
+        from utils.tavily_search import TavilySearchClient
+        from utils.data_quality_filter import DataQualityFilter
 
         # Initialize systems
         hybrid_rag = HybridRAGSystem()
         ai_agent = CryptoAIAgent()  # Uses LangGraph + LangSmith
+        tavily_client = TavilySearchClient()
+        quality_filter = DataQualityFilter()
 
         # 1. Get portfolio-aware news (existing system)
         news_data = await get_portfolio_news(
@@ -276,7 +280,33 @@ async def get_enhanced_news():
             hours_back=24,
         )
 
-        # 2. Use hybrid RAG for enhanced search
+        # 2. Get Tavily news for additional sources (Phase 3 enhancement)
+        tavily_news = []
+        try:
+            # Search for crypto market news
+            tavily_response = await tavily_client.search_news(
+                query="cryptocurrency market news Bitcoin Ethereum",
+                max_results=15,
+                time_period="1d"
+            )
+            
+            # Convert Tavily results to our format
+            for result in tavily_response.results:
+                tavily_news.append({
+                    "title": result.title,
+                    "content": result.content,
+                    "source_url": result.url,
+                    "published_at": result.published_date.isoformat() if result.published_date else datetime.now().isoformat(),
+                    "sentiment_score": None,  # Will be calculated by quality filter
+                    "relevance_score": result.score,
+                    "source": "tavily",
+                    "search_type": result.search_type,
+                    "metadata": result.metadata
+                })
+        except Exception as e:
+            print(f"Tavily news error: {e}")
+
+        # 3. Use hybrid RAG for enhanced search
         hybrid_query = HybridQuery(
             query_text="crypto market news analysis",
             query_type=HybridQueryType.SENTIMENT_ANALYSIS,
@@ -287,46 +317,101 @@ async def get_enhanced_news():
 
         hybrid_results = await hybrid_rag.hybrid_search(hybrid_query)
 
-        # 3. Combine with existing news data
+        # 4. Combine all news sources
         combined_news = []
 
-        # Add cached news
+        # Add cached news (NewsAPI)
         for category, articles in news_data.get("news_by_category", {}).items():
-            combined_news.extend(articles[:5])  # Top 5 per category
+            for article in articles[:5]:  # Top 5 per category
+                article["source"] = "newsapi"
+                article["category"] = category
+                combined_news.append(article)
+
+        # Add Tavily news
+        combined_news.extend(tavily_news)
 
         # Add hybrid RAG results
         for result in hybrid_results:
-            combined_news.append(
-                {
-                    "title": result.title,
-                    "content": result.content,
-                    "source_url": result.source_url,
-                    "published_at": result.published_at.isoformat(),
-                    "sentiment_score": result.sentiment_score,
-                    "relevance_score": result.relevance_score,
-                    "source": "hybrid_rag",
-                }
-            )
+            combined_news.append({
+                "title": result.title,
+                "content": result.content,
+                "source_url": result.source_url,
+                "published_at": result.published_at.isoformat(),
+                "sentiment_score": result.sentiment_score,
+                "relevance_score": result.relevance_score,
+                "source": "hybrid_rag",
+                "category": "rag_analysis"
+            })
 
-        # 4. Get AI sentiment analysis using LangGraph agent
+        # 5. Apply quality filtering (Phase 3 enhancement)
+        filtered_news = []
+        quality_metrics = {
+            "total_articles": len(combined_news),
+            "filtered_articles": 0,
+            "quality_scores": [],
+            "filtered_out": 0
+        }
+
+        for article in combined_news:
+            try:
+                # Apply quality filter
+                filtered_article = await quality_filter.filter_article(article)
+                
+                if filtered_article.is_high_quality:
+                    filtered_news.append({
+                        **article,
+                        "quality_score": filtered_article.quality_score,
+                        "filtered_reasons": filtered_article.filtered_reasons,
+                        "sentiment_score": filtered_article.sentiment_score or article.get("sentiment_score")
+                    })
+                    quality_metrics["filtered_articles"] += 1
+                    quality_metrics["quality_scores"].append(filtered_article.quality_score)
+                else:
+                    quality_metrics["filtered_out"] += 1
+                    
+            except Exception as e:
+                print(f"Quality filter error for article: {e}")
+                # Include article if quality filter fails
+                filtered_news.append(article)
+                quality_metrics["filtered_articles"] += 1
+
+        # 6. Sort by quality and relevance
+        filtered_news.sort(
+            key=lambda x: (
+                x.get("quality_score", 0) * 0.6 + 
+                x.get("relevance_score", 0) * 0.4
+            ),
+            reverse=True
+        )
+
+        # 7. Get AI sentiment analysis using LangGraph agent
         sentiment_analysis = await ai_agent.execute_task(
             AgentTask.NEWS_SENTIMENT_ANALYSIS,
-            query="Analyze overall crypto market sentiment",
+            query="Analyze overall crypto market sentiment from filtered news",
             symbols=["BTC", "ETH", "SOL", "XRP", "DOGE"],
         )
 
+        # 8. Calculate overall quality metrics
+        avg_quality = sum(quality_metrics["quality_scores"]) / len(quality_metrics["quality_scores"]) if quality_metrics["quality_scores"] else 0
+        
         return {
-            "news": combined_news[:20],  # Top 20 for MVP
+            "news": filtered_news[:25],  # Top 25 for Phase 3
             "sentiment": (
                 sentiment_analysis.analysis_results
                 if sentiment_analysis
                 else {"overall": "neutral", "score": 0.5}
             ),
             "sources": ["newsapi", "tavily", "hybrid_rag"],
-            "total_articles": len(combined_news),
+            "total_articles": len(filtered_news),
+            "quality_metrics": {
+                **quality_metrics,
+                "average_quality_score": round(avg_quality, 3),
+                "filter_rate": round(quality_metrics["filtered_out"] / quality_metrics["total_articles"] * 100, 1) if quality_metrics["total_articles"] > 0 else 0
+            },
             "cache_stats": get_cache_statistics(),
             "last_updated": datetime.now().isoformat(),
             "status": "success",
+            "phase": "3"
         }
     except Exception as e:
         print(f"News API error: {e}")
@@ -335,10 +420,71 @@ async def get_enhanced_news():
             "sentiment": {"overall": "neutral", "score": 0.5},
             "sources": [],
             "total_articles": 0,
+            "quality_metrics": {
+                "total_articles": 0,
+                "filtered_articles": 0,
+                "filtered_out": 0,
+                "average_quality_score": 0,
+                "filter_rate": 0
+            },
             "cache_stats": {},
             "last_updated": datetime.now().isoformat(),
             "status": "fallback",
             "error": str(e),
+            "phase": "3"
+        }
+
+
+@app.get("/api/news-quality-test")
+async def test_news_quality():
+    """Test endpoint for news quality filtering (Phase 3)."""
+    try:
+        from utils.data_quality_filter import DataQualityFilter
+        
+        quality_filter = DataQualityFilter()
+        
+        # Test articles
+        test_articles = [
+            {
+                "title": "Bitcoin Reaches New All-Time High as Institutional Adoption Grows",
+                "content": "Bitcoin has reached a new all-time high of $50,000 as major institutions continue to adopt cryptocurrency. The price surge comes amid growing acceptance from traditional financial institutions and increased retail interest.",
+                "source_url": "https://example.com/bitcoin-news",
+                "published_at": datetime.now().isoformat(),
+                "source": "test"
+            },
+            {
+                "title": "CLICK HERE TO WIN FREE BITCOIN!!!",
+                "content": "You won't believe what happened next! Click here to get free Bitcoin instantly! This is too good to be true!",
+                "source_url": "https://spam-site.com/free-bitcoin",
+                "published_at": datetime.now().isoformat(),
+                "source": "test"
+            }
+        ]
+        
+        results = []
+        for article in test_articles:
+            filtered = await quality_filter.filter_article(article)
+            results.append({
+                "original": article,
+                "filtered": {
+                    "is_high_quality": filtered.is_high_quality,
+                    "quality_score": filtered.quality_score,
+                    "sentiment_score": filtered.sentiment_score,
+                    "filtered_reasons": filtered.filtered_reasons
+                }
+            })
+        
+        return {
+            "test_results": results,
+            "status": "success",
+            "message": "Quality filter test completed"
+        }
+        
+    except Exception as e:
+        return {
+            "test_results": [],
+            "status": "error",
+            "error": str(e)
         }
 
 
