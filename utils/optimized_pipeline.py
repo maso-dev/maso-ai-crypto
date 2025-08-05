@@ -17,39 +17,40 @@ from utils.optimized_embedding import process_article_for_optimized_storage
 from utils.react_validation import validate_news_articles
 import asyncio
 
+
 class OptimizedNewsPipeline:
     """
     LangChain pipeline for optimized crypto news processing.
     """
-    
+
     def __init__(self):
         self.enrichment_chain = get_enrichment_chain()
-        
+
     async def process_single_article(self, article: Dict[str, Any]) -> Dict[str, Any]:
         """
         Process a single article through the optimized pipeline.
-        
+
         Steps:
         1. Enhance with temporal context
         2. Enrich with AI metadata
         3. Create summary-focused chunk
         4. Prepare for vector and graph storage
         """
-        
+
         print(f"🔄 Processing article: {article.get('title', '')[:50]}...")
-        
+
         # Step 1: Enhance with temporal context
         article = enhance_article_with_temporal_context(article)
         print(f"   ✅ Enhanced with temporal context")
-        
+
         # Step 2: Enrich with AI metadata
         enrichment_input = {
-            "title": article.get('title', ''),
-            "content": article.get('content', ''),
-            "source_name": article.get('source_name', ''),
-            "published_at": article.get('published_at', '')
+            "title": article.get("title", ""),
+            "content": article.get("content", ""),
+            "source_name": article.get("source_name", ""),
+            "published_at": article.get("published_at", ""),
         }
-        
+
         try:
             enrichment_result = await self.enrichment_chain.ainvoke(enrichment_input)
             print(f"   ✅ Enriched with AI metadata")
@@ -61,26 +62,30 @@ class OptimizedNewsPipeline:
                 "trust": 0.5,
                 "categories": ["Cryptocurrency"],
                 "macro_category": "Finance",
-                "summary": article.get('content', '')[:200] + "...",
+                "summary": article.get("content", "")[:200] + "...",
                 "urgency_score": 0.5,
                 "market_impact": "medium",
-                "time_relevance": "recent"
+                "time_relevance": "recent",
             }
-        
+
         # Step 3: Process for optimized storage
-        processed_data = await process_article_for_optimized_storage(article, enrichment_result)
+        processed_data = await process_article_for_optimized_storage(
+            article, enrichment_result
+        )
         print(f"   ✅ Prepared for vector and graph storage")
-        
+
         return processed_data
-    
-    async def process_articles_batch(self, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+    async def process_articles_batch(
+        self, articles: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
         Process a batch of articles through the optimized pipeline.
         """
         print(f"🚀 Processing {len(articles)} articles through optimized pipeline...")
-        
+
         processed_articles = []
-        
+
         for i, article in enumerate(articles):
             try:
                 processed = await self.process_single_article(article)
@@ -89,11 +94,15 @@ class OptimizedNewsPipeline:
             except Exception as e:
                 print(f"   ❌ Article {i+1}/{len(articles)} failed: {e}")
                 continue
-        
-        print(f"🎉 Pipeline completed: {len(processed_articles)}/{len(articles)} articles processed")
+
+        print(
+            f"🎉 Pipeline completed: {len(processed_articles)}/{len(articles)} articles processed"
+        )
         return processed_articles
-    
-    def get_vector_data_batch(self, processed_articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+    def get_vector_data_batch(
+        self, processed_articles: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
         Extract vector data for batch insertion into Milvus.
         """
@@ -101,8 +110,10 @@ class OptimizedNewsPipeline:
         for article in processed_articles:
             vector_data.append(article["vector_data"])
         return vector_data
-    
-    def get_graph_data_batch(self, processed_articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+    def get_graph_data_batch(
+        self, processed_articles: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
         Extract graph data for batch insertion into Neo4j.
         """
@@ -110,70 +121,79 @@ class OptimizedNewsPipeline:
         for article in processed_articles:
             graph_data.append(article["graph_data"])
         return graph_data
-    
-    def get_processing_summary(self, processed_articles: List[Dict[str, Any]], validation_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+
+    def get_processing_summary(
+        self,
+        processed_articles: List[Dict[str, Any]],
+        validation_summary: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         Generate a summary of the processing results.
         """
         if not processed_articles:
             return {"total_processed": 0}
-        
+
         # Extract metadata for analysis
         metadata_list = [article["metadata"] for article in processed_articles]
-        
+
         # Calculate statistics
         total_processed = len(processed_articles)
-        breaking_news = sum(1 for m in metadata_list if m.get('is_breaking', False))
-        recent_news = sum(1 for m in metadata_list if m.get('is_recent', False))
-        
+        breaking_news = sum(1 for m in metadata_list if m.get("is_breaking", False))
+        recent_news = sum(1 for m in metadata_list if m.get("is_recent", False))
+
         # Sentiment analysis
-        sentiments = [m.get('sentiment', 0.5) for m in metadata_list]
+        sentiments = [m.get("sentiment", 0.5) for m in metadata_list]
         avg_sentiment = sum(sentiments) / len(sentiments) if sentiments else 0.5
-        
+
         # Market impact distribution
         market_impacts = {}
         for m in metadata_list:
-            impact = m.get('market_impact', 'medium')
+            impact = m.get("market_impact", "medium")
             market_impacts[impact] = market_impacts.get(impact, 0) + 1
-        
+
         # Category distribution
         all_categories = []
         for m in metadata_list:
-            all_categories.extend(m.get('categories', []))
-        
+            all_categories.extend(m.get("categories", []))
+
         category_counts = {}
         for category in all_categories:
             category_counts[category] = category_counts.get(category, 0) + 1
-        
+
         summary = {
             "total_processed": total_processed,
             "breaking_news": breaking_news,
             "recent_news": recent_news,
             "avg_sentiment": round(avg_sentiment, 3),
             "market_impact_distribution": market_impacts,
-            "top_categories": sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:5],
+            "top_categories": sorted(
+                category_counts.items(), key=lambda x: x[1], reverse=True
+            )[:5],
             "processing_stats": {
                 "summary_focused_chunks": total_processed,
                 "vector_ready": total_processed,
-                "graph_ready": total_processed
-            }
+                "graph_ready": total_processed,
+            },
         }
-        
+
         # Add validation summary if available
         if validation_summary:
             summary["validation_stats"] = validation_summary
-        
+
         return summary
 
+
 # Convenience function for easy pipeline usage
-async def run_optimized_pipeline(articles: List[Dict[str, Any]], enable_validation: bool = True) -> Dict[str, Any]:
+async def run_optimized_pipeline(
+    articles: List[Dict[str, Any]], enable_validation: bool = True
+) -> Dict[str, Any]:
     """
     Run the complete optimized pipeline on a list of articles.
-    
+
     Args:
         articles: List of articles to process
         enable_validation: Whether to enable REACT validation
-    
+
     Returns:
         Dict containing:
         - processed_articles: List of processed articles
@@ -182,12 +202,12 @@ async def run_optimized_pipeline(articles: List[Dict[str, Any]], enable_validati
         - summary: Processing statistics
         - validation_summary: REACT validation statistics (if enabled)
     """
-    
+
     pipeline = OptimizedNewsPipeline()
-    
+
     # Process articles
     processed_articles = await pipeline.process_articles_batch(articles)
-    
+
     # REACT validation (optional)
     validation_summary = None
     if enable_validation and articles:
@@ -196,41 +216,49 @@ async def run_optimized_pipeline(articles: List[Dict[str, Any]], enable_validati
             # Extract original articles for validation
             original_articles = []
             for processed in processed_articles:
-                original_articles.append({
-                    "title": processed["metadata"]["title"],
-                    "content": processed["metadata"]["original_content"],
-                    "source_name": processed["metadata"]["source_name"],
-                    "published_at": processed["metadata"]["published_at"]
-                })
-            
+                original_articles.append(
+                    {
+                        "title": processed["metadata"]["title"],
+                        "content": processed["metadata"]["original_content"],
+                        "source_name": processed["metadata"]["source_name"],
+                        "published_at": processed["metadata"]["published_at"],
+                    }
+                )
+
             # Run validation
-            validated_articles, validation_summary = await validate_news_articles(original_articles)
-            
+            validated_articles, validation_summary = await validate_news_articles(
+                original_articles
+            )
+
             # Merge validation data back into processed articles
             for i, processed in enumerate(processed_articles):
-                if i < len(validated_articles) and "validation" in validated_articles[i]:
-                    processed["metadata"]["validation"] = validated_articles[i]["validation"]
-            
-            print(f"✅ REACT validation completed: {validation_summary.get('total_validated', 0)} articles validated")
-            
+                if (
+                    i < len(validated_articles)
+                    and "validation" in validated_articles[i]
+                ):
+                    processed["metadata"]["validation"] = validated_articles[i][
+                        "validation"
+                    ]
+
+            print(
+                f"✅ REACT validation completed: {validation_summary.get('total_validated', 0)} articles validated"
+            )
+
         except Exception as e:
             print(f"⚠️ REACT validation failed: {e}")
-            validation_summary = {
-                "total_validated": 0,
-                "error": str(e)
-            }
-    
+            validation_summary = {"total_validated": 0, "error": str(e)}
+
     # Extract data for storage
     vector_data = pipeline.get_vector_data_batch(processed_articles)
     graph_data = pipeline.get_graph_data_batch(processed_articles)
-    
+
     # Generate summary with validation data
     summary = pipeline.get_processing_summary(processed_articles, validation_summary)
-    
+
     return {
         "processed_articles": processed_articles,
         "vector_data": vector_data,
         "graph_data": graph_data,
         "summary": summary,
-        "validation_summary": validation_summary
-    } 
+        "validation_summary": validation_summary,
+    }

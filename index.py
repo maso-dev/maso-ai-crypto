@@ -13,4 +13,4 @@ sys.path.append(str(Path(__file__).parent))
 from main import app
 
 # Export the app for Vercel (FastAPI is ASGI compatible)
-handler = app 
+handler = app

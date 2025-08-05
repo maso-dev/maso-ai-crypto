@@ -9,9 +9,11 @@ from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+
 @dataclass
 class APIConfig:
     """API configuration settings."""
+
     name: str
     key_name: str
     key_value: Optional[str]
@@ -21,9 +23,11 @@ class APIConfig:
     icon: str = "🔧"
     category: str = "external"
 
+
 @dataclass
 class ServiceConfig:
     """Service configuration settings."""
+
     name: str
     description: str
     icon: str
@@ -32,9 +36,10 @@ class ServiceConfig:
     dependencies: list
     health_check_url: Optional[str] = None
 
+
 class ConfigManager:
     """Centralized configuration manager."""
-    
+
     def __init__(self):
         self.api_configs = {
             "openai": APIConfig(
@@ -44,7 +49,7 @@ class ConfigManager:
                 base_url="https://api.openai.com/v1",
                 description="AI language model and embeddings",
                 icon="🤖",
-                category="ai"
+                category="ai",
             ),
             "binance": APIConfig(
                 name="Binance",
@@ -53,7 +58,7 @@ class ConfigManager:
                 base_url="https://api.binance.com",
                 description="Cryptocurrency trading and portfolio data",
                 icon="💰",
-                category="trading"
+                category="trading",
             ),
             "newsapi": APIConfig(
                 name="NewsAPI",
@@ -62,7 +67,7 @@ class ConfigManager:
                 base_url="https://newsapi.org/v2",
                 description="News and market sentiment data",
                 icon="📰",
-                category="news"
+                category="news",
             ),
             "livecoinwatch": APIConfig(
                 name="LiveCoinWatch",
@@ -71,7 +76,7 @@ class ConfigManager:
                 base_url="https://api.livecoinwatch.com",
                 description="Real-time cryptocurrency price data",
                 icon="🪙",
-                category="pricing"
+                category="pricing",
             ),
             "tavily": APIConfig(
                 name="Tavily",
@@ -80,7 +85,7 @@ class ConfigManager:
                 base_url="https://api.tavily.com",
                 description="Real-time web search and news aggregation",
                 icon="🔍",
-                category="search"
+                category="search",
             ),
             "langsmith": APIConfig(
                 name="LangSmith",
@@ -89,7 +94,7 @@ class ConfigManager:
                 base_url="https://api.smith.langchain.com",
                 description="AI workflow tracing and monitoring",
                 icon="🔍",
-                category="monitoring"
+                category="monitoring",
             ),
             "neo4j": APIConfig(
                 name="Neo4j",
@@ -98,10 +103,10 @@ class ConfigManager:
                 base_url="bolt://localhost:7687",
                 description="Graph database for knowledge graphs",
                 icon="🕸️",
-                category="database"
-            )
+                category="database",
+            ),
         }
-        
+
         self.service_configs = {
             "ai_agent": ServiceConfig(
                 name="AI Agent System",
@@ -110,7 +115,7 @@ class ConfigManager:
                 category="backend",
                 endpoints=["/api/dream-team", "/api/opportunities"],
                 dependencies=["openai", "langsmith"],
-                health_check_url="/api/health"
+                health_check_url="/api/health",
             ),
             "vector_rag": ServiceConfig(
                 name="Vector RAG",
@@ -119,7 +124,7 @@ class ConfigManager:
                 category="backend",
                 endpoints=["/api/news-briefing"],
                 dependencies=["openai"],
-                health_check_url="/api/health"
+                health_check_url="/api/health",
             ),
             "hybrid_rag": ServiceConfig(
                 name="Hybrid RAG",
@@ -128,7 +133,7 @@ class ConfigManager:
                 category="backend",
                 endpoints=["/api/context"],
                 dependencies=["openai", "neo4j"],
-                health_check_url="/api/health"
+                health_check_url="/api/health",
             ),
             "livecoinwatch_processor": ServiceConfig(
                 name="LiveCoinWatch Processor",
@@ -137,7 +142,7 @@ class ConfigManager:
                 category="backend",
                 endpoints=["/livecoinwatch/health", "/livecoinwatch/latest-prices"],
                 dependencies=["livecoinwatch"],
-                health_check_url="/livecoinwatch/health"
+                health_check_url="/livecoinwatch/health",
             ),
             "realtime_data": ServiceConfig(
                 name="Real-time Data",
@@ -146,7 +151,7 @@ class ConfigManager:
                 category="backend",
                 endpoints=["/api/portfolio", "/api/top-movers"],
                 dependencies=["binance"],
-                health_check_url="/api/health"
+                health_check_url="/api/health",
             ),
             "data_quality_filter": ServiceConfig(
                 name="Data Quality Filter",
@@ -155,51 +160,60 @@ class ConfigManager:
                 category="backend",
                 endpoints=["/api/news-briefing"],
                 dependencies=["openai"],
-                health_check_url="/api/health"
+                health_check_url="/api/health",
             ),
             "refresh_processor": ServiceConfig(
                 name="Refresh Process Engine",
                 description="Flexible data processing with configurable intervals",
                 icon="🔄",
                 category="backend",
-                endpoints=["/refresh/quick", "/refresh/hourly", "/refresh/daily", "/refresh/manual"],
+                endpoints=[
+                    "/refresh/quick",
+                    "/refresh/hourly",
+                    "/refresh/daily",
+                    "/refresh/manual",
+                ],
                 dependencies=["livecoinwatch", "openai", "newsapi", "tavily"],
-                health_check_url="/refresh/status"
+                health_check_url="/refresh/status",
             ),
             "tavily_search": ServiceConfig(
                 name="Tavily Search",
                 description="Real-time web search and news aggregation",
                 icon="🔍",
                 category="backend",
-                endpoints=["/api/tavily/news", "/api/tavily/finance", "/api/tavily/web"],
+                endpoints=[
+                    "/api/tavily/news",
+                    "/api/tavily/finance",
+                    "/api/tavily/web",
+                ],
                 dependencies=["tavily"],
-                health_check_url="/api/tavily/status"
-            )
+                health_check_url="/api/tavily/status",
+            ),
         }
-    
+
     def get_api_config(self, name: str) -> Optional[APIConfig]:
         """Get API configuration by name."""
         return self.api_configs.get(name)
-    
+
     def get_service_config(self, name: str) -> Optional[ServiceConfig]:
         """Get service configuration by name."""
         return self.service_configs.get(name)
-    
+
     def get_all_api_configs(self) -> Dict[str, APIConfig]:
         """Get all API configurations."""
         return self.api_configs
-    
+
     def get_all_service_configs(self) -> Dict[str, ServiceConfig]:
         """Get all service configurations."""
         return self.service_configs
-    
+
     def is_api_configured(self, name: str) -> bool:
         """Check if API is properly configured."""
         config = self.get_api_config(name)
         if not config:
             return False
         return bool(config.key_value)
-    
+
     def get_missing_apis(self) -> list:
         """Get list of missing API configurations."""
         missing = []
@@ -207,7 +221,7 @@ class ConfigManager:
             if config.is_required and not config.key_value:
                 missing.append(name)
         return missing
-    
+
     def get_configured_apis(self) -> list:
         """Get list of configured APIs."""
         configured = []
@@ -215,7 +229,7 @@ class ConfigManager:
             if config.key_value:
                 configured.append(name)
         return configured
-    
+
     def get_config_summary(self) -> Dict[str, Any]:
         """Get comprehensive configuration summary."""
         return {
@@ -230,7 +244,7 @@ class ConfigManager:
                     "configured": bool(config.key_value),
                     "category": config.category,
                     "icon": config.icon,
-                    "description": config.description
+                    "description": config.description,
                 }
                 for name, config in self.api_configs.items()
             },
@@ -241,14 +255,16 @@ class ConfigManager:
                     "icon": config.icon,
                     "description": config.description,
                     "endpoints": config.endpoints,
-                    "dependencies": config.dependencies
+                    "dependencies": config.dependencies,
                 }
                 for name, config in self.service_configs.items()
-            }
+            },
         }
+
 
 # Global instance
 config_manager = ConfigManager()
+
 
 # Convenience functions
 def get_api_key(name: str) -> Optional[str]:
@@ -256,10 +272,12 @@ def get_api_key(name: str) -> Optional[str]:
     config = config_manager.get_api_config(name)
     return config.key_value if config else None
 
+
 def is_api_available(name: str) -> bool:
     """Check if API is available (configured and working)."""
     return config_manager.is_api_configured(name)
 
+
 def get_config_summary() -> Dict[str, Any]:
     """Get configuration summary."""
-    return config_manager.get_config_summary() 
+    return config_manager.get_config_summary()

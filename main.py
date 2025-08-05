@@ -515,9 +515,9 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
             "oversold_assets": [],
             "overbought_assets": [],
             "volatile_assets": [],
-            "stable_assets": []
+            "stable_assets": [],
         }
-        
+
         if portfolio_data and portfolio_data.assets:
             for asset in portfolio_data.assets:
                 try:
@@ -528,12 +528,14 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                         )
                     )
                     technical_indicators[asset.asset] = indicators
-                    
+
                     # Analyze indicators for sentiment
                     if indicators:
-                        sentiment = _analyze_technical_sentiment(asset.asset, indicators)
+                        sentiment = _analyze_technical_sentiment(
+                            asset.asset, indicators
+                        )
                         technical_indicators[asset.asset]["sentiment"] = sentiment
-                        
+
                         # Categorize assets based on technical analysis
                         if sentiment.get("trend") == "bullish":
                             technical_summary["trending_assets"].append(asset.asset)
@@ -545,7 +547,7 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                             technical_summary["volatile_assets"].append(asset.asset)
                         else:
                             technical_summary["stable_assets"].append(asset.asset)
-                            
+
                 except Exception as e:
                     print(f"Technical indicators failed for {asset.asset}: {e}")
                     continue
@@ -602,10 +604,22 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                 "BTC": {
                     "rsi_14": 65.2,
                     "macd": {"macd": 1250.5, "signal": 1200.0, "histogram": 50.5},
-                    "bollinger_bands": {"upper": 45000, "middle": 42000, "lower": 39000},
-                    "moving_averages": {"sma_20": 41500, "sma_50": 40000, "ema_12": 41800},
+                    "bollinger_bands": {
+                        "upper": 45000,
+                        "middle": 42000,
+                        "lower": 39000,
+                    },
+                    "moving_averages": {
+                        "sma_20": 41500,
+                        "sma_50": 40000,
+                        "ema_12": 41800,
+                    },
                     "volatility": 0.045,
-                    "sentiment": {"trend": "bullish", "strength": "moderate", "confidence": 0.7}
+                    "sentiment": {
+                        "trend": "bullish",
+                        "strength": "moderate",
+                        "confidence": 0.7,
+                    },
                 },
                 "ETH": {
                     "rsi_14": 58.7,
@@ -613,10 +627,14 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                     "bollinger_bands": {"upper": 3200, "middle": 3000, "lower": 2800},
                     "moving_averages": {"sma_20": 3050, "sma_50": 2950, "ema_12": 3080},
                     "volatility": 0.052,
-                    "sentiment": {"trend": "neutral", "strength": "weak", "confidence": 0.5}
-                }
+                    "sentiment": {
+                        "trend": "neutral",
+                        "strength": "weak",
+                        "confidence": 0.5,
+                    },
+                },
             }
-            
+
             return {
                 "portfolio": {
                     "total_value_usdt": 36500.0,
@@ -658,7 +676,7 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                     "oversold_assets": [],
                     "overbought_assets": [],
                     "volatile_assets": ["ETH"],
-                    "stable_assets": []
+                    "stable_assets": [],
                 },
                 "ai_analysis": ai_analysis.analysis_results if ai_analysis else None,
                 "last_updated": datetime.now().isoformat(),
@@ -708,7 +726,7 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                 "oversold_assets": [],
                 "overbought_assets": [],
                 "volatile_assets": [],
-                "stable_assets": []
+                "stable_assets": [],
             },
             "ai_analysis": None,
             "last_updated": datetime.now().isoformat(),
@@ -717,15 +735,17 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
         }
 
 
-def _analyze_technical_sentiment(symbol: str, indicators: Dict[str, Any]) -> Dict[str, Any]:
+def _analyze_technical_sentiment(
+    symbol: str, indicators: Dict[str, Any]
+) -> Dict[str, Any]:
     """Analyze technical indicators to determine sentiment."""
     sentiment = {
         "trend": "neutral",
         "strength": "weak",
         "confidence": 0.5,
-        "signals": []
+        "signals": [],
     }
-    
+
     try:
         # RSI Analysis
         rsi = indicators.get("rsi_14", 50)
@@ -735,14 +755,14 @@ def _analyze_technical_sentiment(symbol: str, indicators: Dict[str, Any]) -> Dic
         elif rsi < 30:
             sentiment["signals"].append("RSI oversold")
             sentiment["trend"] = "bullish"
-        
+
         # MACD Analysis
         macd_data = indicators.get("macd", {})
         if macd_data:
             macd = macd_data.get("macd", 0)
             signal = macd_data.get("signal", 0)
             histogram = macd_data.get("histogram", 0)
-            
+
             if macd > signal and histogram > 0:
                 sentiment["signals"].append("MACD bullish crossover")
                 if sentiment["trend"] == "neutral":
@@ -751,26 +771,26 @@ def _analyze_technical_sentiment(symbol: str, indicators: Dict[str, Any]) -> Dic
                 sentiment["signals"].append("MACD bearish crossover")
                 if sentiment["trend"] == "neutral":
                     sentiment["trend"] = "bearish"
-        
+
         # Bollinger Bands Analysis
         bb_data = indicators.get("bollinger_bands", {})
         if bb_data:
             upper = bb_data.get("upper", 0)
             lower = bb_data.get("lower", 0)
             middle = bb_data.get("middle", 0)
-            
+
             # This would need current price to be meaningful
             # For now, just note if bands are wide (volatile) or narrow (stable)
             band_width = (upper - lower) / middle if middle > 0 else 0
             if band_width > 0.1:
                 sentiment["signals"].append("High volatility (wide Bollinger Bands)")
-        
+
         # Moving Averages Analysis
         ma_data = indicators.get("moving_averages", {})
         if ma_data:
             sma_20 = ma_data.get("sma_20", 0)
             sma_50 = ma_data.get("sma_50", 0)
-            
+
             if sma_20 > sma_50:
                 sentiment["signals"].append("Short-term trend above long-term")
                 if sentiment["trend"] == "neutral":
@@ -779,12 +799,12 @@ def _analyze_technical_sentiment(symbol: str, indicators: Dict[str, Any]) -> Dic
                 sentiment["signals"].append("Short-term trend below long-term")
                 if sentiment["trend"] == "neutral":
                     sentiment["trend"] = "bearish"
-        
+
         # Volatility Analysis
         volatility = indicators.get("volatility", 0)
         if volatility > 0.05:
             sentiment["signals"].append("High volatility detected")
-        
+
         # Calculate confidence based on number of confirming signals
         signal_count = len(sentiment["signals"])
         if signal_count >= 3:
@@ -798,10 +818,10 @@ def _analyze_technical_sentiment(symbol: str, indicators: Dict[str, Any]) -> Dic
             sentiment["confidence"] = 0.4
         else:
             sentiment["confidence"] = 0.2
-            
+
     except Exception as e:
         print(f"Error analyzing technical sentiment for {symbol}: {e}")
-    
+
     return sentiment
 
 
@@ -810,51 +830,55 @@ async def get_technical_analysis(symbol: str, days: int = 30) -> Dict[str, Any]:
     """Get comprehensive technical analysis for a specific symbol (Phase 2)."""
     try:
         from utils.livecoinwatch_processor import LiveCoinWatchProcessor
-        
+
         processor = LiveCoinWatchProcessor()
-        
+
         # Get latest price data
         latest_prices = await processor.get_latest_prices([symbol])
         price_data = latest_prices.get(symbol)
-        
+
         # Get comprehensive technical indicators
         indicators = await processor.calculate_technical_indicators(symbol, days)
-        
+
         # Analyze sentiment
         sentiment = _analyze_technical_sentiment(symbol, indicators)
-        
+
         # Get historical data for charting
         historical_data = await processor.collect_historical_data(symbol, days)
-        
+
         return {
             "symbol": symbol,
             "current_price": price_data.price_usd if price_data else None,
             "price_change_24h": price_data.change_24h if price_data else None,
             "technical_indicators": indicators,
             "sentiment_analysis": sentiment,
-            "historical_data": [
-                {
-                    "date": data.date.isoformat(),
-                    "open": data.open_price,
-                    "high": data.high_price,
-                    "low": data.low_price,
-                    "close": data.close_price,
-                    "volume": data.volume
-                }
-                for data in historical_data
-            ] if historical_data else [],
+            "historical_data": (
+                [
+                    {
+                        "date": data.date.isoformat(),
+                        "open": data.open_price,
+                        "high": data.high_price,
+                        "low": data.low_price,
+                        "close": data.close_price,
+                        "volume": data.volume,
+                    }
+                    for data in historical_data
+                ]
+                if historical_data
+                else []
+            ),
             "analysis_period": f"{days} days",
             "last_updated": datetime.now().isoformat(),
-            "status": "success"
+            "status": "success",
         }
-        
+
     except Exception as e:
         print(f"Technical analysis error for {symbol}: {e}")
         return {
             "symbol": symbol,
             "error": str(e),
             "status": "error",
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
 
