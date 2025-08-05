@@ -8,25 +8,26 @@ python-multipart==0.0.6
 httpx==0.25.2
 
 # Data processing and validation
-pydantic==2.5.0
-pydantic-settings==2.1.0
+pydantic>=2.6.0,<3.0.0
+pydantic-settings>=2.1.0
 
 # AI and Machine Learning (LangChain stack - minimal)
-openai==1.24.0
-langchain==0.1.0
-langchain-openai==0.0.2
-langchain-core==0.1.8
+openai>=1.24.0
+langchain>=0.1.0
+langchain-openai>=0.0.2
+langchain-core>=0.1.8
+langgraph>=0.0.20
 
 # Crypto and trading APIs
 python-binance==1.0.0
 
 # News and data APIs
 newsapi-python==0.2.6
-tavily-python==0.3.1
+tavily-python>=0.3.1
 
 # Database and vector search
-neo4j==5.15.0
-pymilvus==2.3.4
+neo4j>=5.15.0
+pymilvus>=2.3.4
 
 # Utilities
 python-dotenv==1.0.0
@@ -43,4 +44,4 @@ pytest-asyncio==0.24.0
 flake8==7.3.0
 black==25.1.0
 bandit==1.8.6
-safety==3.6.0
+safety>=3.6.0
