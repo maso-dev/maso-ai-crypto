@@ -125,41 +125,60 @@ class EnhancedAgentEngine:
     async def get_market_data(
         self, symbols: Optional[List[str]]
     ) -> Dict[str, MarketData]:
-        """Fetch real-time market data for symbols."""
+        """Fetch real-time market data for symbols using LiveCoinWatch."""
         market_data = {}
 
         try:
-            # Fetch 24h ticker data from Binance
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    "https://api.binance.com/api/v3/ticker/24hr"
-                )
-                if response.status_code == 200:
-                    tickers = response.json()
+            # Use LiveCoinWatch as primary source
+            from utils.livecoinwatch_processor import get_latest_prices, calculate_technical_indicators
+            
+            if not symbols:
+                return {}
 
-                    if not symbols:
-                        return {}
-
-                    for symbol in symbols:
-                        # Find matching ticker
-                        ticker = next(
-                            (t for t in tickers if t["symbol"] == f"{symbol}USDT"), None
-                        )
-                        if ticker:
-                            market_data[symbol] = MarketData(
-                                symbol=symbol,
-                                current_price=float(ticker["lastPrice"]),
-                                price_change_24h=float(ticker["priceChange"]),
-                                price_change_percent_24h=float(
-                                    ticker["priceChangePercent"]
-                                ),
-                                volume_24h=float(ticker["volume"]),
-                                market_cap=None,  # Would need additional API call
-                                rsi=self._calculate_rsi(ticker),  # Simplified RSI
-                                sentiment_score=self._calculate_sentiment_score(ticker),
-                            )
+            # Get real-time prices from LiveCoinWatch
+            latest_prices = await get_latest_prices(symbols)
+            
+            for symbol in symbols:
+                if symbol in latest_prices:
+                    price_data = latest_prices[symbol]
+                    
+                    # Get technical indicators
+                    try:
+                        indicators = await calculate_technical_indicators(symbol, days=30)
+                        rsi = indicators.get("rsi", 50.0)
+                    except Exception:
+                        rsi = 50.0  # Fallback
+                    
+                    market_data[symbol] = MarketData(
+                        symbol=symbol,
+                        current_price=price_data.price_usd,
+                        price_change_24h=price_data.change_24h,
+                        price_change_percent_24h=getattr(price_data, 'change_24h_percent', 0.0),
+                        volume_24h=price_data.volume_24h,
+                        market_cap=price_data.market_cap,
+                        rsi=rsi,
+                        sentiment_score=self._calculate_sentiment_score_livecoinwatch(price_data),
+                    )
+                    
         except Exception as e:
-            print(f"Error fetching market data: {e}")
+            print(f"Error fetching LiveCoinWatch market data: {e}")
+            
+            # Fallback: Try to get basic data without technical indicators
+            try:
+                if symbols:  # Check if symbols is not None
+                    for symbol in symbols:
+                        market_data[symbol] = MarketData(
+                            symbol=symbol,
+                            current_price=0.0,  # No data available
+                            price_change_24h=0.0,
+                            price_change_percent_24h=0.0,
+                            volume_24h=0.0,
+                            market_cap=None,
+                            rsi=50.0,
+                            sentiment_score=0.0,
+                        )
+            except Exception as fallback_error:
+                print(f"Fallback market data also failed: {fallback_error}")
 
         return market_data
 
@@ -200,6 +219,22 @@ class EnhancedAgentEngine:
             return -0.3  # Negative
         else:
             return 0.0  # Neutral
+
+    def _calculate_sentiment_score_livecoinwatch(self, price_data) -> float:
+        """Calculate sentiment score based on LiveCoinWatch price data."""
+        try:
+            price_change = price_data.change_24h_percent if hasattr(price_data, 'change_24h_percent') else 0.0
+            volume = price_data.volume_24h if hasattr(price_data, 'volume_24h') else 0.0
+
+            # Simple sentiment calculation
+            if price_change > 2 and volume > 1000000:
+                return 0.7  # Positive
+            elif price_change < -2:
+                return -0.3  # Negative
+            else:
+                return 0.0  # Neutral
+        except Exception:
+            return 0.0  # Neutral if calculation fails
 
     def analyze_portfolio(
         self, portfolio_data: PortfolioData, market_data: Dict[str, MarketData]

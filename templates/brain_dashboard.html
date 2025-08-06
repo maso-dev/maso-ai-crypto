@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masonic Brain Dashboard</title>
+    <title>🎓 AI Agent Capstone - Brain Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/static/css/ai-flow.css?v=2">
     <style>
         /* Apple Liquid Glass Design System */
         :root {
@@ -480,10 +481,11 @@
                     <span class="version-badge">Enhanced v1.0</span>
                 </div>
                 <div class="header-nav">
-                    <a href="/">← Back to App</a>
+                    <a href="/">← Home</a>
+                    <a href="/dashboard">Portfolio</a>
                     <a href="/admin">Admin</a>
                     <button onclick="refreshDashboard()" class="liquid-button" style="margin-left: 1rem;">
-                        🔄 Refresh Data
+                        🔄 Refresh
                     </button>
                 </div>
             </div>
@@ -491,144 +493,61 @@
 
         <!-- Main Content -->
         <main class="main-container">
-            <!-- Status Overview -->
-            <div class="status-grid">
-                <div class="status-card">
-                    <div class="status-card-header">
-                        <div class="status-icon brain">🧠</div>
-                        <div class="status-info">
-                            <h3>Brain Status</h3>
-                            <p id="brain-status">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="status-card">
-                    <div class="status-card-header">
-                        <div class="status-icon news">📰</div>
-                        <div class="status-info">
-                            <h3>News Pipeline</h3>
-                            <p id="news-status">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="status-card">
-                    <div class="status-card-header">
-                        <div class="status-icon langsmith">🔍</div>
-                        <div class="status-info">
-                            <h3>LangSmith</h3>
-                            <p id="langsmith-status">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="status-card">
-                    <div class="status-card-header">
-                        <div class="status-icon performance">⚡</div>
-                        <div class="status-info">
-                            <h3>Performance</h3>
-                            <p id="performance-status">Loading...</p>
-                        </div>
-                    </div>
-                </div>
+            <!-- AI Agent Status Header -->
+            <div class="ai-status-header">
+                <div class="status-badge" id="agent-status">Ready</div>
+                <div class="status-description">AI Agent is ready to process real-time data</div>
             </div>
 
-            <!-- Main Dashboard Grid -->
-            <div class="dashboard-grid">
-                <!-- Left Column: News Processing -->
-                <div class="space-y-6">
-                    <!-- News Processing Panel -->
-                    <div class="liquid-card">
-                        <div class="card-header">
-                            <span class="card-icon">📰</span>
-                            <h2 class="card-title">News Processing Pipeline</h2>
-                        </div>
-                        <div class="card-content">
-                            <div class="control-panel">
-                                <button class="liquid-button primary" onclick="startNewsProcessing()">
-                                    <span>🚀</span>
-                                    Start Processing
-                                </button>
-                                <button class="liquid-button success" onclick="refreshNewsData()">
-                                    <span>🔄</span>
-                                    Refresh Data
-                                </button>
-                                <button class="liquid-button warning" onclick="clearNewsCache()">
-                                    <span>🗑️</span>
-                                    Clear Cache
-                                </button>
-                            </div>
-                            <div id="news-processing-content">
-                                <div class="liquid-loading"></div> Loading news processing data...
-                            </div>
-                        </div>
-                    </div>
+            <!-- Flow Controls -->
+            <div class="flow-controls">
+                <button id="trigger-analysis" class="flow-button primary">
+                    🧠 Trigger AI Analysis
+                </button>
+                <button id="refresh-flow" class="flow-button secondary">
+                    🔄 Refresh Flow
+                </button>
+            </div>
 
-                    <!-- AI Agent Status -->
-                    <div class="liquid-card">
-                        <div class="card-header">
-                            <span class="card-icon">🤖</span>
-                            <h2 class="card-title">AI Agent Status</h2>
-                        </div>
-                        <div class="card-content">
-                            <div id="agent-status-content">
-                                <div class="liquid-loading"></div> Loading agent status...
-                            </div>
-                        </div>
-                    </div>
+            <!-- AI Flow Steps -->
+            <div id="ai-flow-steps">
+                <!-- Flow steps will be rendered by JavaScript -->
+            </div>
 
-                    <!-- Performance Metrics -->
-                    <div class="liquid-card">
-                        <div class="card-header">
-                            <span class="card-icon">📊</span>
-                            <h2 class="card-title">Performance Metrics</h2>
-                        </div>
-                        <div class="card-content">
-                            <div class="chart-container">
-                                <canvas id="performanceChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Article Preview -->
+            <div id="article-preview">
+                <!-- Article preview will be shown during processing -->
+            </div>
 
-                <!-- Right Column: System Info -->
-                <div class="space-y-6">
-                    <!-- System Health -->
-                    <div class="liquid-card">
-                        <div class="card-header">
-                            <span class="card-icon">💚</span>
-                            <h2 class="card-title">System Health</h2>
-                        </div>
-                        <div class="card-content">
-                            <div id="system-health-content">
-                                <div class="liquid-loading"></div> Loading system health...
-                            </div>
-                        </div>
-                    </div>
+            <!-- Analysis Results -->
+            <div id="analysis-results">
+                <!-- Final analysis results will be displayed here -->
+            </div>
 
-                    <!-- Recent Activity -->
-                    <div class="liquid-card">
-                        <div class="card-header">
-                            <span class="card-icon">📝</span>
-                            <h2 class="card-title">Recent Activity</h2>
-                        </div>
-                        <div class="card-content">
-                            <div id="recent-activity-content">
-                                <div class="liquid-loading"></div> Loading recent activity...
-                            </div>
-                        </div>
+            <!-- Educational Features -->
+            <div class="educational-section">
+                <div class="liquid-card">
+                    <div class="card-header">
+                        <span class="card-icon">🎓</span>
+                        <h2 class="card-title">Capstone Features</h2>
                     </div>
-
-                    <!-- Configuration -->
-                    <div class="liquid-card">
-                        <div class="card-header">
-                            <span class="card-icon">⚙️</span>
-                            <h2 class="card-title">Configuration</h2>
-                        </div>
-                        <div class="card-content">
-                            <div id="configuration-content">
-                                <div class="liquid-loading"></div> Loading configuration...
+                    <div class="card-content">
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <h4>🧠 LangGraph Flow</h4>
+                                <p>Real-time visualization of AI agent decision-making steps</p>
+                            </div>
+                            <div class="feature-item">
+                                <h4>📊 Confidence Scoring</h4>
+                                <p>AI-generated confidence levels for each analysis step</p>
+                            </div>
+                            <div class="feature-item">
+                                <h4>⏱️ Processing Metrics</h4>
+                                <p>Real-time performance tracking and timing analysis</p>
+                            </div>
+                            <div class="feature-item">
+                                <h4>📄 Article Preview</h4>
+                                <p>Live preview of articles being processed by the AI</p>
                             </div>
                         </div>
                     </div>
@@ -888,43 +807,80 @@
             });
         }
 
-        // Control functions
-        function startNewsProcessing() {
-            console.log('Starting news processing...');
-            // Add implementation here
-        }
-
-        function refreshNewsData() {
-            console.log('Refreshing news data...');
-            loadNewsProcessingData();
-        }
-
-        function clearNewsCache() {
-            console.log('Clearing news cache...');
-            // Add implementation here
-        }
-
-        // Refresh all dashboard data
-        async function refreshDashboard() {
-            console.log('🔄 Refreshing dashboard data...');
-            const refreshButton = document.querySelector('button[onclick="refreshDashboard()"]');
-            if (refreshButton) {
-                refreshButton.innerHTML = '🔄 Refreshing...';
-                refreshButton.disabled = true;
-            }
-
-            try {
-                await loadDashboardData();
-                console.log('✅ Dashboard refreshed successfully');
-            } catch (error) {
-                console.error('❌ Error refreshing dashboard:', error);
-            } finally {
-                if (refreshButton) {
-                    refreshButton.innerHTML = '🔄 Refresh Data';
-                    refreshButton.disabled = false;
+    </script>
+    <script src="/static/js/ai-flow-visualizer.js?v=3"></script>
+    <script>
+        // Additional styles for the new brain dashboard
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add custom styles for the new layout
+            const style = document.createElement('style');
+            style.textContent = `
+                .ai-status-header {
+                    text-align: center;
+                    margin: 2rem 0;
+                    padding: 2rem;
+                    background: var(--glass-primary);
+                    backdrop-filter: var(--glass-blur);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 1rem;
                 }
-            }
-        }
+                
+                .status-badge {
+                    display: inline-block;
+                    padding: 0.5rem 1.5rem;
+                    background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+                    color: white;
+                    border-radius: 2rem;
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    margin-bottom: 1rem;
+                }
+                
+                .status-description {
+                    color: rgba(255, 255, 255, 0.8);
+                    font-size: 1rem;
+                }
+                
+                .educational-section {
+                    margin-top: 3rem;
+                }
+                
+                .feature-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 1.5rem;
+                    margin-top: 1rem;
+                }
+                
+                .feature-item {
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 0.75rem;
+                    padding: 1.5rem;
+                    transition: all 0.3s ease;
+                }
+                
+                .feature-item:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                    border-color: rgba(255, 255, 255, 0.2);
+                    transform: translateY(-2px);
+                }
+                
+                .feature-item h4 {
+                    color: var(--neon-blue);
+                    margin: 0 0 0.5rem 0;
+                    font-size: 1.1rem;
+                }
+                
+                .feature-item p {
+                    color: rgba(255, 255, 255, 0.8);
+                    margin: 0;
+                    font-size: 0.9rem;
+                    line-height: 1.5;
+                }
+            `;
+            document.head.appendChild(style);
+        });
     </script>
 </body>
 

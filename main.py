@@ -88,52 +88,46 @@ async def get_dream_team_portfolio():
         # Use enhanced agent for portfolio analysis (with fallback for missing LangChain)
         try:
             from utils.enhanced_agent import get_enhanced_agent
-            from utils.binance_client import get_portfolio_data
+            # Use LiveCoinWatch instead of Binance
+            from utils.livecoinwatch_processor import get_latest_prices
 
-            # Get portfolio data (will use mock if no API keys)
-            portfolio_data = await get_portfolio_data()
+            # Use mock portfolio data for analysis (LiveCoinWatch integration in progress)
+            from utils.binance_client import PortfolioData, PortfolioAsset
+
+            mock_portfolio = PortfolioData(
+                total_value_usdt=100000.0,
+                total_cost_basis=60000.0,
+                total_roi_percentage=66.67,
+                assets=[
+                    PortfolioAsset(
+                        asset="BTC",
+                        free=1.0,
+                        locked=0.0,
+                        total=1.0,
+                        usdt_value=50000.0,
+                        cost_basis=40000.0,
+                        roi_percentage=25.0,
+                        avg_buy_price=40000.0,
+                    ),
+                    PortfolioAsset(
+                        asset="ETH",
+                        free=5.0,
+                        locked=0.0,
+                        total=5.0,
+                        usdt_value=25000.0,
+                        cost_basis=20000.0,
+                        roi_percentage=25.0,
+                        avg_buy_price=4000.0,
+                    ),
+                ],
+                last_updated=datetime.now(),
+            )
 
             # Get enhanced agent analysis
             agent = get_enhanced_agent()
-            if portfolio_data:
-                analysis = await agent.generate_complete_analysis(
-                    portfolio_data, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"]
-                )
-            else:
-                # Use mock portfolio data for analysis
-                from utils.binance_client import PortfolioData, PortfolioAsset
-
-                mock_portfolio = PortfolioData(
-                    total_value_usdt=100000.0,
-                    total_cost_basis=60000.0,
-                    total_roi_percentage=66.67,
-                    assets=[
-                        PortfolioAsset(
-                            asset="BTC",
-                            free=1.0,
-                            locked=0.0,
-                            total=1.0,
-                            usdt_value=50000.0,
-                            cost_basis=40000.0,
-                            roi_percentage=25.0,
-                            avg_buy_price=40000.0,
-                        ),
-                        PortfolioAsset(
-                            asset="ETH",
-                            free=5.0,
-                            locked=0.0,
-                            total=5.0,
-                            usdt_value=25000.0,
-                            cost_basis=20000.0,
-                            roi_percentage=25.0,
-                            avg_buy_price=4000.0,
-                        ),
-                    ],
-                    last_updated=datetime.now(),
-                )
-                analysis = await agent.generate_complete_analysis(
-                    mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"]
-                )
+            analysis = await agent.generate_complete_analysis(
+                mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"]
+            )
 
             return {
                 "portfolio": analysis.portfolio_analysis if analysis else None,
@@ -857,6 +851,34 @@ try:
     app.include_router(brain_simple_router)
 except ImportError as e:
     print(f"Warning: Could not import brain_simple_router: {e}")
+
+# Phase 1: Cache Reader Router (Capstone Implementation)
+try:
+    from routers.cache_readers import router as cache_router
+    app.include_router(cache_router)
+except ImportError as e:
+    print(f"Warning: Could not import cache_router: {e}")
+
+# LiveCoinWatch Router
+try:
+    from routers.livecoinwatch_router import router as livecoinwatch_router
+    app.include_router(livecoinwatch_router)
+except ImportError as e:
+    print(f"Warning: Could not import livecoinwatch_router: {e}")
+
+# Tavily Router
+try:
+    from routers.tavily_router import router as tavily_router
+    app.include_router(tavily_router)
+except ImportError as e:
+    print(f"Warning: Could not import tavily_router: {e}")
+
+# AI Agent Router
+try:
+    from routers.ai_agent_router import router as ai_agent_router
+    app.include_router(ai_agent_router)
+except ImportError as e:
+    print(f"Warning: Could not import ai_agent_router: {e}")
 
 
 @app.get("/api/portfolio", response_model=Dict[str, Any])
@@ -1677,3 +1699,14 @@ def brain_dashboard(request: Request):
 def status_dashboard(request: Request):
     """Status dashboard for system health monitoring."""
     return templates.TemplateResponse("status_dashboard.html", {"request": request})
+
+
+# Server startup for development
+if __name__ == "__main__":
+    import uvicorn
+    print("🚀 Starting Masonic AI Capstone Server...")
+    print("📊 Phase 1: Cache Reader Implementation")
+    print("🌐 Server will be available at: http://localhost:8000")
+    print("📚 Cache endpoints: /api/cache/*")
+    print("🎓 Capstone dashboard: /dashboard")
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

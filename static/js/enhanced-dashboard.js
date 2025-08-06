@@ -11,7 +11,7 @@ class EnhancedDashboard {
         this.adminUpdateInterval = 120000; // 2 minutes
         this.isUpdating = false;
         this.currentPhase = "6";
-        
+
         // Initialize when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.init());
@@ -19,22 +19,22 @@ class EnhancedDashboard {
             this.init();
         }
     }
-    
+
     init() {
         console.log('🚀 Enhanced Dashboard Phase 6 initializing...');
         this.startRealTimeUpdates();
         this.loadInitialData();
         this.setupEventListeners();
     }
-    
+
     setupEventListeners() {
         // Add refresh buttons
         this.addRefreshButtons();
-        
+
         // Add phase indicator
         this.updatePhaseIndicator();
     }
-    
+
     addRefreshButtons() {
         const cards = document.querySelectorAll('.liquid-card');
         cards.forEach(card => {
@@ -52,7 +52,7 @@ class EnhancedDashboard {
             }
         });
     }
-    
+
     updatePhaseIndicator() {
         const header = document.querySelector('.liquid-header');
         if (header) {
@@ -62,7 +62,7 @@ class EnhancedDashboard {
             header.appendChild(phaseBadge);
         }
     }
-    
+
     async loadInitialData() {
         try {
             await Promise.all([
@@ -76,7 +76,7 @@ class EnhancedDashboard {
             console.error('❌ Error loading initial data:', error);
         }
     }
-    
+
     startRealTimeUpdates() {
         // Portfolio updates
         setInterval(async () => {
@@ -84,34 +84,34 @@ class EnhancedDashboard {
                 await this.updatePortfolioData();
             }
         }, this.updateInterval);
-        
+
         // Opportunities updates (Phase 4)
         setInterval(async () => {
             if (!this.isUpdating) {
                 await this.updateOpportunitiesData();
             }
         }, this.marketUpdateInterval);
-        
+
         // News updates
         setInterval(async () => {
             if (!this.isUpdating) {
                 await this.updateNewsData();
             }
         }, this.newsUpdateInterval);
-        
+
         // Admin status updates (Phase 5)
         setInterval(async () => {
             if (!this.isUpdating) {
                 await this.updateAdminStatus();
             }
         }, this.adminUpdateInterval);
-        
+
         console.log('🔄 Phase 6 real-time updates started');
     }
-    
+
     async refreshCardData(cardType) {
         console.log(`🔄 Refreshing ${cardType} data...`);
-        
+
         switch (cardType) {
             case 'portfolio-summary':
                 await this.updatePortfolioData();
@@ -129,18 +129,28 @@ class EnhancedDashboard {
                 await this.updatePortfolioData();
         }
     }
-    
+
     async updatePortfolioData() {
         try {
             this.isUpdating = true;
-            const response = await fetch('/api/portfolio');
+            // Use cache reader endpoint instead of full AI agent
+            const response = await fetch('/api/cache/portfolio/livecoinwatch');
             const data = await response.json();
-            
-            this.updatePortfolioUI(data);
-            this.updatePriceTickers(data.live_prices);
-            this.updateTechnicalIndicators(data.technical_indicators);
-            this.updateAIInsights(data.ai_analysis);
-            
+
+            if (data.status === 'success') {
+                this.updatePortfolioUI(data.data);
+                // Update technical indicators from cache data
+                if (data.data.portfolio && data.data.portfolio.assets) {
+                    const indicators = {};
+                    data.data.portfolio.assets.forEach(asset => {
+                        indicators[asset.symbol] = asset.technical_indicators;
+                    });
+                    this.updateTechnicalIndicators(indicators);
+                }
+            } else {
+                throw new Error('Cache data not available');
+            }
+
         } catch (error) {
             console.error('❌ Error updating portfolio data:', error);
             this.showError('portfolio-summary-content', 'Portfolio data temporarily unavailable');
@@ -148,17 +158,21 @@ class EnhancedDashboard {
             this.isUpdating = false;
         }
     }
-    
+
     async updateOpportunitiesData() {
         try {
             this.isUpdating = true;
-            const response = await fetch('/api/opportunities');
+            // Use cache reader endpoint instead of full AI agent
+            const response = await fetch('/api/cache/signals/latest');
             const data = await response.json();
-            
-            this.updateOpportunitiesUI(data);
-            this.updateMarketAnalysis(data);
-            this.updateAgentIntelligence(data);
-            
+
+            if (data.status === 'success') {
+                this.updateOpportunitiesUI(data.data);
+                this.updateMarketAnalysis(data.data);
+            } else {
+                throw new Error('Cache data not available');
+            }
+
         } catch (error) {
             console.error('❌ Error updating opportunities data:', error);
             this.showError('market-summary-content', 'Market analysis temporarily unavailable');
@@ -166,16 +180,21 @@ class EnhancedDashboard {
             this.isUpdating = false;
         }
     }
-    
+
     async updateNewsData() {
         try {
             this.isUpdating = true;
-            const response = await fetch('/api/news-briefing');
+            // Use cache reader endpoint instead of full AI agent
+            const response = await fetch('/api/cache/news/latest-summary');
             const data = await response.json();
-            
-            this.updateNewsUI(data);
-            this.updateSentimentAnalysis(data.sentiment_analysis);
-            
+
+            if (data.status === 'success') {
+                this.updateNewsUI(data.data);
+                this.updateSentimentAnalysis(data.data.summary.sentiment);
+            } else {
+                throw new Error('Cache data not available');
+            }
+
         } catch (error) {
             console.error('❌ Error updating news data:', error);
             this.showError('news-insights-content', 'News data temporarily unavailable');
@@ -183,31 +202,33 @@ class EnhancedDashboard {
             this.isUpdating = false;
         }
     }
-    
+
     async updateAdminStatus() {
         try {
             this.isUpdating = true;
             const response = await fetch('/api/admin/mvp-status');
             const data = await response.json();
-            
+
             this.updateSystemStatus(data);
-            
+
         } catch (error) {
             console.error('❌ Error updating admin status:', error);
         } finally {
             this.isUpdating = false;
         }
     }
-    
+
     updatePortfolioUI(data) {
         const summaryDiv = document.getElementById('portfolio-summary-content');
         if (!summaryDiv) return;
-        
-        const totalValue = data.total_value_usdt || 0;
-        const assets = data.assets || [];
-        const dataSource = data.data_source || 'unknown';
-        const enhancedFeatures = data.enhanced_features !== false;
-        
+
+        // Handle cache data structure
+        const portfolio = data.portfolio || data;
+        const totalValue = portfolio.total_value || data.total_value_usdt || 0;
+        const assets = portfolio.assets || data.assets || [];
+        const dataSource = 'LIVECOINWATCH';
+        const enhancedFeatures = true;
+
         let html = `
             <div class="portfolio-overview">
                 <div class="summary-stats">
@@ -232,7 +253,7 @@ class EnhancedDashboard {
                 </div>
             </div>
         `;
-        
+
         if (assets.length > 0) {
             html += `
                 <div class="table-container">
@@ -240,47 +261,50 @@ class EnhancedDashboard {
                         <thead>
                             <tr>
                                 <th>Asset</th>
-                                <th>Amount</th>
-                                <th>Value (USDT)</th>
-                                <th>ROI</th>
+                                <th>Price</th>
+                                <th>24h Change</th>
+                                <th>Volume</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
-            
+
             assets.forEach(asset => {
-                const roi = asset.roi_percentage || 0;
-                const roiClass = roi > 0 ? 'roi-positive' : roi < 0 ? 'roi-negative' : 'roi-neutral';
-                
+                const change24h = asset.change_24h || 0;
+                const changeClass = change24h > 0 ? 'roi-positive' : change24h < 0 ? 'roi-negative' : 'roi-neutral';
+
                 html += `
                     <tr>
-                        <td><strong>${asset.asset}</strong></td>
-                        <td>${asset.total}</td>
-                        <td>${this.formatCurrency(asset.usdt_value)}</td>
-                        <td class="${roiClass}">${this.formatROI(roi)}</td>
+                        <td>
+                            <strong>${asset.symbol}</strong><br>
+                            <small>${asset.name}</small>
+                        </td>
+                        <td>$${asset.price?.toLocaleString() || '0'}</td>
+                        <td class="${changeClass}">${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%</td>
+                        <td>$${this.formatVolume(asset.volume_24h)}</td>
                     </tr>
                 `;
             });
-            
+
             html += `
                         </tbody>
                     </table>
                 </div>
             `;
         }
-        
+
         summaryDiv.innerHTML = html;
     }
-    
+
     updatePriceTickers(livePrices) {
         const tickerContainer = document.querySelector('.price-ticker');
         if (!tickerContainer || !livePrices || livePrices.length === 0) return;
-        
+
         let html = '';
         livePrices.forEach(price => {
             const change = price.change_24h || 0;
             const changeClass = change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral';
-            
+
             html += `
                 <div class="ticker-item" data-symbol="${price.symbol}">
                     <span class="symbol">${price.symbol}</span>
@@ -289,19 +313,19 @@ class EnhancedDashboard {
                 </div>
             `;
         });
-        
+
         tickerContainer.innerHTML = html;
     }
-    
+
     updateTechnicalIndicators(indicators) {
         const indicatorsContainer = document.querySelector('.technical-indicators');
         if (!indicatorsContainer || !indicators) return;
-        
+
         let html = '';
         Object.entries(indicators).forEach(([symbol, data]) => {
             const rsi = data.rsi_14 || 50;
             const rsiClass = rsi < 30 ? 'oversold' : rsi > 70 ? 'overbought' : 'neutral';
-            
+
             html += `
                 <div class="indicator" data-symbol="${symbol}">
                     <span class="label">${symbol} RSI</span>
@@ -310,14 +334,14 @@ class EnhancedDashboard {
                 </div>
             `;
         });
-        
+
         indicatorsContainer.innerHTML = html;
     }
-    
+
     updateAIInsights(aiAnalysis) {
         const insightsContainer = document.querySelector('.ai-insights');
         if (!insightsContainer || !aiAnalysis) return;
-        
+
         let html = '';
         if (aiAnalysis.error) {
             html = `
@@ -335,18 +359,19 @@ class EnhancedDashboard {
                 </div>
             `;
         }
-        
+
         insightsContainer.innerHTML = html;
     }
-    
+
     updateOpportunitiesUI(data) {
         const opportunitiesDiv = document.getElementById('market-summary-content');
         if (!opportunitiesDiv) return;
-        
-        const opportunities = data.opportunities || [];
+
+        // Handle cache data structure
+        const signals = data.signals || data.opportunities || [];
         const marketRegime = data.market_regime || 'neutral';
-        const statistics = data.statistics || {};
-        
+        const overallConfidence = data.overall_confidence || 0.5;
+
         let html = `
             <div class="market-overview">
                 <div class="market-regime">
@@ -355,71 +380,63 @@ class EnhancedDashboard {
                 </div>
                 <div class="opportunities-stats">
                     <div class="stat-item">
-                        <div class="stat-value">${statistics.total_opportunities || 0}</div>
-                        <div class="stat-label">Opportunities</div>
+                        <div class="stat-value">${signals.length}</div>
+                        <div class="stat-label">Active Signals</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">${statistics.buy_opportunities || 0}</div>
-                        <div class="stat-label">Buy Signals</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${statistics.sell_opportunities || 0}</div>
-                        <div class="stat-label">Sell Signals</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${(statistics.average_confidence * 100).toFixed(0)}%</div>
-                        <div class="stat-label">Avg Confidence</div>
+                        <div class="stat-value">${(overallConfidence * 100).toFixed(0)}%</div>
+                        <div class="stat-label">Confidence</div>
                     </div>
                 </div>
             </div>
         `;
-        
-        if (opportunities.length > 0) {
+
+        if (signals.length > 0) {
             html += '<div class="opportunities-list">';
-            opportunities.slice(0, 5).forEach(opp => {
-                const typeClass = opp.type === 'BUY' ? 'type-buy' : opp.type === 'SELL' ? 'type-sell' : 'type-hold';
-                
+            signals.forEach(signal => {
+                const typeClass = signal.action === 'BUY' ? 'type-buy' : signal.action === 'SELL' ? 'type-sell' : 'type-hold';
+
                 html += `
                     <div class="recommendation-item">
-                        <div class="recommendation-type ${typeClass}">${opp.type}</div>
+                        <div class="recommendation-type ${typeClass}">${signal.action}</div>
                         <div class="recommendation-header">
-                            <span class="symbol">${opp.symbol}</span>
-                            <span class="score">Score: ${opp.score}</span>
-                            <span class="confidence">${(opp.confidence * 100).toFixed(0)}%</span>
+                            <span class="symbol">${signal.symbol}</span>
+                            <span class="confidence">${(signal.confidence * 100).toFixed(0)}%</span>
                         </div>
                         <div class="recommendation-reasons">
-                            ${opp.reasons ? opp.reasons.slice(0, 2).map(reason => `<div class="reason">• ${reason}</div>`).join('') : ''}
+                            <div class="reason">${signal.reasoning}</div>
                         </div>
                         <div class="recommendation-metrics">
-                            <span class="metric">Price: ${this.formatCurrency(opp.price)}</span>
-                            <span class="metric">24h: ${this.formatROI(opp.change_24h)}</span>
-                            <span class="metric">Vol: ${this.formatVolume(opp.volume_24h)}</span>
+                            <span class="metric">RSI: ${signal.technical_indicators?.rsi || 'N/A'}</span>
+                            <span class="metric">MACD: ${signal.technical_indicators?.macd || 'N/A'}</span>
+                            <span class="metric">Target: $${signal.target_price?.toLocaleString() || 'N/A'}</span>
+                            <span class="metric">Risk: ${signal.risk_level || 'N/A'}</span>
                         </div>
                     </div>
                 `;
             });
             html += '</div>';
         } else {
-            html += '<div class="no-opportunities">No trading opportunities available at this time.</div>';
+            html += '<div class="no-opportunities">No trading signals available at this time.</div>';
         }
-        
+
         opportunitiesDiv.innerHTML = html;
     }
-    
+
     updateMarketAnalysis(data) {
         const analysisDiv = document.getElementById('market-analysis-content');
         if (!analysisDiv) return;
-        
+
         const marketInsights = data.market_insights || [];
         const aiAnalysis = data.ai_analysis || {};
-        
+
         let html = `
             <div class="market-analysis-header">
                 <h4>Market Intelligence</h4>
                 <span class="analysis-source">AI Powered</span>
             </div>
         `;
-        
+
         if (marketInsights.length > 0) {
             html += '<div class="insights-list">';
             marketInsights.forEach(insight => {
@@ -435,7 +452,7 @@ class EnhancedDashboard {
             });
             html += '</div>';
         }
-        
+
         if (aiAnalysis.market_regime) {
             html += `
                 <div class="ai-analysis">
@@ -444,24 +461,24 @@ class EnhancedDashboard {
                 </div>
             `;
         }
-        
+
         analysisDiv.innerHTML = html;
     }
-    
+
     updateAgentIntelligence(data) {
         const intelligenceDiv = document.getElementById('agent-intelligence-content');
         if (!intelligenceDiv) return;
-        
+
         const opportunities = data.opportunities || [];
         const statistics = data.statistics || {};
-        
+
         let html = `
             <div class="intelligence-header">
                 <h4>Brotherhood Intelligence</h4>
                 <span class="intelligence-phase">Phase ${data.phase || '4'}</span>
             </div>
         `;
-        
+
         if (opportunities.length > 0) {
             html += `
                 <div class="intelligence-stats">
@@ -479,7 +496,7 @@ class EnhancedDashboard {
                     </div>
                 </div>
             `;
-            
+
             html += '<div class="intelligence-insights">';
             opportunities.slice(0, 3).forEach(opp => {
                 html += `
@@ -498,45 +515,48 @@ class EnhancedDashboard {
         } else {
             html += '<div class="no-insights">AI analysis in progress...</div>';
         }
-        
+
         intelligenceDiv.innerHTML = html;
     }
-    
+
     updateNewsUI(data) {
         const newsDiv = document.getElementById('news-insights-content');
         if (!newsDiv) return;
-        
-        const articles = data.articles || [];
-        const sources = data.sources || [];
-        const qualityMetrics = data.quality_metrics || {};
-        
+
+        // Handle cache data structure
+        const summary = data.summary || data;
+        const articles = summary.top_stories || data.articles || [];
+        const sources = ['NEWSAPI', 'TAVILY'];
+        const totalArticles = summary.total_articles || 0;
+
         let html = `
             <div class="news-header">
                 <div class="news-sources">
                     ${sources.map(source => `<span class="source-badge ${source}">${source}</span>`).join('')}
                 </div>
                 <div class="quality-metrics">
-                    <span class="metric">Articles: ${data.total_articles || 0}</span>
-                    ${qualityMetrics.rejected_count ? `<span class="metric">Filtered: ${qualityMetrics.rejected_count}</span>` : ''}
+                    <span class="metric">Articles: ${totalArticles}</span>
+                    <span class="metric">Cache: Active</span>
                 </div>
             </div>
         `;
-        
+
         if (articles.length > 0) {
             html += '<div class="news-list">';
-            articles.slice(0, 5).forEach(article => {
+            articles.forEach(article => {
                 const sentiment = article.sentiment || 'neutral';
-                const sentimentClass = sentiment === 'positive' ? 'positive' : 
-                                      sentiment === 'negative' ? 'negative' : 'neutral';
-                
+                const sentimentClass = sentiment === 'positive' ? 'positive' :
+                    sentiment === 'negative' ? 'negative' : 'neutral';
+
                 html += `
                     <div class="news-item">
                         <div class="news-title">${article.title}</div>
                         <div class="news-meta">
-                            <span class="news-source">${article.source?.name || 'Unknown'}</span>
-                            <span class="news-time">${this.formatTime(article.publishedAt)}</span>
+                            <span class="news-source">${article.source || 'Unknown'}</span>
+                            <span class="news-time">${this.formatTime(article.published_at)}</span>
                             <span class="news-sentiment ${sentimentClass}">${sentiment}</span>
                         </div>
+                        <div class="news-summary">${article.summary}</div>
                     </div>
                 `;
             });
@@ -544,19 +564,19 @@ class EnhancedDashboard {
         } else {
             html += '<div class="no-news">No recent news articles available.</div>';
         }
-        
+
         newsDiv.innerHTML = html;
     }
-    
+
     updateSentimentAnalysis(sentiment) {
         const sentimentContainer = document.querySelector('.sentiment-analysis');
         if (!sentimentContainer || !sentiment) return;
-        
+
         // Simple sentiment visualization
         const sentimentValue = sentiment.overall_sentiment || 'neutral';
-        const sentimentClass = sentimentValue === 'bullish' ? 'positive' : 
-                              sentimentValue === 'bearish' ? 'negative' : 'neutral';
-        
+        const sentimentClass = sentimentValue === 'bullish' ? 'positive' :
+            sentimentValue === 'bearish' ? 'negative' : 'neutral';
+
         const html = `
             <div class="sentiment-display">
                 <div class="sentiment-label">Market Sentiment: <span class="${sentimentClass}">${sentimentValue}</span></div>
@@ -565,15 +585,15 @@ class EnhancedDashboard {
                 </div>
             </div>
         `;
-        
+
         sentimentContainer.innerHTML = html;
     }
-    
+
     updateSystemStatus(data) {
         // Update system status in a subtle way
         const systemHealth = data.system_health || 'unknown';
         const currentPhase = data.current_phase || '5';
-        
+
         // Add system status to header if not already present
         let statusIndicator = document.querySelector('.system-status');
         if (!statusIndicator) {
@@ -584,11 +604,11 @@ class EnhancedDashboard {
                 header.appendChild(statusIndicator);
             }
         }
-        
+
         if (statusIndicator) {
-            const healthClass = systemHealth === 'healthy' ? 'healthy' : 
-                               systemHealth === 'degraded' ? 'degraded' : 'unhealthy';
-            
+            const healthClass = systemHealth === 'healthy' ? 'healthy' :
+                systemHealth === 'degraded' ? 'degraded' : 'unhealthy';
+
             statusIndicator.innerHTML = `
                 <span class="status-badge ${healthClass}">
                     ${systemHealth.toUpperCase()} | Phase ${currentPhase}
@@ -596,7 +616,7 @@ class EnhancedDashboard {
             `;
         }
     }
-    
+
     showError(elementId, message) {
         const element = document.getElementById(elementId);
         if (element) {
@@ -608,7 +628,7 @@ class EnhancedDashboard {
             `;
         }
     }
-    
+
     formatCurrency(amount) {
         if (!amount || amount === 0) return '$0.00';
         return new Intl.NumberFormat('en-US', {
@@ -618,13 +638,13 @@ class EnhancedDashboard {
             maximumFractionDigits: 2
         }).format(amount);
     }
-    
+
     formatROI(roi) {
         if (roi === null || roi === undefined) return '-';
         const val = Number(roi).toFixed(2);
         return (roi > 0 ? '+' : '') + val + '%';
     }
-    
+
     formatVolume(volume) {
         if (!volume) return '-';
         if (volume >= 1e9) return (volume / 1e9).toFixed(1) + 'B';
@@ -632,14 +652,14 @@ class EnhancedDashboard {
         if (volume >= 1e3) return (volume / 1e3).toFixed(1) + 'K';
         return volume.toFixed(0);
     }
-    
+
     formatTime(timestamp) {
         if (!timestamp) return 'Unknown';
         const date = new Date(timestamp);
         const now = new Date();
         const diffMs = now - date;
         const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        
+
         if (diffHours < 1) return 'Just now';
         if (diffHours < 24) return `${diffHours}h ago`;
         return date.toLocaleDateString();

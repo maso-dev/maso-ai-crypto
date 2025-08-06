@@ -127,14 +127,14 @@
             padding: 3rem 2rem;
         }
 
-        /* Hero Section */
-        .hero-section {
+        /* Demo Disclaimer */
+        .demo-disclaimer {
             background: var(--glass-primary);
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
             border-radius: 2rem;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             margin-bottom: 3rem;
             text-align: center;
             box-shadow: var(--glass-shadow);
@@ -142,45 +142,36 @@
             overflow: hidden;
         }
 
-        .hero-section::before {
+        .demo-disclaimer::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            background: linear-gradient(90deg, var(--neon-yellow), var(--neon-orange), var(--neon-red));
             opacity: 0.8;
         }
 
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 300;
+        .disclaimer-title {
+            font-size: 2.5rem;
+            font-weight: 600;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5));
+            filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.5));
         }
 
-        .hero-subtitle {
-            font-size: 1.5rem;
+        .disclaimer-text {
             color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 1rem;
-        }
-
-        .hero-tagline {
-            font-style: italic;
-            color: var(--neon-cyan);
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-        }
-
-        .hero-description {
-            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 2rem;
             font-size: 1.1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
         }
 
         /* Liquid Glass Cards */
@@ -258,26 +249,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--glass-secondary);
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
             transition: all 0.3s ease;
         }
 
         .portfolio-item:hover {
-            background: var(--glass-secondary);
-            border-radius: 0.75rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .portfolio-item:last-child {
-            border-bottom: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .asset-info {
             display: flex;
-            align-items: center;
-            gap: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
         }
 
         .asset-symbol {
@@ -288,15 +278,50 @@
 
         .asset-name {
             color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
         }
 
-        .asset-weight {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
+        .asset-price {
+            font-size: 1rem;
             font-weight: 600;
+            color: #ffffff;
+        }
+
+        .asset-roi {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
+        .roi-value {
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .roi-positive {
+            background: linear-gradient(135deg, var(--neon-green), #059669);
+            color: white;
+        }
+
+        .roi-negative {
+            background: linear-gradient(135deg, var(--neon-red), #dc2626);
+            color: white;
+        }
+
+        .roi-neutral {
+            background: linear-gradient(135deg, var(--metal-silver), #94a3b8);
+            color: #1f2937;
+        }
+
+        .roi-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Signal Items */
@@ -449,6 +474,52 @@
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
         }
 
+        /* Demo Badge */
+        .demo-badge {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            background: linear-gradient(45deg, var(--neon-yellow), var(--neon-orange));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Portfolio Summary */
+        .portfolio-summary {
+            display: flex;
+            justify-content: space-around;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--glass-secondary);
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .summary-stat {
+            text-align: center;
+        }
+
+        .summary-stat .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-stat .stat-label {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-content {
@@ -551,9 +622,8 @@
             <nav>
                 <ul class="nav-menu">
                     <li><a href="/" class="nav-link active">Home</a></li>
-                    <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
-                    <li><a href="/brain-dashboard" class="nav-link">Brain</a></li>
-                    <li><a href="/status-dashboard" class="nav-link">Status</a></li>
+                    <li><a href="/dashboard" class="nav-link">Portfolio</a></li>
+                    <li><a href="/brain-dashboard" class="nav-link">AI Agent</a></li>
                     <li><a href="/admin" class="nav-link">Admin</a></li>
                 </ul>
             </nav>
@@ -561,72 +631,47 @@
     </header>
 
     <main class="main-container">
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <h1 class="hero-title">🏛️ Masonic</h1>
-            <h2 class="hero-subtitle">Alpha Strategy Advisor</h2>
-            <p class="hero-tagline">"Access to insights others don't have"</p>
-            <p class="hero-description">Join the brotherhood of informed traders</p>
-            <a href="/dashboard" class="liquid-button primary">
-                <span>🚀</span>
-                Enter the Lodge (Smart)
-            </a>
+        <!-- Demo Disclaimer -->
+        <div class="demo-disclaimer">
+            <div class="disclaimer-content">
+                <h1 class="disclaimer-title">🎓 AI Agent Capstone Demo</h1>
+                <p class="disclaimer-text">This is a demonstration project showcasing AI agent workflows. All data is
+                    for educational purposes and should not be used for actual trading decisions.</p>
+                <a href="/dashboard" class="liquid-button primary">
+                    <span>🧠</span>
+                    Explore AI Agent Dashboard
+                </a>
+            </div>
         </div>
 
         <!-- Main Content Grid -->
         <div class="liquid-grid grid-3 mb-5">
-            <!-- Dream Team Portfolio -->
-            <div class="liquid-card relative">
-                <div class="exclusive-badge">Exclusive</div>
+            <!-- Alpha Portfolio -->
+            <div class="liquid-card relative text-center">
                 <div class="card-header">
                     <span class="card-icon">🏆</span>
                     <h3 class="card-title">Alpha Portfolio</h3>
                 </div>
                 <div class="card-content">
-                    <p class="text-secondary mb-4">Our brotherhood's most trusted allocation strategy</p>
+                    <p class="text-secondary mb-4">LiveCoinWatch data with 7-day performance</p>
+                    <div class="portfolio-summary mb-4">
+                        <div class="summary-stat">
+                            <div class="stat-value" id="total-value">$125,000</div>
+                            <div class="stat-label">Total Value</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="stat-value" id="total-roi">+8.2%</div>
+                            <div class="stat-label">7-Day ROI</div>
+                        </div>
+                    </div>
                     <div id="dream-team-content">
-                        <div class="portfolio-item">
-                            <div class="asset-info">
-                                <span class="asset-symbol">BTC</span>
-                                <span class="asset-name">Bitcoin</span>
-                            </div>
-                            <span class="asset-weight">40%</span>
-                        </div>
-                        <div class="portfolio-item">
-                            <div class="asset-info">
-                                <span class="asset-symbol">ETH</span>
-                                <span class="asset-name">Ethereum</span>
-                            </div>
-                            <span class="asset-weight">30%</span>
-                        </div>
-                        <div class="portfolio-item">
-                            <div class="asset-info">
-                                <span class="asset-symbol">XRP</span>
-                                <span class="asset-name">Ripple</span>
-                            </div>
-                            <span class="asset-weight">15%</span>
-                        </div>
-                        <div class="portfolio-item">
-                            <div class="asset-info">
-                                <span class="asset-symbol">SOL</span>
-                                <span class="asset-name">Solana</span>
-                            </div>
-                            <span class="asset-weight">10%</span>
-                        </div>
-                        <div class="portfolio-item">
-                            <div class="asset-info">
-                                <span class="asset-symbol">DOGE</span>
-                                <span class="asset-name">Dogecoin</span>
-                            </div>
-                            <span class="asset-weight">5%</span>
-                        </div>
+                        <!-- Portfolio items will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
 
             <!-- Today's Opportunities -->
-            <div class="liquid-card relative">
-                <div class="exclusive-badge">Alpha</div>
+            <div class="liquid-card relative text-center">
                 <div class="card-header">
                     <span class="card-icon">🎯</span>
                     <h3 class="card-title">Today's Alpha Signals</h3>
@@ -663,8 +708,7 @@
             </div>
 
             <!-- News Briefing -->
-            <div class="liquid-card relative">
-                <div class="exclusive-badge">Insider</div>
+            <div class="liquid-card relative text-center">
                 <div class="card-header">
                     <span class="card-icon">📰</span>
                     <h3 class="card-title">Brotherhood Intelligence</h3>
@@ -718,47 +762,96 @@
                     updateDreamTeamContent(dreamTeamData);
                 }
 
-                // Load opportunities
-                const opportunitiesResponse = await fetch('/api/opportunities');
+                // Load opportunities from cache
+                const opportunitiesResponse = await fetch('/api/cache/signals/latest');
                 if (opportunitiesResponse.ok) {
                     const opportunitiesData = await opportunitiesResponse.json();
-                    updateOpportunitiesContent(opportunitiesData);
+                    if (opportunitiesData.status === 'success') {
+                        updateOpportunitiesContent(opportunitiesData.data);
+                    }
                 }
 
-                // Load news briefing
-                const newsResponse = await fetch('/api/news-briefing');
+                // Load news briefing from cache
+                const newsResponse = await fetch('/api/cache/news/latest-summary');
                 if (newsResponse.ok) {
                     const newsData = await newsResponse.json();
-                    updateNewsContent(newsData);
+                    if (newsData.status === 'success') {
+                        updateNewsContent(newsData.data);
+                    }
                 }
             } catch (error) {
                 console.log('Masonic data loaded successfully');
             }
         }
 
-        // Update dream team portfolio content
-        function updateDreamTeamContent(data) {
+        // Update dream team portfolio content with LiveCoinWatch data
+        async function updateDreamTeamContent(data) {
             const container = document.getElementById('dream-team-content');
-            if (!container || !data.assets) return;
+            if (!container) return;
 
-            container.innerHTML = '';
-            data.assets.forEach(asset => {
-                const item = document.createElement('div');
-                item.className = 'portfolio-item';
-                item.innerHTML = `
-                    <div class="asset-info">
-                        <span class="asset-symbol">${asset.symbol}</span>
-                        <span class="asset-name">${asset.name}</span>
-                    </div>
-                    <span class="asset-weight">${(asset.weight * 100).toFixed(0)}%</span>
-                `;
-                container.appendChild(item);
-            });
+            try {
+                // Get LiveCoinWatch portfolio data
+                const portfolioResponse = await fetch('/api/cache/portfolio/livecoinwatch');
+                if (portfolioResponse.ok) {
+                    const portfolioData = await portfolioResponse.json();
+                    if (portfolioData.status === 'success') {
+                        const assets = portfolioData.data.portfolio.assets;
 
-            // Update description if available
-            const description = document.querySelector('#dream-team-content').parentElement.querySelector('p');
-            if (description && data.description) {
-                description.textContent = data.description;
+                        // Update summary stats
+                        const totalValueEl = document.getElementById('total-value');
+                        const totalRoiEl = document.getElementById('total-roi');
+
+                        if (totalValueEl) {
+                            totalValueEl.textContent = `$${(portfolioData.data.portfolio.total_value / 1000).toFixed(0)}K`;
+                        }
+                        if (totalRoiEl) {
+                            const roi = portfolioData.data.portfolio.total_change_7d;
+                            totalRoiEl.textContent = `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`;
+                            totalRoiEl.className = `stat-value ${roi >= 0 ? 'roi-positive' : 'roi-negative'}`;
+                        }
+
+                        // Update portfolio items
+                        container.innerHTML = '';
+                        assets.forEach(asset => {
+                            const item = document.createElement('div');
+                            item.className = 'portfolio-item';
+
+                            const change24h = asset.change_24h || 0;
+                            const roiClass = change24h > 0 ? 'roi-positive' : change24h < 0 ? 'roi-negative' : 'roi-neutral';
+
+                            item.innerHTML = `
+                                <div class="asset-info">
+                                    <span class="asset-symbol">${asset.symbol}</span>
+                                    <span class="asset-name">${asset.name}</span>
+                                    <span class="asset-price">$${asset.price?.toLocaleString() || '0'}</span>
+                                </div>
+                                <div class="asset-roi">
+                                    <span class="roi-value ${roiClass}">${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%</span>
+                                    <span class="roi-label">24h</span>
+                                </div>
+                            `;
+                            container.appendChild(item);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading portfolio data:', error);
+                // Fallback to original data if available
+                if (data && data.assets) {
+                    container.innerHTML = '';
+                    data.assets.forEach(asset => {
+                        const item = document.createElement('div');
+                        item.className = 'portfolio-item';
+                        item.innerHTML = `
+                            <div class="asset-info">
+                                <span class="asset-symbol">${asset.symbol}</span>
+                                <span class="asset-name">${asset.name}</span>
+                            </div>
+                            <span class="asset-weight">${(asset.weight * 100).toFixed(0)}%</span>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
             }
         }
 
@@ -772,27 +865,27 @@
                 const item = document.createElement('div');
                 item.className = 'signal-item';
 
-                const typeClass = signal.type === 'strong_buy' ? 'success' :
-                    signal.type === 'buy' ? 'success' :
-                        signal.type === 'hold' ? 'warning' :
-                            signal.type === 'sell' ? 'danger' : 'cyan';
+                const typeClass = signal.action === 'BUY' ? 'success' :
+                    signal.action === 'HOLD' ? 'warning' :
+                        signal.action === 'SELL' ? 'danger' : 'cyan';
 
-                const typeText = signal.type === 'strong_buy' ? 'Strong Buy' :
-                    signal.type === 'buy' ? 'Buy' :
-                        signal.type === 'hold' ? 'Hold' :
-                            signal.type === 'sell' ? 'Sell' : 'Watch';
+                const typeText = signal.action === 'BUY' ? 'Buy' :
+                    signal.action === 'HOLD' ? 'Hold' :
+                        signal.action === 'SELL' ? 'Sell' : 'Watch';
 
-                if (signal.type === 'hold') item.classList.add('hold');
-                if (signal.type === 'watch') item.classList.add('watch');
+                if (signal.action === 'HOLD') item.classList.add('hold');
+                if (signal.action === 'WATCH') item.classList.add('watch');
 
                 item.innerHTML = `
                     <div class="signal-badge badge-${typeClass}">${typeText}</div>
-                    <div class="signal-asset">${signal.asset}</div>
-                    <div class="signal-reason">${signal.reason}</div>
+                    <div class="signal-asset">${signal.symbol}</div>
+                    <div class="signal-reason">${signal.reasoning}</div>
                     <div class="signal-meta">
-                        Confidence: ${(signal.confidence * 100).toFixed(0)}% | Timeframe: ${signal.timeframe}
+                        Confidence: ${(signal.confidence * 100).toFixed(0)}% | Risk: ${signal.risk_level}
                     </div>
-                    ${signal.brotherhood_insight ? `<div style="font-size: 0.8rem; color: var(--neon-blue); margin-top: 0.5rem; font-style: italic;">💡 ${signal.brotherhood_insight}</div>` : ''}
+                    <div style="font-size: 0.8rem; color: var(--neon-blue); margin-top: 0.5rem; font-style: italic;">
+                        💡 Target: $${signal.target_price?.toLocaleString() || 'N/A'} | Stop: $${signal.stop_loss?.toLocaleString() || 'N/A'}
+                    </div>
                 `;
                 container.appendChild(item);
             });
@@ -801,32 +894,36 @@
         // Update news content
         function updateNewsContent(data) {
             const container = document.getElementById('news-content');
-            if (!container || !data.intelligence) return;
-
-            container.innerHTML = '';
-            data.intelligence.forEach(item => {
-                const newsItem = document.createElement('div');
-                newsItem.className = 'news-item';
-
-                const sentimentClass = item.sentiment === 'bullish' ? 'success' :
-                    item.sentiment === 'bearish' ? 'danger' : 'warning';
-                const sentimentText = item.sentiment === 'bullish' ? 'Bullish' :
-                    item.sentiment === 'bearish' ? 'Bearish' : 'Neutral';
-
-                newsItem.innerHTML = `
-                    <div class="signal-badge badge-${sentimentClass} mb-2">${sentimentText}</div>
-                    <div class="news-title">${item.title}</div>
-                    <div class="news-meta">
-                        ${item.impact.charAt(0).toUpperCase() + item.impact.slice(1)} Impact | ${item.brotherhood_insight ? item.brotherhood_insight : 'Market Intelligence'}
-                    </div>
-                `;
-                container.appendChild(newsItem);
-            });
+            if (!container || !data.summary) return;
 
             // Update summary if available
             const summaryElement = document.querySelector('#news-content').parentElement.querySelector('p');
-            if (summaryElement && data.summary) {
-                summaryElement.textContent = data.summary;
+            if (summaryElement && data.summary.key_insights) {
+                summaryElement.textContent = `Key Insights: ${data.summary.key_insights.join(', ')}`;
+            }
+
+            // Update top stories if available
+            if (data.summary.top_stories) {
+                container.innerHTML = '';
+                data.summary.top_stories.forEach(story => {
+                    const newsItem = document.createElement('div');
+                    newsItem.className = 'news-item';
+
+                    const sentimentClass = story.sentiment === 'positive' ? 'success' :
+                        story.sentiment === 'negative' ? 'danger' : 'warning';
+                    const sentimentText = story.sentiment === 'positive' ? 'Positive' :
+                        story.sentiment === 'negative' ? 'Negative' : 'Neutral';
+
+                    newsItem.innerHTML = `
+                        <div class="signal-badge badge-${sentimentClass} mb-2">${sentimentText}</div>
+                        <div class="news-title">${story.title}</div>
+                        <div class="news-meta">
+                            ${story.source} | ${new Date(story.published_at).toLocaleDateString()}
+                        </div>
+                        <div class="news-summary">${story.summary}</div>
+                    `;
+                    container.appendChild(newsItem);
+                });
             }
         }
 

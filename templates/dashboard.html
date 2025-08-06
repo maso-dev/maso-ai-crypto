@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏛️ Masonic - Personal Portfolio</title>
+    <title>🎓 AI Agent Capstone - Masonic Portfolio</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         /* Apple Liquid Glass Design System */
@@ -848,6 +848,7 @@
 
         /* Responsive Enhancements */
         @media (max-width: 768px) {
+
             .phase-badge,
             .system-status {
                 position: relative;
@@ -872,14 +873,221 @@
                 gap: 0.5rem;
             }
         }
+
+        /* Phase 3: Financial Visualization Styles */
+        
+        /* Portfolio Controls */
+        .portfolio-controls,
+        .market-controls,
+        .builder-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .refresh-btn,
+        .chart-btn,
+        .add-btn,
+        .save-btn {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn:hover,
+        .chart-btn:hover,
+        .add-btn:hover,
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .asset-selector {
+            background: var(--glass-primary);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .asset-selector option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* Charts Container */
+        .charts-container {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .chart-section {
+            background: var(--glass-secondary);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .chart-section h4 {
+            color: var(--neon-blue);
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            margin-top: 1.5rem;
+            background: var(--glass-secondary);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Portfolio Builder */
+        .portfolio-builder {
+            margin-top: 2rem;
+        }
+
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .asset-card {
+            background: var(--glass-secondary);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--neon-blue);
+        }
+
+        .asset-card.selected {
+            border-color: var(--neon-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .asset-symbol {
+            font-weight: 600;
+            color: var(--neon-blue);
+            font-size: 1.1rem;
+        }
+
+        .asset-name {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .asset-price {
+            font-weight: 600;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .asset-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .asset-change.positive {
+            color: var(--neon-green);
+        }
+
+        .asset-change.negative {
+            color: var(--neon-red);
+        }
+
+        /* Technical Analysis */
+        .technical-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .indicator-card {
+            background: var(--glass-secondary);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .indicator-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .indicator-status {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+        }
+
+        .status-bullish {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--neon-green);
+        }
+
+        .status-bearish {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--neon-red);
+        }
+
+        .status-neutral {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--neon-yellow);
+        }
+
+        /* Responsive Charts */
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .assets-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .technical-indicators {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 
 <body>
     <header class="liquid-header">
         <a href="/" class="back-link">← Back to Welcome</a>
-        <h1>🏛️ Masonic</h1>
-        <p>Personal Portfolio Analysis</p>
+        <h1>🎓 AI Agent Capstone</h1>
+        <p>Masonic Portfolio - AI Agent Showcase</p>
         {% if data_mode %}
         <div class="data-mode-indicator">
             <span class="mode-badge mode-{{ data_mode }}">
@@ -898,68 +1106,93 @@
     </header>
 
     <div class="main-container">
-        <!-- Portfolio Summary -->
+        <!-- Alpha Portfolio with Enhanced Visualization -->
         <div class="liquid-card portfolio-summary">
-            <div class="exclusive-badge">Personal</div>
-            <h3><span class="card-icon">💰</span> Portfolio Overview</h3>
+            <h3><span class="card-icon">💰</span> Alpha Portfolio</h3>
+            <div class="portfolio-controls">
+                <button id="refresh-portfolio" class="refresh-btn">🔄 Refresh</button>
+                <button id="view-charts" class="chart-btn">📊 View Charts</button>
+            </div>
             <div id="portfolio-summary-content" class="placeholder">
-                <div class="liquid-loading"></div> Loading your portfolio data...
+                <div class="liquid-loading"></div> Loading LiveCoinWatch data...
+            </div>
+            <!-- Enhanced Portfolio Charts -->
+            <div id="portfolio-charts" class="charts-container" style="display: none;">
+                <div class="chart-section">
+                    <h4>📈 Portfolio Performance</h4>
+                    <canvas id="portfolio-chart" width="400" height="200"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h4>🎯 Asset Allocation</h4>
+                    <canvas id="allocation-chart" width="400" height="200"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- Agent Intelligence -->
+        <!-- Market Analysis with Technical Indicators -->
+        <div class="liquid-card market-analysis">
+            <h3><span class="card-icon">📊</span> Market Analysis</h3>
+            <div class="market-controls">
+                <select id="selected-asset" class="asset-selector">
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                    <option value="SOL">Solana (SOL)</option>
+                </select>
+                <button id="refresh-analysis" class="refresh-btn">🔄 Update</button>
+            </div>
+            <div id="technical-analysis-content" class="placeholder">
+                <div class="liquid-loading"></div> Loading technical analysis...
+            </div>
+            <!-- Technical Indicators Chart -->
+            <div id="technical-chart" class="chart-container">
+                <canvas id="price-chart" width="400" height="250"></canvas>
+            </div>
+        </div>
+
+        <!-- Brotherhood Intelligence -->
         <div class="liquid-card agent-insights">
-            <div class="exclusive-badge">AI</div>
             <h3><span class="card-icon">🧠</span> Brotherhood Intelligence</h3>
             <div id="agent-intelligence-content" class="placeholder">
-                <div class="liquid-loading"></div> Analyzing your portfolio with AI...
+                <div class="liquid-loading"></div> Loading from RAG cache...
             </div>
         </div>
 
-        <!-- Portfolio Grid -->
-        <div class="portfolio-grid">
-            <!-- Your Assets -->
-            <div class="liquid-card">
-                <div class="exclusive-badge">Assets</div>
-                <h3><span class="card-icon">📊</span> Your Assets</h3>
-                <div id="assets-content" class="placeholder">
-                    <div class="liquid-loading"></div> Loading assets...
-                </div>
+        <!-- Today's Alpha Signals -->
+        <div class="liquid-card agent-insights">
+            <h3><span class="card-icon">📈</span> Today's Alpha Signals</h3>
+            <div id="market-summary-content" class="placeholder">
+                <div class="liquid-loading"></div> Loading trading signals from cache...
             </div>
+        </div>
 
-            <!-- Market Analysis -->
-            <div class="liquid-card">
-                <div class="exclusive-badge">Market</div>
-                <h3><span class="card-icon">📈</span> Market Analysis</h3>
-                <div id="market-summary-content" class="placeholder">
-                    <div class="liquid-loading"></div> Analyzing market conditions...
-                </div>
-                <div id="market-analysis-content" class="placeholder">
-                    <div class="liquid-loading"></div> Loading market intelligence...
-                </div>
+        <!-- Portfolio Builder (Stretch Goal) -->
+        <div class="liquid-card portfolio-builder">
+            <h3><span class="card-icon">🔧</span> Build Your Portfolio</h3>
+            <div class="builder-controls">
+                <button id="add-asset" class="add-btn">➕ Add Asset</button>
+                <button id="save-portfolio" class="save-btn">💾 Save Portfolio</button>
             </div>
-
-            <!-- News Insights -->
-            <div class="liquid-card">
-                <div class="exclusive-badge">News</div>
-                <h3><span class="card-icon">📰</span> News Insights</h3>
-                <div id="news-insights-content" class="placeholder">
-                    <div class="liquid-loading"></div> Gathering market intelligence...
+            <div id="portfolio-builder-content">
+                <div class="available-assets">
+                    <h4>Available Assets (LiveCoinWatch)</h4>
+                    <div id="available-assets-list" class="assets-grid">
+                        <!-- Available assets will be loaded here -->
+                    </div>
                 </div>
-            </div>
-
-            <!-- ETF Comparison -->
-            <div class="liquid-card">
-                <div class="exclusive-badge">ETF</div>
-                <h3><span class="card-icon">🏆</span> ETF Comparison</h3>
-                <div id="etf-content" class="placeholder">
-                    <div class="liquid-loading"></div> Comparing with ETF performance...
+                <div class="selected-assets">
+                    <h4>Your Portfolio</h4>
+                    <div id="selected-assets-list" class="assets-grid">
+                        <!-- Selected assets will be shown here -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/cache-reader.js"></script>
     <script src="/static/js/enhanced-dashboard.js"></script>
+    <script src="/static/js/financial-visualization.js"></script>
 </body>
 
 </html>
