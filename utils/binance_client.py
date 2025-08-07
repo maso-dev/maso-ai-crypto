@@ -1,364 +1,111 @@
-#!/usr/bin/env python3
-"""
-Binance API Client for Portfolio Data
-Provides read-only access to user's Binance portfolio for personalized insights.
-"""
-
+from binance.client import Client
+from pathlib import Path
 import os
 import asyncio
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
-from pydantic import BaseModel, Field
-import httpx
-import hmac
-import hashlib
-import time
-from urllib.parse import urlencode
-
-# Environment variables
-BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
-BINANCE_SECRET_KEY = os.getenv("BINANCE_SECRET_KEY")
-BINANCE_BASE_URL = "https://api.binance.com"
+from typing import Dict, Any, List
+from datetime import datetime
 
 
-class PortfolioAsset(BaseModel):
-    """Portfolio asset model with real data."""
+def get_binance_client() -> Client:
+    api_key = os.getenv("BINANCE_API_KEY")
+    api_secret = os.getenv("BINANCE_API_SECRET")
 
-    asset: str
-    free: float
-    locked: float
-    total: float
-    usdt_value: float
-    cost_basis: Optional[float] = None
-    roi_percentage: Optional[float] = None
-    avg_buy_price: Optional[float] = None
+    if not api_key or not api_secret:
+        raise ValueError("API key or secret missing in environment variables")
+
+    return Client(api_key, api_secret)
 
 
-class TradeHistory(BaseModel):
-    """Trade history model."""
-
-    symbol: str
-    side: str  # BUY or SELL
-    quantity: float
-    price: float
-    timestamp: datetime
-    cost_basis_impact: float
-
-
-class PortfolioData(BaseModel):
-    """Complete portfolio data model."""
-
-    total_value_usdt: float
-    total_cost_basis: float
-    total_roi_percentage: float
-    assets: List[PortfolioAsset]
-    last_updated: datetime
-    trade_history: List[TradeHistory]
-
-
-class BinanceClient:
-    """Binance API client for read-only portfolio access."""
-
-    def __init__(self, api_key: Optional[str] = None, secret_key: Optional[str] = None):
-        self.api_key = api_key or BINANCE_API_KEY
-        self.secret_key = secret_key or BINANCE_SECRET_KEY
-        self.base_url = BINANCE_BASE_URL
-
-        # Don't raise error - just log that keys are missing
-        if not self.api_key or not self.secret_key:
-            print("⚠️ Binance API keys not configured - using mock data")
-
-    def _generate_signature(self, params: Dict[str, Any]) -> str:
-        """Generate HMAC signature for authenticated requests."""
-        if not self.secret_key:
-            raise ValueError("Secret key required for signature generation")
-        query_string = urlencode(params)
-        signature = hmac.new(
-            self.secret_key.encode("utf-8"),
-            query_string.encode("utf-8"),
-            hashlib.sha256,
-        ).hexdigest()
-        return signature
-
-    def _get_headers(self) -> Dict[str, str]:
-        """Get headers for authenticated requests."""
-        if not self.api_key:
-            raise ValueError("API key required for headers")
-        return {"X-MBX-APIKEY": self.api_key}
-
-    async def get_account_info(self) -> Dict[str, Any]:
-        """Get account information including balances."""
-        endpoint = "/api/v3/account"
-        timestamp = int(time.time() * 1000)
-        params = {"timestamp": timestamp}
-        params["signature"] = self._generate_signature(params)
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{self.base_url}{endpoint}", params=params, headers=self._get_headers()
-            )
-            response.raise_for_status()
-            return response.json()
-
-    async def get_ticker_prices(self) -> Dict[str, float]:
-        """Get current prices for all trading pairs."""
-        endpoint = "/api/v3/ticker/price"
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{self.base_url}{endpoint}")
-            response.raise_for_status()
-            data = response.json()
-
-            # Convert to symbol -> price mapping
-            prices = {}
-            for item in data:
-                if item["symbol"].endswith("USDT"):
-                    base_asset = item["symbol"].replace("USDT", "")
-                    prices[base_asset] = float(item["price"])
-
-            return prices
-
-    async def get_trade_history(
-        self, symbol: str, limit: int = 1000
-    ) -> List[Dict[str, Any]]:
-        """Get trade history for a specific symbol."""
-        endpoint = "/api/v3/myTrades"
-        params = {
-            "symbol": symbol,
-            "limit": limit,
-            "timestamp": int(time.time() * 1000),
-        }
-        params["signature"] = self._generate_signature(params)
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{self.base_url}{endpoint}", params=params, headers=self._get_headers()
-            )
-            response.raise_for_status()
-            return response.json()
-
-    def calculate_cost_basis(self, trades: List[Dict[str, Any]]) -> Dict[str, float]:
-        """Calculate cost basis from trade history."""
-        cost_basis = {}
-        total_quantity = {}
-        total_cost = {}
-
-        for trade in trades:
-            symbol = trade["symbol"].replace("USDT", "")
-            side = trade["side"]
-            quantity = float(trade["qty"])
-            price = float(trade["price"])
-
-            if side == "BUY":
-                if symbol not in total_quantity:
-                    total_quantity[symbol] = 0
-                    total_cost[symbol] = 0
-
-                total_quantity[symbol] += quantity
-                total_cost[symbol] += quantity * price
-            elif side == "SELL":
-                # Reduce cost basis proportionally
-                if symbol in total_quantity and total_quantity[symbol] > 0:
-                    reduction_ratio = quantity / total_quantity[symbol]
-                    cost_reduction = total_cost[symbol] * reduction_ratio
-                    total_cost[symbol] -= cost_reduction
-                    total_quantity[symbol] -= quantity
-
-        # Calculate average cost basis
-        for symbol in total_quantity:
-            if total_quantity[symbol] > 0:
-                cost_basis[symbol] = total_cost[symbol] / total_quantity[symbol]
-
-        return cost_basis
-
-    async def get_portfolio_data(self) -> PortfolioData:
-        """Get complete portfolio data with cost basis and ROI calculations."""
-        try:
-            # Get account info and current prices
-            account_info = await self.get_account_info()
-            prices = await self.get_ticker_prices()
-
-            assets = []
-            total_value = 0
-            total_cost_basis = 0
-
-            for balance in account_info["balances"]:
-                asset = balance["asset"]
-                free = float(balance["free"])
-                locked = float(balance["locked"])
-                total = free + locked
-
-                if total > 0 and asset in prices:
-                    usdt_value = total * prices[asset]
-                    total_value += usdt_value
-
-                    # Get trade history for cost basis calculation
-                    symbol = f"{asset}USDT"
-                    try:
-                        trades = await self.get_trade_history(symbol, limit=500)
-                        cost_basis_data = self.calculate_cost_basis(trades)
-                        avg_buy_price = cost_basis_data.get(asset)
-
-                        if avg_buy_price and avg_buy_price > 0:
-                            current_price = prices[asset]
-                            roi_percentage = (
-                                (current_price - avg_buy_price) / avg_buy_price
-                            ) * 100
-                            cost_basis = total * avg_buy_price
-                            total_cost_basis += cost_basis
-                        else:
-                            roi_percentage = None
-                            cost_basis = None
-                            avg_buy_price = None
-
-                    except Exception as e:
-                        # If we can't get trade history, skip cost basis calculation
-                        roi_percentage = None
-                        cost_basis = None
-                        avg_buy_price = None
-
-                    assets.append(
-                        PortfolioAsset(
-                            asset=asset,
-                            free=free,
-                            locked=locked,
-                            total=total,
-                            usdt_value=usdt_value,
-                            cost_basis=cost_basis,
-                            roi_percentage=roi_percentage,
-                            avg_buy_price=avg_buy_price,
-                        )
-                    )
-
-            # Calculate total ROI
-            total_roi_percentage = 0
-            if total_cost_basis > 0:
-                total_roi_percentage = (
-                    (total_value - total_cost_basis) / total_cost_basis
-                ) * 100
-
-            return PortfolioData(
-                total_value_usdt=total_value,
-                total_cost_basis=total_cost_basis,
-                total_roi_percentage=total_roi_percentage,
-                assets=assets,
-                last_updated=datetime.now(timezone.utc),
-                trade_history=[],  # Simplified for now
-            )
-
-        except Exception as e:
-            raise Exception(f"Error fetching portfolio data: {str(e)}")
-
-
-# Global client instance
-binance_client: Optional[BinanceClient] = None
-
-
-def get_binance_client() -> Optional[BinanceClient]:
-    """Get or create Binance client instance."""
-    global binance_client
-
-    print(
-        f"🏛️ Checking Binance API keys: API_KEY={'SET' if BINANCE_API_KEY else 'NOT SET'}, SECRET_KEY={'SET' if BINANCE_SECRET_KEY else 'NOT SET'}"
-    )
-
-    if binance_client is None and BINANCE_API_KEY and BINANCE_SECRET_KEY:
-        try:
-            print("🏛️ Creating new Binance client...")
-            binance_client = BinanceClient()
-            print("🏛️ Binance client created successfully!")
-        except Exception as e:
-            print(f"Warning: Could not initialize Binance client: {e}")
-            return None
-    elif not BINANCE_API_KEY or not BINANCE_SECRET_KEY:
-        print("🏛️ Binance API keys not configured - cannot create client")
-
-    return binance_client
-
-
-async def get_portfolio_data() -> Optional[PortfolioData]:
-    """Get portfolio data using the global client with fallback to mock data."""
-
-    # Check if we're on Vercel (force mock data) or Replit (use real APIs)
-    is_vercel = os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None
-    is_replit = (
-        os.getenv("REPL_ID") is not None
-        or os.getenv("REPL_OWNER") is not None
-        or os.getenv("REPL_SLUG") is not None
-    )
-
-    print(f"🏛️ Environment Check: Vercel={is_vercel}, Replit={is_replit}")
-    print(
-        f"🏛️ Environment Variables: REPL_ID={os.getenv('REPL_ID')}, REPL_OWNER={os.getenv('REPL_OWNER')}, REPL_SLUG={os.getenv('REPL_SLUG')}"
-    )
-
-    if is_vercel:
-        print("🏛️ Vercel detected - using Masonic mock data")
-    elif is_replit:
-        print("🏛️ Replit detected - using real Binance API")
-        # Continue to try real Binance API on Replit
-
-    # Try real Binance data for local development
+async def get_portfolio_data() -> Dict[str, Any]:
+    """
+    Get portfolio data using LiveCoinWatch instead of Binance.
+    This function replaces the old Binance portfolio data function.
+    """
     try:
-        print("🏛️ Attempting to get Binance client...")
-        client = get_binance_client()
-        if client:
-            print("🏛️ Binance client created successfully, fetching portfolio data...")
-            return await client.get_portfolio_data()
-        else:
-            print("🏛️ No Binance client available - API keys not configured")
+        from utils.livecoinwatch_processor import LiveCoinWatchProcessor
+        
+        # Initialize LiveCoinWatch processor
+        processor = LiveCoinWatchProcessor()
+        
+        # Define default portfolio assets
+        symbols = ["BTC", "ETH", "SOL", "XRP", "ADA"]
+        
+        # Get latest prices
+        latest_prices = await processor.get_latest_prices(symbols)
+        
+        # Calculate portfolio value (mock portfolio with fixed quantities)
+        portfolio_assets = []
+        total_value = 0
+        
+        # Mock portfolio quantities
+        quantities = {
+            "BTC": 0.5,
+            "ETH": 5.0,
+            "SOL": 100.0,
+            "XRP": 10000.0,
+            "ADA": 5000.0
+        }
+        
+        for symbol, price_data in latest_prices.items():
+            if price_data:
+                quantity = quantities.get(symbol, 0)
+                asset_value = price_data.price_usd * quantity
+                total_value += asset_value
+                
+                portfolio_assets.append({
+                    "symbol": symbol,
+                    "quantity": quantity,
+                    "price_usd": price_data.price_usd,
+                    "value_usd": asset_value,
+                    "change_24h": price_data.change_24h,
+                    "market_cap": price_data.market_cap,
+                    "volume_24h": price_data.volume_24h
+                })
+        
+        return {
+            "total_value_usdt": total_value,
+            "assets": portfolio_assets,
+            "last_updated": datetime.now().isoformat(),
+            "data_source": "LiveCoinWatch"
+        }
+        
     except Exception as e:
-        print(f"⚠️ Binance API error ({str(e)[:100]}...) - using mock data")
+        # Fallback to mock data if LiveCoinWatch fails
+        return {
+            "total_value_usdt": 125000.0,
+            "assets": [
+                {
+                    "symbol": "BTC",
+                    "quantity": 0.5,
+                    "price_usd": 115000.0,
+                    "value_usd": 57500.0,
+                    "change_24h": 2.1,
+                    "market_cap": 2200000000000,
+                    "volume_24h": 30000000000
+                },
+                {
+                    "symbol": "ETH",
+                    "quantity": 5.0,
+                    "price_usd": 3950.0,
+                    "value_usd": 19750.0,
+                    "change_24h": 1.8,
+                    "market_cap": 475000000000,
+                    "volume_24h": 15000000000
+                },
+                {
+                    "symbol": "SOL",
+                    "quantity": 100.0,
+                    "price_usd": 145.0,
+                    "value_usd": 14500.0,
+                    "change_24h": 4.2,
+                    "market_cap": 65000000000,
+                    "volume_24h": 5000000000
+                }
+            ],
+            "last_updated": datetime.now().isoformat(),
+            "data_source": "Mock (LiveCoinWatch unavailable)"
+        }
 
-    # Return mock data when Binance is unavailable
-    mock_assets = [
-        PortfolioAsset(
-            asset="BTC",
-            free=0.5,
-            locked=0.0,
-            total=0.5,
-            usdt_value=25000.0,
-            cost_basis=20000.0,
-            roi_percentage=25.0,
-            avg_buy_price=40000.0,
-        ),
-        PortfolioAsset(
-            asset="ETH",
-            free=2.0,
-            locked=0.0,
-            total=2.0,
-            usdt_value=8000.0,
-            cost_basis=6000.0,
-            roi_percentage=33.3,
-            avg_buy_price=3000.0,
-        ),
-        PortfolioAsset(
-            asset="ADA",
-            free=1000.0,
-            locked=0.0,
-            total=1000.0,
-            usdt_value=500.0,
-            cost_basis=400.0,
-            roi_percentage=25.0,
-            avg_buy_price=0.4,
-        ),
-        PortfolioAsset(
-            asset="SOL",
-            free=50.0,
-            locked=0.0,
-            total=50.0,
-            usdt_value=3000.0,
-            cost_basis=2500.0,
-            roi_percentage=20.0,
-            avg_buy_price=50.0,
-        ),
-    ]
 
-    return PortfolioData(
-        total_value_usdt=36500.0,
-        total_cost_basis=28900.0,
-        total_roi_percentage=26.3,
-        assets=mock_assets,
-        last_updated=datetime.now(timezone.utc),
-        trade_history=[],
-    )
+# For backward compatibility
+PortfolioData = Dict[str, Any]

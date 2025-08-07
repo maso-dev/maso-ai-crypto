@@ -250,8 +250,8 @@ class FinancialVisualization {
             const data = await response.json();
 
             if (data.status === 'success') {
-                this.updateTechnicalAnalysis(data.data);
-                this.createPriceChart(data.data);
+                this.updateTechnicalAnalysis(data);
+                this.createPriceChart(data);
             }
         } catch (error) {
             console.error('Error loading technical analysis:', error);
@@ -387,12 +387,38 @@ class FinancialVisualization {
         const chartsContainer = document.getElementById('portfolio-charts');
         const button = document.getElementById('view-charts');
 
-        if (chartsContainer.style.display === 'none') {
+        if (chartsContainer.style.display === 'none' || chartsContainer.style.display === '') {
+            // Show charts with smooth transition
             chartsContainer.style.display = 'grid';
+            chartsContainer.style.opacity = '0';
             button.textContent = '📊 Hide Charts';
+            
+            // Smooth fade in
+            setTimeout(() => {
+                chartsContainer.style.opacity = '1';
+                chartsContainer.style.transition = 'opacity 0.3s ease';
+            }, 10);
+            
+            // Ensure charts are properly sized
+            this.resizeCharts();
         } else {
-            chartsContainer.style.display = 'none';
+            // Hide charts with smooth transition
+            chartsContainer.style.opacity = '0';
             button.textContent = '📊 View Charts';
+            
+            setTimeout(() => {
+                chartsContainer.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    resizeCharts() {
+        // Resize charts to fit container
+        if (this.charts.performance) {
+            this.charts.performance.resize();
+        }
+        if (this.charts.allocation) {
+            this.charts.allocation.resize();
         }
     }
 

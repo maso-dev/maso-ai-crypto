@@ -36,31 +36,34 @@ class EnhancedDashboard {
     }
 
     addRefreshButtons() {
-        const cards = document.querySelectorAll('.liquid-card');
-        cards.forEach(card => {
-            const header = card.querySelector('h3');
-            if (header) {
-                const refreshBtn = document.createElement('button');
-                refreshBtn.className = 'refresh-btn';
-                refreshBtn.innerHTML = '🔄';
-                refreshBtn.title = 'Refresh data';
-                refreshBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    this.refreshCardData(card.id || card.className);
-                };
-                header.appendChild(refreshBtn);
+        // Only add refresh buttons to specific cards that have refresh functionality
+        const refreshableCards = [
+            'portfolio-summary', // Portfolio card
+            'market-analysis'    // Market analysis card
+        ];
+
+        refreshableCards.forEach(cardClass => {
+            const card = document.querySelector(`.${cardClass}`);
+            if (card) {
+                const header = card.querySelector('h3');
+                if (header && !header.querySelector('.refresh-btn')) {
+                    const refreshBtn = document.createElement('button');
+                    refreshBtn.className = 'refresh-btn';
+                    refreshBtn.innerHTML = '🔄';
+                    refreshBtn.title = 'Refresh data';
+                    refreshBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.refreshCardData(cardClass);
+                    };
+                    header.appendChild(refreshBtn);
+                }
             }
         });
     }
 
     updatePhaseIndicator() {
-        const header = document.querySelector('.liquid-header');
-        if (header) {
-            const phaseBadge = document.createElement('div');
-            phaseBadge.className = 'phase-badge';
-            phaseBadge.innerHTML = `Phase ${this.currentPhase}`;
-            header.appendChild(phaseBadge);
-        }
+        // Phase indicator removed for clean UI
+        // No longer adding status badges to header
     }
 
     async loadInitialData() {
@@ -164,9 +167,14 @@ class EnhancedDashboard {
             this.isUpdating = true;
             // Use cache reader endpoint instead of full AI agent
             const response = await fetch('/api/cache/signals/latest');
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
 
-            if (data.status === 'success') {
+            if (data.status === 'success' && data.data) {
                 this.updateOpportunitiesUI(data.data);
                 this.updateMarketAnalysis(data.data);
             } else {
@@ -175,7 +183,7 @@ class EnhancedDashboard {
 
         } catch (error) {
             console.error('❌ Error updating opportunities data:', error);
-            this.showError('market-summary-content', 'Market analysis temporarily unavailable');
+            this.showError('market-summary-content', 'Alpha signals data temporarily unavailable');
         } finally {
             this.isUpdating = false;
         }
@@ -226,7 +234,8 @@ class EnhancedDashboard {
         const portfolio = data.portfolio || data;
         const totalValue = portfolio.total_value || data.total_value_usdt || 0;
         const assets = portfolio.assets || data.assets || [];
-        const dataSource = 'LIVECOINWATCH';
+        // Read actual data source from API response, fallback to LiveCoinWatch
+        const dataSource = data.source || 'LIVECOINWATCH';
         const enhancedFeatures = true;
 
         let html = `
@@ -590,31 +599,8 @@ class EnhancedDashboard {
     }
 
     updateSystemStatus(data) {
-        // Update system status in a subtle way
-        const systemHealth = data.system_health || 'unknown';
-        const currentPhase = data.current_phase || '5';
-
-        // Add system status to header if not already present
-        let statusIndicator = document.querySelector('.system-status');
-        if (!statusIndicator) {
-            const header = document.querySelector('.liquid-header');
-            if (header) {
-                statusIndicator = document.createElement('div');
-                statusIndicator.className = 'system-status';
-                header.appendChild(statusIndicator);
-            }
-        }
-
-        if (statusIndicator) {
-            const healthClass = systemHealth === 'healthy' ? 'healthy' :
-                systemHealth === 'degraded' ? 'degraded' : 'unhealthy';
-
-            statusIndicator.innerHTML = `
-                <span class="status-badge ${healthClass}">
-                    ${systemHealth.toUpperCase()} | Phase ${currentPhase}
-                </span>
-            `;
-        }
+        // System status updates removed for clean UI
+        // No longer adding status badges to header
     }
 
     showError(elementId, message) {
@@ -624,8 +610,18 @@ class EnhancedDashboard {
                 <div class="error-message">
                     <span class="error-icon">⚠️</span>
                     <span class="error-text">${message}</span>
+                    <div class="error-retry">Auto-retrying in 30 seconds...</div>
                 </div>
             `;
+
+            // Auto-retry after 30 seconds
+            setTimeout(() => {
+                if (elementId === 'market-summary-content') {
+                    this.updateOpportunitiesData();
+                } else if (elementId === 'news-insights-content') {
+                    this.updateNewsData();
+                }
+            }, 30000);
         }
     }
 

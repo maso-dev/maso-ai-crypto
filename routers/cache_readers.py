@@ -72,7 +72,30 @@ MOCK_NEWS_CACHE = {
                 "summary": "Traditional financial institutions continue to enter the digital asset custody space"
             }
         ]
-    }
+    },
+    "articles": [
+        {
+            "title": "Bitcoin ETF Sees Record Inflows as Institutional Demand Grows",
+            "source": "Bloomberg",
+            "sentiment": "positive",
+            "published_at": datetime.now().isoformat(),
+            "summary": "Major Bitcoin ETFs report significant inflows as institutional investors increase crypto allocations"
+        },
+        {
+            "title": "Ethereum Spot ETF Decision Expected Soon",
+            "source": "CoinDesk",
+            "sentiment": "positive", 
+            "published_at": (datetime.now() - timedelta(hours=2)).isoformat(),
+            "summary": "SEC decision on Ethereum spot ETFs could come within weeks, sources say"
+        },
+        {
+            "title": "Solana DeFi Protocols Hit New TVL Highs",
+            "source": "The Block",
+            "sentiment": "positive",
+            "published_at": (datetime.now() - timedelta(hours=4)).isoformat(),
+            "summary": "Solana-based DeFi protocols reach record total value locked as ecosystem expands"
+        }
+    ]
 }
 
 MOCK_SIGNALS_CACHE = {
@@ -80,21 +103,21 @@ MOCK_SIGNALS_CACHE = {
     "signals": [
         {
             "symbol": "BTC",
-            "action": "BUY",
+            "signal_type": "BUY",
             "confidence": 0.85,
             "reasoning": "Strong technical indicators, institutional adoption",
             "technical_indicators": {
                 "rsi": 65,
                 "macd": "bullish",
-                "support_level": 68000
+                "support_level": 110000
             },
             "risk_level": "medium",
-            "target_price": 78000,
-            "stop_loss": 65000
+            "target_price": 125000,
+            "stop_loss": 105000
         },
         {
             "symbol": "ETH",
-            "action": "HOLD",
+            "signal_type": "HOLD",
             "confidence": 0.72,
             "reasoning": "Consolidation phase, wait for breakout",
             "technical_indicators": {
@@ -209,52 +232,50 @@ MOCK_PORTFOLIO_CACHE = {
 @router.get("/news/latest-summary")
 async def get_latest_news_summary() -> Dict[str, Any]:
     """
-    Get latest news summary from NewsAPI (real-time)
+    Get latest news summary using intelligent cache system
     """
     try:
-        # Import NewsAPI function
-        from utils.newsapi import fetch_news_articles
+        # Import intelligent cache function
+        from utils.intelligent_news_cache import get_portfolio_news
         
-        # Get real-time crypto news
-        crypto_articles = await fetch_news_articles(["cryptocurrency", "bitcoin", "ethereum"], hours_back=24)
+        # Get cached portfolio-aware news
+        news_data = await get_portfolio_news(
+            include_alpha_portfolio=True,
+            include_opportunity_tokens=True,
+            include_personal_portfolio=True,
+            hours_back=24
+        )
         
-        if crypto_articles and len(crypto_articles) > 0:
-            # Process real news data
-            total_articles = len(crypto_articles)
-            sources = {"newsapi": total_articles}
+        if news_data and news_data.get("articles"):
+            # Process cached news data
+            articles = news_data.get("articles", [])
+            total_articles = len(articles)
+            sources = {"intelligent_cache": total_articles}
             
-            # Calculate sentiment (simplified)
-            positive_count = sum(1 for article in crypto_articles if "bitcoin" in article.get("title", "").lower() or "bull" in article.get("title", "").lower())
-            negative_count = sum(1 for article in crypto_articles if "crash" in article.get("title", "").lower() or "bear" in article.get("title", "").lower())
+            # Calculate sentiment from cached data
+            positive_count = sum(1 for article in articles if article.get("sentiment") == "positive")
+            negative_count = sum(1 for article in articles if article.get("sentiment") == "negative")
             neutral_count = total_articles - positive_count - negative_count
             
-            # Extract key insights from recent articles
-            key_insights = []
-            for article in crypto_articles[:3]:
-                title = article.get("title", "")
-                if "bitcoin" in title.lower():
-                    key_insights.append("Bitcoin market activity in focus")
-                elif "ethereum" in title.lower():
-                    key_insights.append("Ethereum ecosystem developments")
-                elif "regulation" in title.lower():
-                    key_insights.append("Regulatory developments impact markets")
+            # Extract key insights from cached data
+            key_insights = news_data.get("key_insights", [
+                "Crypto market volatility continues",
+                "Institutional adoption trends", 
+                "DeFi protocol developments"
+            ])
             
-            # Ensure we have at least some insights
-            if not key_insights:
-                key_insights = ["Crypto market volatility continues", "Institutional adoption trends", "DeFi protocol developments"]
-            
-            # Format top stories
+            # Format top stories from cached data
             top_stories = []
-            for article in crypto_articles[:5]:
+            for article in articles[:5]:
                 top_stories.append({
                     "title": article.get("title", "Crypto News"),
-                    "source": article.get("source", {}).get("name", "News Source"),
-                    "sentiment": "positive" if "bitcoin" in article.get("title", "").lower() else "neutral",
-                    "published_at": article.get("publishedAt", datetime.now().isoformat()),
-                    "summary": article.get("description", "Crypto market update")[:100] + "..."
+                    "source": article.get("source", "News Source"),
+                    "sentiment": article.get("sentiment", "neutral"),
+                    "published_at": article.get("published_at", datetime.now().isoformat()),
+                    "summary": article.get("summary", "Crypto market update")
                 })
             
-            real_news_data = {
+            cached_news_data = {
                 "last_updated": datetime.now().isoformat(),
                 "summary": {
                     "total_articles": total_articles,
@@ -266,14 +287,15 @@ async def get_latest_news_summary() -> Dict[str, Any]:
                     },
                     "key_insights": key_insights[:4],
                     "top_stories": top_stories
-                }
+                },
+                "articles": articles
             }
             
             return {
                 "status": "success",
-                "data": real_news_data,
-                "source": "newsapi",
-                "cache_age": "real-time"
+                "data": cached_news_data,
+                "source": "intelligent_cache",
+                "cache_age": "cached"
             }
         else:
             # Fallback to realistic mock data if NewsAPI fails
@@ -316,7 +338,7 @@ async def get_livecoinwatch_portfolio() -> Dict[str, Any]:
     Get portfolio data from LiveCoinWatch API (real-time)
     """
     try:
-        # Import LiveCoinWatch processor
+        # Import LiveCoinWatch processor convenience functions
         from utils.livecoinwatch_processor import get_latest_prices, calculate_technical_indicators
         
         # Define our portfolio symbols
@@ -375,7 +397,8 @@ async def get_livecoinwatch_portfolio() -> Dict[str, Any]:
                     "change_24h": price_data.change_24h,
                     "volume_24h": price_data.volume_24h,
                     "market_cap": price_data.market_cap,
-                    "technical_indicators": indicators
+                    "technical_indicators": indicators,
+                    "data_source": "LiveCoinWatch"
                 })
         
         # If no real data available, use realistic mock data
@@ -411,7 +434,8 @@ async def get_livecoinwatch_portfolio() -> Dict[str, Any]:
                             "macd": "bullish",
                             "support": mock_data["price"] * 0.95,
                             "resistance": mock_data["price"] * 1.05
-                        }
+                        },
+                        "data_source": "Mock (LiveCoinWatch unavailable)"
                     })
         
         # Calculate weighted portfolio changes

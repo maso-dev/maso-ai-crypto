@@ -557,53 +557,9 @@
             transform: rotate(180deg);
         }
 
-        .phase-badge {
-            position: absolute;
-            top: 2rem;
-            right: 8rem;
-            z-index: 2;
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-            color: white;
-            box-shadow: var(--glass-shadow);
-        }
 
-        .system-status {
-            position: absolute;
-            top: 2rem;
-            right: 12rem;
-            z-index: 2;
-        }
 
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: var(--glass-shadow);
-        }
 
-        .status-badge.healthy {
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            color: white;
-        }
-
-        .status-badge.degraded {
-            background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
-            color: white;
-        }
-
-        .status-badge.unhealthy {
-            background: linear-gradient(135deg, var(--neon-red), var(--neon-pink));
-            color: white;
-        }
 
         /* Market Regime */
         .market-overview {
@@ -849,13 +805,7 @@
         /* Responsive Enhancements */
         @media (max-width: 768px) {
 
-            .phase-badge,
-            .system-status {
-                position: relative;
-                top: auto;
-                right: auto;
-                margin-bottom: 1rem;
-            }
+
 
             .opportunities-stats,
             .intelligence-stats {
@@ -875,7 +825,7 @@
         }
 
         /* Phase 3: Financial Visualization Styles */
-        
+
         /* Portfolio Controls */
         .portfolio-controls,
         .market-controls,
@@ -1071,11 +1021,11 @@
             .charts-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .assets-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
-            
+
             .technical-indicators {
                 grid-template-columns: repeat(2, 1fr);
             }
