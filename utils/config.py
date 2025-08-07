@@ -105,6 +105,16 @@ class ConfigManager:
                 icon="🕸️",
                 category="database",
             ),
+            "milvus": APIConfig(
+                name="Milvus",
+                key_name="MILVUS_URI",
+                key_value=os.getenv("MILVUS_URI"),
+                base_url=os.getenv("MILVUS_URI", "http://localhost:19530"),
+                description="Vector database for embeddings",
+                icon="🗄️",
+                category="database",
+                is_required=False,  # Milvus is optional for MVP
+            ),
         }
 
         self.service_configs = {

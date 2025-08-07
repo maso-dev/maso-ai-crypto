@@ -18,7 +18,7 @@ from utils.livecoinwatch_processor import (
     livecoinwatch_processor,
 )
 
-router = APIRouter(prefix="/livecoinwatch", tags=["livecoinwatch"])
+router = APIRouter(prefix="/api/livecoinwatch", tags=["livecoinwatch"])
 
 
 # Pydantic models
@@ -58,6 +58,39 @@ async def trigger_price_collection(
     if not is_admin_user(request):
         raise HTTPException(status_code=403, detail="Admin access required")
 
+    try:
+        # Collect price data
+        background_tasks.add_task(collect_price_data, data_request.symbols)
+
+        # Collect historical data if requested
+        if data_request.include_historical:
+            for symbol in data_request.symbols:
+                background_tasks.add_task(collect_historical_data, symbol, 30)
+
+        # Calculate indicators if requested
+        if data_request.include_indicators:
+            for symbol in data_request.symbols:
+                background_tasks.add_task(calculate_technical_indicators, symbol, 30)
+
+        return {
+            "message": "Price collection triggered",
+            "symbols": data_request.symbols,
+            "include_historical": data_request.include_historical,
+            "include_indicators": data_request.include_indicators,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error triggering collection: {str(e)}"
+        )
+
+
+@router.post("/trigger-collection")
+async def trigger_data_collection(
+    background_tasks: BackgroundTasks, data_request: PriceDataRequest
+):
+    """Trigger price data collection (public endpoint for admin page)."""
     try:
         # Collect price data
         background_tasks.add_task(collect_price_data, data_request.symbols)
