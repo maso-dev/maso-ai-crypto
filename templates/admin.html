@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏛️ Masonic - Admin Configuration</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
     <style>
         /* Apple Liquid Glass Design System */
         :root {
@@ -675,11 +675,19 @@
         </div>
     </main>
 
-    <script src="/static/js/service-monitor.js"></script>
+    <script src="/static/js/service-monitor.js?v=4"></script>
     <script>
         // Initialize admin dashboard
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('🔧 Admin Dashboard initialized');
+
+            // Initialize Service Monitor
+            if (typeof ServiceMonitor !== 'undefined') {
+                window.serviceMonitor = new ServiceMonitor();
+                console.log('✅ Service Monitor initialized');
+            } else {
+                console.error('❌ ServiceMonitor class not found');
+            }
         });
     </script>
 </body>

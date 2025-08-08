@@ -428,3 +428,200 @@ async def get_system_logs(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving logs: {str(e)}")
+
+
+# ============================================================================
+# DATA QUALITY VALIDATION ENDPOINTS
+# ============================================================================
+
+
+@router.get("/validate-real-data")
+async def validate_real_data(admin: bool = Depends(verify_admin_access)) -> Dict[str, Any]:
+    """Get comprehensive validation of real vs mock data"""
+    try:
+        from utils.admin_validator import get_comprehensive_admin_status, get_status_emoji, format_status_text
+        
+        result = await get_comprehensive_admin_status()
+        
+        # Format the response for easy reading
+        formatted_result = {
+            "overall_health": result.overall_health,
+            "real_data_percentage": round(result.real_data_percentage, 1),
+            "last_updated": result.last_updated.isoformat(),
+            "api_keys": result.api_keys,
+            "components": {
+                "livecoinwatch": {
+                    "status": get_status_emoji(result.livecoinwatch),
+                    "text": format_status_text(result.livecoinwatch),
+                    "is_real_data": result.livecoinwatch.is_real_data,
+                    "is_operational": result.livecoinwatch.is_operational,
+                    "mock_mode": result.livecoinwatch.mock_mode,
+                    "error": result.livecoinwatch.error_message,
+                    "last_check": result.livecoinwatch.last_check.isoformat(),
+                    "data_freshness_minutes": result.livecoinwatch.data_freshness_minutes
+                },
+                "newsapi": {
+                    "status": get_status_emoji(result.newsapi),
+                    "text": format_status_text(result.newsapi),
+                    "is_real_data": result.newsapi.is_real_data,
+                    "is_operational": result.newsapi.is_operational,
+                    "mock_mode": result.newsapi.mock_mode,
+                    "error": result.newsapi.error_message,
+                    "last_check": result.newsapi.last_check.isoformat(),
+                    "data_freshness_minutes": result.newsapi.data_freshness_minutes
+                },
+                "neo4j": {
+                    "status": get_status_emoji(result.neo4j),
+                    "text": format_status_text(result.neo4j),
+                    "is_real_data": result.neo4j.is_real_data,
+                    "is_operational": result.neo4j.is_operational,
+                    "mock_mode": result.neo4j.mock_mode,
+                    "error": result.neo4j.error_message,
+                    "last_check": result.neo4j.last_check.isoformat(),
+                    "data_freshness_minutes": result.neo4j.data_freshness_minutes
+                },
+                "openai": {
+                    "status": get_status_emoji(result.openai),
+                    "text": format_status_text(result.openai),
+                    "is_real_data": result.openai.is_real_data,
+                    "is_operational": result.openai.is_operational,
+                    "mock_mode": result.openai.mock_mode,
+                    "error": result.openai.error_message,
+                    "last_check": result.openai.last_check.isoformat(),
+                    "data_freshness_minutes": result.openai.data_freshness_minutes
+                },
+                "tavily": {
+                    "status": get_status_emoji(result.tavily),
+                    "text": format_status_text(result.tavily),
+                    "is_real_data": result.tavily.is_real_data,
+                    "is_operational": result.tavily.is_operational,
+                    "mock_mode": result.tavily.mock_mode,
+                    "error": result.tavily.error_message,
+                    "last_check": result.tavily.last_check.isoformat(),
+                    "data_freshness_minutes": result.tavily.data_freshness_minutes
+                },
+                "milvus": {
+                    "status": get_status_emoji(result.milvus),
+                    "text": format_status_text(result.milvus),
+                    "is_real_data": result.milvus.is_real_data,
+                    "is_operational": result.milvus.is_operational,
+                    "mock_mode": result.milvus.mock_mode,
+                    "error": result.milvus.error_message,
+                    "last_check": result.milvus.last_check.isoformat(),
+                    "data_freshness_minutes": result.milvus.data_freshness_minutes
+                },
+                "langsmith": {
+                    "status": get_status_emoji(result.langsmith),
+                    "text": format_status_text(result.langsmith),
+                    "is_real_data": result.langsmith.is_real_data,
+                    "is_operational": result.langsmith.is_operational,
+                    "mock_mode": result.langsmith.mock_mode,
+                    "error": result.langsmith.error_message,
+                    "last_check": result.langsmith.last_check.isoformat(),
+                    "data_freshness_minutes": result.langsmith.data_freshness_minutes
+                }
+            },
+            "summary": {
+                "total_components": 7,
+                "operational_components": sum(1 for comp in [result.livecoinwatch, result.newsapi, result.neo4j, result.openai, result.tavily, result.milvus, result.langsmith] if comp.is_operational),
+                "real_data_components": sum(1 for comp in [result.livecoinwatch, result.newsapi, result.neo4j, result.openai, result.tavily, result.milvus, result.langsmith] if comp.is_real_data),
+                "mock_data_components": sum(1 for comp in [result.livecoinwatch, result.newsapi, result.neo4j, result.openai, result.tavily, result.milvus, result.langsmith] if comp.mock_mode)
+            }
+        }
+        
+        return formatted_result
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "status": "error",
+            "last_updated": datetime.now().isoformat()
+        }
+
+
+@router.get("/data-quality-report")
+async def get_data_quality_report(admin: bool = Depends(verify_admin_access)) -> Dict[str, Any]:
+    """Get a detailed data quality report"""
+    try:
+        from utils.admin_validator import get_comprehensive_admin_status
+        
+        result = await get_comprehensive_admin_status()
+        
+        # Generate recommendations
+        recommendations = []
+        
+        if not result.livecoinwatch.is_real_data:
+            recommendations.append({
+                "component": "LiveCoinWatch",
+                "issue": "Using mock data",
+                "action": "Check API key and connectivity",
+                "priority": "high"
+            })
+        
+        if not result.newsapi.is_real_data:
+            recommendations.append({
+                "component": "NewsAPI",
+                "issue": "Using mock data",
+                "action": "Check rate limits and API key",
+                "priority": "medium"
+            })
+        
+        if result.neo4j.mock_mode:
+            recommendations.append({
+                "component": "Neo4j",
+                "issue": "Using mock mode",
+                "action": "Check database connection",
+                "priority": "low"
+            })
+        
+        if not result.openai.is_real_data:
+            recommendations.append({
+                "component": "OpenAI",
+                "issue": "API not working",
+                "action": "Check API key and quota",
+                "priority": "high"
+            })
+        
+        return {
+            "data_quality_score": round(result.real_data_percentage, 1),
+            "overall_health": result.overall_health,
+            "recommendations": recommendations,
+            "components_status": {
+                "livecoinwatch": {
+                    "quality": "real" if result.livecoinwatch.is_real_data else "mock",
+                    "operational": result.livecoinwatch.is_operational
+                },
+                "newsapi": {
+                    "quality": "real" if result.newsapi.is_real_data else "mock",
+                    "operational": result.newsapi.is_operational
+                },
+                "neo4j": {
+                    "quality": "real" if result.neo4j.is_real_data else "mock",
+                    "operational": result.neo4j.is_operational
+                },
+                "openai": {
+                    "quality": "real" if result.openai.is_real_data else "mock",
+                    "operational": result.openai.is_operational
+                },
+                "tavily": {
+                    "quality": "real" if result.tavily.is_real_data else "mock",
+                    "operational": result.tavily.is_operational
+                },
+                "milvus": {
+                    "quality": "real" if result.milvus.is_real_data else "mock",
+                    "operational": result.milvus.is_operational
+                },
+                "langsmith": {
+                    "quality": "real" if result.langsmith.is_real_data else "mock",
+                    "operational": result.langsmith.is_operational
+                }
+            },
+            "last_updated": result.last_updated.isoformat()
+        }
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "status": "error",
+            "last_updated": datetime.now().isoformat()
+        }

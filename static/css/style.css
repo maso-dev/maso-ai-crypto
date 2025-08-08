@@ -1592,3 +1592,37 @@ main {
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
+
+/* Enhanced status indicators for real vs mock data */
+.service-status.real-data {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.service-status.mock-data {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Environment value styles */
+.env-value.excellent {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.env-value.good {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+.env-value.poor {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.env-value.info {
+  color: #06b6d4;
+  font-weight: 500;
+}

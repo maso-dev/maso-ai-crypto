@@ -84,7 +84,7 @@ class TavilySearchClient:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     f"{self.base_url}/search",
-                    headers={"X-API-Key": self.api_key or ""},
+                    headers={"Authorization": f"Bearer {self.api_key}"},
                     json={
                         "query": query,
                         "search_depth": "basic",
@@ -150,7 +150,7 @@ class TavilySearchClient:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     f"{self.base_url}/search",
-                    headers={"X-API-Key": self.api_key or ""},
+                    headers={"Authorization": f"Bearer {self.api_key}"},
                     json={
                         "query": query,
                         "search_depth": "advanced",
@@ -217,7 +217,7 @@ class TavilySearchClient:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     f"{self.base_url}/search",
-                    headers={"X-API-Key": self.api_key or ""},
+                    headers={"Authorization": f"Bearer {self.api_key}"},
                     json={
                         "query": query,
                         "search_depth": "basic",

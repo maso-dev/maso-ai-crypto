@@ -15,8 +15,8 @@ try:
     from utils.enhanced_news_pipeline import get_enhanced_crypto_news, EnhancedNewsPipeline
     from utils.enhanced_agent import generate_enhanced_agent_analysis, get_enhanced_agent
     from utils.data_quality_filter import filter_news_articles
-    from utils.vector_rag import search_knowledge_base
-    from utils.agent_engine import generate_market_analysis
+    # from utils.vector_rag import search_knowledge_base  # Function moved to brain_enhanced
+    from utils.agent_engine import generate_agent_analysis
     from utils.newsapi import fetch_news_articles
     from utils.tavily_search import TavilySearchClient
     from utils.binance_client import get_portfolio_data

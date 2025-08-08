@@ -175,29 +175,34 @@ class LiveCoinWatchProcessor:
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                # Prepare request payload for multiple coins
-                payload = {"currency": "USD", "codes": symbols, "meta": True}
-
                 headers = {
                     "x-api-key": self.api_key,
                     "Content-Type": "application/json",
                 }
 
-                # Make API request to /coins/map for multiple symbols
-                response = await client.post(
-                    f"{self.base_url}/coins/map", json=payload, headers=headers
-                )
-                response.raise_for_status()
-
-                data = response.json()
                 price_data_list = []
                 timestamp = datetime.now(timezone.utc)
 
-                # Process each symbol's data
-                for symbol_data in data:
+                # Use individual /coins/single calls instead of /coins/map
+                for symbol in symbols:
                     try:
+                        payload = {
+                            "currency": "USD",
+                            "code": symbol,
+                            "meta": True
+                        }
+
+                        response = await client.post(
+                            f"{self.base_url}/coins/single", 
+                            json=payload, 
+                            headers=headers
+                        )
+                        response.raise_for_status()
+
+                        symbol_data = response.json()
+                        
                         price_data = PriceData(
-                            symbol=symbol_data.get("code", "").upper(),
+                            symbol=symbol.upper(),  # Use the original symbol from request
                             timestamp=timestamp,
                             price_usd=float(symbol_data.get("rate", 0)),
                             market_cap=float(symbol_data.get("cap", 0)),
@@ -223,20 +228,21 @@ class LiveCoinWatchProcessor:
                         price_data_list.append(price_data)
 
                     except (KeyError, ValueError, TypeError) as e:
-                        logger.warning(f"Error processing data for symbol: {e}")
+                        logger.warning(f"Error processing data for symbol {symbol}: {e}")
+                        continue
+                    except httpx.HTTPStatusError as e:
+                        logger.warning(f"HTTP error for symbol {symbol}: {e}")
                         continue
 
                 # Store data in database
-                await self._store_price_data(price_data_list)
+                if price_data_list:
+                    await self._store_price_data(price_data_list)
 
                 logger.info(
                     f"Successfully collected price data for {len(price_data_list)} symbols"
                 )
                 return price_data_list
 
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error collecting price data: {e}")
-            return []
         except httpx.RequestError as e:
             logger.error(f"Request error collecting price data: {e}")
             return []

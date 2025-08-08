@@ -6,9 +6,17 @@ from pathlib import Path
 import os
 from datetime import datetime, timedelta
 
-app = FastAPI(title="🏛️ Masonic - Alpha Strategy Advisor")
+app = FastAPI(title="🏛️ Masonic - AI Crypto Broker")
 
 templates = Jinja2Templates(directory="templates")
+
+# Import and include routers
+from routers import admin, cache_readers, brain_enhanced, status_control
+
+app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
+app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
+app.include_router(status_control.router, prefix="/status", tags=["status"])
 
 
 # Custom static files handling for Vercel (similar to working example)
@@ -845,12 +853,7 @@ try:
 except ImportError as e:
     print(f"Warning: Could not import brain_enhanced_router: {e}")
 
-try:
-    from routers.brain_simple import router as brain_simple_router
-
-    app.include_router(brain_simple_router)
-except ImportError as e:
-    print(f"Warning: Could not import brain_simple_router: {e}")
+# brain_simple router removed - not needed for current functionality
 
 # Phase 1: Cache Reader Router (Capstone Implementation)
 try:

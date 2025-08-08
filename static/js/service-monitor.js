@@ -49,12 +49,20 @@ class ServiceMonitor {
 
     async refreshAllServices() {
         try {
-            // Use the admin_conf endpoint which has the actual service structure
-            const response = await fetch('/admin_conf');
+            console.log('🔄 Refreshing all services...');
+            console.log('📡 Fetching from: /admin/validate-real-data');
+            // Use the correct admin endpoint for real data validation
+            const response = await fetch('/admin/validate-real-data');
+            console.log('📊 Response status:', response.status);
+            console.log('📊 Response ok:', response.ok);
             const data = await response.json();
+            console.log('📊 Data received:', Object.keys(data));
 
-            if (data.status === 'ready') {
+            if (data.overall_health) {
                 this.updateServiceStatus(data);
+            } else {
+                console.error('Admin validation failed:', data);
+                this.showError('Failed to validate service status');
             }
         } catch (error) {
             console.error('Error refreshing services:', error);
@@ -73,30 +81,33 @@ class ServiceMonitor {
 
     updateServiceStatus(data) {
         // Update overall health
+        const realDataCount = Object.values(data.components).filter(comp => comp.is_real_data).length;
+        const totalComponents = Object.keys(data.components).length;
+
         this.updateOverallHealth({
-            score: `${data.configured_count}/${data.total_apis}`,
-            status: data.api_keys_configured ? 'healthy' : 'degraded'
+            score: `${realDataCount}/${totalComponents}`,
+            status: realDataCount >= totalComponents * 0.7 ? 'healthy' : 'degraded'
         });
 
-        // Update individual services from api_configurations
-        this.updateServicesGrid(data.api_configurations);
-        this.updateBackendServicesGrid(data.api_configurations);
+        // Update individual services from components
+        this.updateServicesGrid(data.components);
+        this.updateBackendServicesGrid(data.components);
 
-        Object.keys(data.api_configurations).forEach(serviceName => {
-            this.updateSingleService(serviceName, data.api_configurations[serviceName]);
+        Object.keys(data.components).forEach(serviceName => {
+            this.updateSingleService(serviceName, data.components[serviceName]);
 
             // Update specific service elements if they exist
             if (serviceName === 'livecoinwatch') {
-                this.updateLiveCoinWatchStatus(data.api_configurations[serviceName]);
+                this.updateLiveCoinWatchStatus(data.components[serviceName]);
             }
         });
 
         // Update environment info
         this.updateEnvironmentInfo({
-            'API Keys Configured': data.api_keys_configured ? 'Yes' : 'No',
-            'Configured Services': `${data.configured_count}/${data.total_apis}`,
-            'Cache Queries': data.cache_statistics?.total_cached_queries || 0,
-            'Cache Hits': data.cache_statistics?.total_cache_hits || 0
+            'Real Data Services': `${realDataCount}/${totalComponents}`,
+            'Overall Health': data.overall_health || 'Unknown',
+            'Data Quality Score': `${data.real_data_percentage || 0}%`,
+            'Last Updated': data.last_updated || 'Unknown'
         });
 
         // Update last refresh time
@@ -230,25 +241,46 @@ class ServiceMonitor {
         const serviceElement = document.querySelector(`[data-service="${serviceName}"]`);
         if (!serviceElement) return;
 
-        // Update status badge
+        // Update status badge with real data indicators
         const statusBadge = serviceElement.querySelector('.service-status');
         if (statusBadge) {
-            statusBadge.textContent = serviceData.status || 'Unknown';
-            statusBadge.className = `service-status ${serviceData.status || 'unknown'}`;
+            let statusText, statusClass;
+
+            if (serviceData.is_real_data) {
+                statusText = `✅ ${serviceData.text} (Real Data)`;
+                statusClass = 'real-data';
+            } else if (serviceData.is_operational) {
+                statusText = `⚠️ ${serviceData.text} (Mock Data)`;
+                statusClass = 'mock-data';
+            } else {
+                statusText = `❌ ${serviceData.text}`;
+                statusClass = 'error';
+            }
+
+            // Add data freshness if available
+            if (serviceData.data_freshness_minutes > 0) {
+                statusText += ` (${serviceData.data_freshness_minutes}m ago)`;
+            }
+
+            statusBadge.textContent = statusText;
+            statusBadge.className = `service-status ${statusClass}`;
+
+            // Add tooltip with detailed info
+            statusBadge.title = `Last Check: ${serviceData.last_check}\nMock Mode: ${serviceData.mock_mode}\nError: ${serviceData.error || 'None'}`;
         }
 
         // Update API key status
         const keyStatus = serviceElement.querySelector('.key-status');
         if (keyStatus) {
-            const hasKey = serviceData.key_set || false;
-            keyStatus.textContent = hasKey ? '✅ Configured' : '❌ Not Configured';
+            const hasKey = serviceData.is_operational || false;
+            keyStatus.textContent = hasKey ? '✅ Operational' : '❌ Not Operational';
             keyStatus.className = `key-status ${hasKey ? 'configured' : 'not-configured'}`;
         }
 
-        // Update last updated time (use current time since API doesn't provide this)
+        // Update last updated time
         const lastUpdated = serviceElement.querySelector('.last-updated');
         if (lastUpdated) {
-            lastUpdated.textContent = this.formatTime(new Date());
+            lastUpdated.textContent = this.formatTime(new Date(serviceData.last_check));
         }
     }
 
@@ -258,26 +290,37 @@ class ServiceMonitor {
 
         envGrid.innerHTML = Object.entries(env).map(([key, value]) => {
             // Handle different types of values
-            let displayValue, isConfigured;
+            let displayValue, isConfigured, valueClass;
 
-            if (key === 'API Keys Configured') {
-                displayValue = value === 'Yes' ? '✅ Configured' : '❌ Not Set';
-                isConfigured = value === 'Yes';
-            } else if (key === 'Configured Services') {
+            if (key === 'Real Data Services') {
+                const [real, total] = value.split('/').map(Number);
+                const percentage = Math.round((real / total) * 100);
+                displayValue = `${value} (${percentage}%)`;
+                valueClass = percentage >= 70 ? 'excellent' : percentage >= 50 ? 'good' : 'poor';
+                isConfigured = true;
+            } else if (key === 'Overall Health') {
                 displayValue = value;
-                isConfigured = true; // Always show as configured if we have the data
-            } else if (key.includes('Cache')) {
+                valueClass = value === 'healthy' ? 'excellent' : value === 'degraded' ? 'good' : 'poor';
+                isConfigured = true;
+            } else if (key === 'Data Quality Score') {
+                const score = parseInt(value);
                 displayValue = value;
-                isConfigured = true; // Cache statistics are always valid if we have them
+                valueClass = score >= 80 ? 'excellent' : score >= 60 ? 'good' : 'poor';
+                isConfigured = true;
+            } else if (key === 'Last Updated') {
+                displayValue = this.formatTime(new Date(value));
+                valueClass = 'info';
+                isConfigured = true;
             } else {
                 displayValue = value ? '✅ Configured' : '❌ Not Set';
+                valueClass = value ? 'configured' : 'not-configured';
                 isConfigured = !!value;
             }
 
             return `
                 <div class="env-item">
                     <div class="env-label">${key}</div>
-                    <div class="env-value ${isConfigured ? 'configured' : 'not-configured'}">
+                    <div class="env-value ${valueClass}">
                         ${displayValue}
                     </div>
                 </div>

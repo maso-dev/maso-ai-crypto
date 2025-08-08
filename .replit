@@ -1,11 +1,11 @@
-run = "python -m uvicorn main:app --host 0.0.0.0 --port 8000"
+run = "python run.py"
 entrypoint = "main.py"
 
 [nix]
-channel = "stable-22_11"
+channel = "stable-23_11"
 
 [env]
-PYTHONPATH = "${REPL_HOME}"
+PYTHONPATH = "${PYTHONPATH}:/home/runner/${REPL_SLUG}"
 
 [packager]
 language = "python3"
@@ -14,19 +14,9 @@ language = "python3"
 packageSearch = true
 guessImports = true
 
-[languages]
 [languages.python]
 pattern = "**/*.py"
 syntax = "python"
 
-[languages.javascript]
-pattern = "**/*.js"
-syntax = "javascript"
-
-[languages.html]
-pattern = "**/*.html"
-syntax = "html"
-
-[languages.css]
-pattern = "**/*.css"
-syntax = "css"
+[languages.python.languageServer]
+start = [ "pylsp" ]
