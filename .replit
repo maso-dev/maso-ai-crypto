@@ -2,6 +2,13 @@ run = "python main.py"
 entrypoint = "main.py"
 modules = ["python-3.11"]
 
+[deployment]
+run = ["sh", "-c", "python main.py"]
+deploymentTarget = "cloudrun"
+
+[env]
+PORT = "8000"
+
 [nix]
 channel = "stable-23_11"
 packages = ["bash", "libxcrypt"]

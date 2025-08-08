@@ -2,7 +2,13 @@
   deps = [
     pkgs.python311
     pkgs.python311Packages.pip
-    pkgs.nodejs-18_x
-    pkgs.nodePackages.npm
+    pkgs.python311Packages.virtualenv
+    pkgs.bash
+    pkgs.libxcrypt
   ];
+  
+  env = {
+    PYTHONPATH = ".";
+    PORT = "8000";
+  };
 } 

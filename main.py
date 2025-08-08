@@ -1790,9 +1790,14 @@ def status_dashboard(request: Request):
 # Server startup for development
 if __name__ == "__main__":
     import uvicorn
+    import os
+    
+    # Get port from environment (Replit sets this)
+    port = int(os.environ.get("PORT", 8000))
+    
     print("🚀 Starting Masonic AI Capstone Server...")
     print("📊 Phase 1: Cache Reader Implementation")
-    print("🌐 Server will be available at: http://localhost:8000")
+    print(f"🌐 Server will be available at: http://0.0.0.0:{port}")
     print("📚 Cache endpoints: /api/cache/*")
     print("🎓 Capstone dashboard: /dashboard")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
