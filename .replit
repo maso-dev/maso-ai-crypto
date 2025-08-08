@@ -1,37 +1,13 @@
-run = "python main.py"
-entrypoint = "main.py"
-modules = ["python-3.11"]
-
-[deployment]
-run = ["sh", "-c", "python main.py"]
-deploymentTarget = "cloudrun"
-
-[env]
-PORT = "8000"
+modules = ["python-3.12", "web"]
+run = "uvicorn main:app --host 0.0.0.0 --port 3000"
 
 [nix]
-channel = "stable-23_11"
+channel = "stable-25_05"
 packages = ["bash", "libxcrypt"]
 
-[env]
-PYTHONPATH = "${PYTHONPATH}:/home/runner/${REPL_SLUG}"
+[deployment]
+run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 3000"]
 
-[languages]
-[languages.python]
-pattern = "**/*.py"
-syntax = "python"
-
-[languages.python.languageServer]
-start = [ "pylsp" ]
-
-[workflows]
-runButton = "Start Server"
-
-[[workflows.workflow]]
-name = "Start Server"
-author = 45862521
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python main.py"
+[[ports]]
+localPort = 3000
+externalPort = 80
