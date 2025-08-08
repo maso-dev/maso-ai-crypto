@@ -55,6 +55,17 @@ app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
 app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
 app.include_router(status_control.router, prefix="/status", tags=["status"])
 
+@app.on_event("startup")
+async def startup_event():
+    """Start status monitoring when the app starts."""
+    try:
+        from utils.status_control import get_status_control
+        status_control = get_status_control()
+        status_control.start_monitoring()
+        print("✅ Status monitoring started")
+    except Exception as e:
+        print(f"⚠️ Could not start status monitoring: {e}")
+
 
 # Custom static files handling for Vercel (similar to working example)
 @app.get("/static/{path:path}")

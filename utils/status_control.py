@@ -103,9 +103,8 @@ class StatusControl:
         # Initialize component health checkers
         self._initialize_health_checkers()
 
-        # Start background monitoring
+        # Don't start monitoring automatically - will be started when needed
         self._monitoring_task: Optional[asyncio.Task] = None
-        self._start_monitoring()
 
     def _initialize_health_checkers(self):
         """Initialize health check functions for each component."""
@@ -522,7 +521,11 @@ class StatusControl:
     def _start_monitoring(self):
         """Start background monitoring task."""
         if self._monitoring_task is None or self._monitoring_task.done():
-            self._monitoring_task = asyncio.create_task(self._monitor_components())
+            try:
+                self._monitoring_task = asyncio.create_task(self._monitor_components())
+            except RuntimeError:
+                # No running event loop, monitoring will start when needed
+                pass
 
     async def _monitor_components(self):
         """Background task to monitor all components."""
@@ -657,10 +660,24 @@ class StatusControl:
         for key, value in kwargs.items():
             if hasattr(self.metrics, key):
                 setattr(self.metrics, key, value)
+    
+    def start_monitoring(self):
+        """Start monitoring when the app is ready."""
+        self._start_monitoring()
 
 
-# Global status control instance
-status_control = StatusControl()
+# Global status control instance - lazy initialization
+_status_control_instance = None
+
+def get_status_control() -> StatusControl:
+    """Get the global status control instance, creating it if needed."""
+    global _status_control_instance
+    if _status_control_instance is None:
+        _status_control_instance = StatusControl()
+    return _status_control_instance
+
+# Create the instance but don't start monitoring yet
+status_control = get_status_control()
 
 
 # Convenience functions
