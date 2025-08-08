@@ -41,11 +41,13 @@ async def validate_livecoinwatch() -> DataQualityStatus:
         from utils.livecoinwatch_processor import LiveCoinWatchProcessor
         
         processor = LiveCoinWatchProcessor()
-        latest_prices = await processor.get_latest_prices(["BTC", "ETH"])
         
-        # Check if we get real prices
+        # Force fresh data collection instead of reading from cache
+        price_data_list = await processor.collect_price_data(["BTC", "ETH"])
+        
+        # Check if we get real prices from API
         real_prices = 0
-        for symbol, price_data in latest_prices.items():
+        for price_data in price_data_list:
             if price_data and price_data.price_usd > 0:
                 real_prices += 1
         
