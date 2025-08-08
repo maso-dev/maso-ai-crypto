@@ -4,26 +4,15 @@ Simple startup script for Replit deployment
 """
 
 import os
-import sys
-import subprocess
-
-def install_dependencies():
-    """Install required dependencies if not already installed"""
-    try:
-        import uvicorn
-        print("✅ uvicorn already installed")
-    except ImportError:
-        print("📦 Installing dependencies...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        print("✅ Dependencies installed")
 
 def main():
     """Main startup function"""
-    # Install dependencies if needed
-    install_dependencies()
-    
-    # Import uvicorn after ensuring it's installed
-    import uvicorn
+    try:
+        import uvicorn
+    except ImportError:
+        print("❌ uvicorn not found. Please install dependencies using Replit's package manager.")
+        print("💡 In Replit, go to 'Packages' tab and install the required packages.")
+        return
     
     # Get port from environment (Replit sets this)
     port = int(os.environ.get("PORT", 8000))

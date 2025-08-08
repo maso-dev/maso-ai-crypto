@@ -1,0 +1,29 @@
+# Replit Package Manager - Install these packages
+# Go to Packages tab in Replit and search for each one
+
+fastapi
+uvicorn[standard]
+jinja2
+httpx
+pydantic
+openai
+langchain
+langchain-openai
+langchain-core
+langgraph
+python-binance
+newsapi-python
+tavily-python
+neo4j
+pymilvus
+python-dotenv
+python-dateutil
+pytz
+websockets
+aiohttp
+
+# Optional development packages
+pytest
+pytest-asyncio
+flake8
+black
