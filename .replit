@@ -17,19 +17,10 @@ syntax = "python"
 start = [ "pylsp" ]
 
 [workflows]
-runButton = "Run"
+runButton = "Start Server"
 
 [[workflows.workflow]]
 name = "Start Server"
-author = 45862521
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python main.py"
-
-[[workflows.workflow]]
-name = "Run"
 author = 45862521
 mode = "sequential"
 
