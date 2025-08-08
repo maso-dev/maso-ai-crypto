@@ -94,11 +94,16 @@ class ServiceMonitor {
         this.updateBackendServicesGrid(data.components);
 
         Object.keys(data.components).forEach(serviceName => {
-            this.updateSingleService(serviceName, data.components[serviceName]);
+            // Pass both component data and API key status
+            const serviceData = {
+                ...data.components[serviceName],
+                api_key_configured: data.api_keys[serviceName] || false
+            };
+            this.updateSingleService(serviceName, serviceData);
 
             // Update specific service elements if they exist
             if (serviceName === 'livecoinwatch') {
-                this.updateLiveCoinWatchStatus(data.components[serviceName]);
+                this.updateLiveCoinWatchStatus(serviceData);
             }
         });
 
@@ -272,8 +277,8 @@ class ServiceMonitor {
         // Update API key status
         const keyStatus = serviceElement.querySelector('.key-status');
         if (keyStatus) {
-            const hasKey = serviceData.is_operational || false;
-            keyStatus.textContent = hasKey ? '✅ Operational' : '❌ Not Operational';
+            const hasKey = serviceData.api_key_configured || false;
+            keyStatus.textContent = hasKey ? '✅ Configured' : '❌ Not Configured';
             keyStatus.className = `key-status ${hasKey ? 'configured' : 'not-configured'}`;
         }
 
