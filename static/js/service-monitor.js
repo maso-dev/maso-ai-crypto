@@ -57,6 +57,8 @@ class ServiceMonitor {
             console.log('📊 Response ok:', response.ok);
             const data = await response.json();
             console.log('📊 Data received:', Object.keys(data));
+            console.log('📊 API Keys:', data.api_keys);
+            console.log('📊 Components:', Object.keys(data.components));
 
             if (data.overall_health) {
                 this.updateServiceStatus(data);
@@ -89,16 +91,21 @@ class ServiceMonitor {
             status: realDataCount >= totalComponents * 0.7 ? 'healthy' : 'degraded'
         });
 
-        // Update individual services from components
-        this.updateServicesGrid(data.components);
-        this.updateBackendServicesGrid(data.components);
-
+        // Create enhanced service data with API key status
+        const enhancedComponents = {};
         Object.keys(data.components).forEach(serviceName => {
-            // Pass both component data and API key status
-            const serviceData = {
+            enhancedComponents[serviceName] = {
                 ...data.components[serviceName],
                 api_key_configured: data.api_keys[serviceName] || false
             };
+        });
+
+        // Update individual services from components
+        this.updateServicesGrid(enhancedComponents);
+        this.updateBackendServicesGrid(enhancedComponents);
+
+        Object.keys(enhancedComponents).forEach(serviceName => {
+            const serviceData = enhancedComponents[serviceName];
             this.updateSingleService(serviceName, serviceData);
 
             // Update specific service elements if they exist
