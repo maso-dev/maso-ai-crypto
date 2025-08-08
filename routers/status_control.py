@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 # Import status control system
 from utils.status_control import (
-    status_control,
+    get_status_control,
     get_system_status,
     get_component_status,
     get_all_components_status,
@@ -148,7 +148,7 @@ async def check_component_health(
     """Manually trigger a health check for a specific component."""
     try:
         # Trigger immediate health check
-        background_tasks.add_task(status_control.check_all_components)
+        background_tasks.add_task(get_status_control().check_all_components)
 
         return {
             "message": f"Health check triggered for {component_name}",
@@ -170,7 +170,7 @@ async def check_component_health(
 async def get_recent_alerts(limit: int = 10) -> List[AlertResponse]:
     """Get recent system alerts."""
     try:
-        alerts = status_control.get_recent_alerts(limit)
+        alerts = get_status_control().get_recent_alerts(limit)
         return [
             AlertResponse(
                 id=alert.id,
@@ -211,7 +211,7 @@ async def create_alert(
 async def resolve_alert(alert_id: str) -> Dict[str, Any]:
     """Mark an alert as resolved."""
     try:
-        status_control.resolve_alert(alert_id)
+        get_status_control().resolve_alert(alert_id)
         return {
             "message": "Alert resolved successfully",
             "alert_id": alert_id,
@@ -230,7 +230,7 @@ async def resolve_alert(alert_id: str) -> Dict[str, Any]:
 async def get_system_metrics() -> MetricsResponse:
     """Get system performance metrics."""
     try:
-        metrics = status_control.get_system_metrics()
+        metrics = get_status_control().get_system_metrics()
         return MetricsResponse(
             total_requests=metrics.total_requests,
             successful_requests=metrics.successful_requests,
@@ -273,7 +273,7 @@ async def update_metrics(
         if cpu_usage_percent is not None:
             update_data["cpu_usage_percent"] = cpu_usage_percent
 
-        status_control.update_metrics(**update_data)
+        get_status_control().update_metrics(**update_data)
 
         return {
             "message": "Metrics updated successfully",
@@ -293,12 +293,12 @@ async def update_metrics(
 async def refresh_all_components(background_tasks: BackgroundTasks) -> Dict[str, Any]:
     """Manually refresh all component statuses."""
     try:
-        background_tasks.add_task(status_control.check_all_components)
+        background_tasks.add_task(get_status_control().check_all_components)
 
         return {
             "message": "Component refresh triggered",
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "components": list(status_control.health_checkers.keys()),
+            "components": list(get_status_control().health_checkers.keys()),
         }
     except Exception as e:
         raise HTTPException(
