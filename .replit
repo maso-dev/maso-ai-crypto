@@ -15,3 +15,15 @@ syntax = "python"
 
 [languages.python.languageServer]
 start = [ "pylsp" ]
+
+[workflows]
+runButton = "Start Server"
+
+[[workflows.workflow]]
+name = "Start Server"
+author = 45862521
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python run.py"
