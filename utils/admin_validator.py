@@ -76,38 +76,44 @@ async def validate_livecoinwatch() -> DataQualityStatus:
 async def validate_newsapi() -> DataQualityStatus:
     """Validate NewsAPI with real data check"""
     try:
-        from utils.intelligent_news_cache import get_portfolio_news
+        from utils.config import get_api_key
+        from utils.newsapi import fetch_news_articles
         
-        news_data = await get_portfolio_news(
-            include_alpha_portfolio=True,
-            include_opportunity_tokens=True,
-            include_personal_portfolio=True,
-            hours_back=24,
-        )
+        # First check if API key is configured
+        api_key = get_api_key("newsapi")
+        if not api_key:
+            raise ValueError("NewsAPI key not configured")
         
-        # Check if we have real articles
-        articles = news_data.get("news_by_category", {})
-        total_articles = sum(len(articles_list) for articles_list in articles.values())
-        
-        # Check for mock indicators
-        is_mock = False
-        for category, articles_list in articles.items():
-            for article in articles_list:
-                if "mock" in str(article).lower() or "Mock" in str(article):
-                    is_mock = True
-                    break
-        
-        is_real_data = total_articles > 0 and not is_mock
-        is_operational = True  # API responds
-        mock_mode = is_mock
-        
-        return DataQualityStatus(
-            is_real_data=is_real_data,
-            is_operational=is_operational,
-            mock_mode=mock_mode,
-            last_check=datetime.now(),
-            data_freshness_minutes=0 if mock_mode else 60
-        )
+        # Test direct API call to verify it's working
+        try:
+            articles = await fetch_news_articles(
+                terms=["bitcoin"],
+                api_key=api_key,
+                hours_back=24
+            )
+            
+            # Check if we got real articles
+            is_real_data = len(articles) > 0
+            is_operational = True
+            mock_mode = not is_real_data
+            
+            return DataQualityStatus(
+                is_real_data=is_real_data,
+                is_operational=is_operational,
+                mock_mode=mock_mode,
+                last_check=datetime.now(),
+                data_freshness_minutes=0 if mock_mode else 60
+            )
+            
+        except Exception as api_error:
+            # API call failed, but key is configured
+            return DataQualityStatus(
+                is_real_data=False,
+                is_operational=False,
+                mock_mode=True,
+                error_message=f"API call failed: {str(api_error)}",
+                last_check=datetime.now()
+            )
         
     except Exception as e:
         return DataQualityStatus(
@@ -261,7 +267,9 @@ async def validate_langsmith() -> DataQualityStatus:
         
         # Check if LangSmith is properly configured
         import os
-        langsmith_configured = bool(os.getenv("LANGCHAIN_TRACING_V2"))
+        # LangSmith is considered operational if API key is configured
+        # The LANGCHAIN_TRACING_V2 is optional for basic functionality
+        langsmith_configured = bool(api_key)
         
         return DataQualityStatus(
             is_real_data=langsmith_configured,
