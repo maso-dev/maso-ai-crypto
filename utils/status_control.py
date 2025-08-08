@@ -676,24 +676,23 @@ def get_status_control() -> StatusControl:
         _status_control_instance = StatusControl()
     return _status_control_instance
 
-# Create the instance but don't start monitoring yet
-status_control = get_status_control()
+# Don't create the instance during import - make it truly lazy
 
 
 # Convenience functions
 async def get_system_status() -> Dict[str, Any]:
     """Get overall system status."""
-    return status_control.get_overall_status()
+    return get_status_control().get_overall_status()
 
 
 async def get_component_status(component_name: str) -> Optional[ComponentHealth]:
     """Get status of a specific component."""
-    return status_control.get_component_status(component_name)
+    return get_status_control().get_component_status(component_name)
 
 
 async def get_all_components_status() -> Dict[str, ComponentHealth]:
     """Get status of all components."""
-    return status_control.get_all_components_status()
+    return get_status_control().get_all_components_status()
 
 
 async def create_status_alert(
@@ -703,7 +702,7 @@ async def create_status_alert(
     metadata: Optional[Dict[str, Any]] = None,
 ):
     """Create a status alert."""
-    await status_control.create_alert(component, severity, message, metadata)
+    await get_status_control().create_alert(component, severity, message, metadata)
 
 
 @asynccontextmanager
