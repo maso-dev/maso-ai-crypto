@@ -106,10 +106,12 @@ class ServiceMonitor {
 
         Object.keys(enhancedComponents).forEach(serviceName => {
             const serviceData = enhancedComponents[serviceName];
+            console.log(`🔧 Service ${serviceName}:`, serviceData);
             this.updateSingleService(serviceName, serviceData);
 
             // Update specific service elements if they exist
             if (serviceName === 'livecoinwatch') {
+                console.log('🪙 LiveCoinWatch data:', serviceData);
                 this.updateLiveCoinWatchStatus(serviceData);
             }
         });
@@ -351,8 +353,8 @@ class ServiceMonitor {
         }
 
         if (keyElement) {
-            keyElement.textContent = serviceData.key_set ? '✅ Configured' : '❌ Not Configured';
-            keyElement.className = `detail-value ${serviceData.key_set ? 'configured' : 'not-configured'}`;
+            keyElement.textContent = serviceData.api_key_configured ? '✅ Configured' : '❌ Not Configured';
+            keyElement.className = `detail-value ${serviceData.api_key_configured ? 'configured' : 'not-configured'}`;
         }
     }
 
