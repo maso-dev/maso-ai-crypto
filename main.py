@@ -48,10 +48,7 @@ app = FastAPI(title="🏛️ Masonic - AI Crypto Broker")
 templates = Jinja2Templates(directory="templates")
 
 # Import and include routers
-import routers.admin as admin
-import routers.cache_readers as cache_readers
-import routers.brain_enhanced as brain_enhanced
-import routers.status_control as status_control
+from routers import admin, cache_readers, brain_enhanced, status_control
 
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
