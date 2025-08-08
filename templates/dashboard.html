@@ -287,6 +287,9 @@
             border: 1px solid var(--glass-border);
             border-left: 4px solid var(--neon-blue);
             transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
 
         .insight-item:hover {
@@ -301,6 +304,9 @@
             font-size: 0.8rem;
             letter-spacing: 1px;
             margin-bottom: 0.5rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
 
         .recommendation-item {
@@ -887,6 +893,15 @@
             padding: 1.5rem;
             border-radius: 1rem;
             border: 1px solid var(--glass-border);
+            position: relative;
+            width: 100%;
+            height: auto;
+        }
+
+        .chart-section canvas {
+            max-width: 100%;
+            height: auto !important;
+            aspect-ratio: 16/9;
         }
 
         .chart-section h4 {
@@ -901,6 +916,15 @@
             padding: 1.5rem;
             border-radius: 1rem;
             border: 1px solid var(--glass-border);
+            position: relative;
+            width: 100%;
+            height: auto;
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+            height: auto !important;
+            aspect-ratio: 16/9;
         }
 
         /* Portfolio Builder */
@@ -1020,6 +1044,17 @@
         @media (max-width: 768px) {
             .charts-container {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .chart-section,
+            .chart-container {
+                padding: 1rem;
+            }
+
+            .chart-section canvas,
+            .chart-container canvas {
+                aspect-ratio: 4/3;
             }
 
             .assets-grid {
@@ -1028,6 +1063,14 @@
 
             .technical-indicators {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .insight-item {
+                padding: 1rem;
+            }
+
+            .insight-type {
+                font-size: 0.75rem;
             }
         }
     </style>
