@@ -1,63 +1,82 @@
 # 🚀 Masonic AI Crypto - Development Branch
 
-## Quick Start (Replit/Local)
+## Quick Start (Replit)
 
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
+### 1. Import to Replit
+1. Go to [replit.com](https://replit.com)
+2. Click "Create Repl"
+3. Choose "Import from GitHub"
+4. Enter: `maso-dev/maso-ai-crypto`
+5. Select branch: `dev-replit-local`
+
+### 2. Install Packages (One Time Setup)
+1. In Replit, go to **Packages** tab (left sidebar)
+2. Search for and install these packages:
+   ```
+   fastapi
+   uvicorn[standard]
+   jinja2
+   httpx
+   pydantic
+   openai
+   langchain
+   langchain-openai
+   langchain-core
+   langgraph
+   python-binance
+   newsapi-python
+   tavily-python
+   neo4j
+   pymilvus
+   python-dotenv
+   python-dateutil
+   pytz
+   websockets
+   aiohttp
+   ```
+
+### 3. Set Environment Variables
+In Replit, go to **Tools** → **Secrets** and add:
+```
+OPENAI_API_KEY=your_openai_key
+LIVECOINWATCH_API_KEY=your_livecoinwatch_key
+TAVILY_API_KEY=your_tavily_key
+NEWSAPI_KEY=your_newsapi_key
+NEO4J_URI=your_neo4j_uri
+NEO4J_USERNAME=your_neo4j_username
+NEO4J_PASSWORD=your_neo4j_password
+LANGSMITH_API_KEY=your_langsmith_key
 ```
 
-### 2. Set Environment Variables
-Copy `env.example` to `.env` and add your API keys:
-```bash
-cp env.example .env
-```
+### 4. Run the Application
+Click the **Run** button! 🚀
 
-Required API Keys:
-- `OPENAI_API_KEY` - For AI analysis
-- `LIVECOINWATCH_API_KEY` - For crypto prices
-- `TAVILY_API_KEY` - For web search
-- `NEWSAPI_KEY` - For news articles
-- `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` - For graph database
-
-### 3. Run the Application
-```bash
-python main.py
-```
-
-Or with uvicorn:
-```bash
-python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### 4. Access the Application
-- **Main Dashboard**: http://localhost:8000
-- **Admin Panel**: http://localhost:8000/admin
-- **Brain Dashboard**: http://localhost:8000/brain-dashboard
+### 5. Access Your App
+- Your app will be available at: `https://your-repl-name.your-username.repl.co`
 
 ## Features
 
-✅ **Real-time crypto data** (LiveCoinWatch)  
-✅ **AI-powered analysis** (OpenAI + LangChain)  
-✅ **News sentiment analysis** (NewsAPI + Tavily)  
-✅ **Vector search** (Milvus)  
-✅ **Graph database** (Neo4j)  
-✅ **Admin transparency** (Real vs mock data indicators)  
-✅ **Cache system** (Intelligent caching with fallbacks)  
-
-## Current Status
-
-- **6/7 services** using real data
-- **Admin transparency** working
-- **Cache system** operational
-- **Local development** ready
+✅ **Real-time crypto data** (LiveCoinWatch)
+✅ **AI-powered analysis** (OpenAI + LangChain)
+✅ **News sentiment analysis** (NewsAPI + Tavily)
+✅ **Vector search** (Milvus)
+✅ **Graph database** (Neo4j)
+✅ **Admin transparency** (Real vs mock data indicators)
+✅ **Cache system** (Intelligent caching with fallbacks)
 
 ## Troubleshooting
 
 ### Common Issues:
-1. **API Rate Limits**: NewsAPI has daily limits, will auto-fallback
-2. **Neo4j Connection**: Graph features work in mock mode if Neo4j unavailable
-3. **Port Conflicts**: Change port in uvicorn command if 8000 is busy
+1. **"No module named 'uvicorn'"**: Install packages using Replit's Package Manager
+2. **"externally-managed-environment"**: Use Replit's Package Manager (not pip)
+3. **API Keys**: Make sure all environment variables are set in Replit Secrets
 
-### Logs:
-Check console output for detailed error messages and service status.
+### Quick Fix:
+If you see missing package errors, just go to **Packages** tab and install them!
+
+## Development
+
+- **Auto-reload**: Enabled for development
+- **Hot reload**: Changes are reflected immediately
+- **Debug mode**: Full logging enabled
+- **Local testing**: Perfect for development and testing

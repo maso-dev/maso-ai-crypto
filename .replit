@@ -1,4 +1,4 @@
-run = "python run.py"
+run = "python main.py"
 entrypoint = "main.py"
 
 [nix]
@@ -7,13 +7,7 @@ channel = "stable-23_11"
 [env]
 PYTHONPATH = "${PYTHONPATH}:/home/runner/${REPL_SLUG}"
 
-[packager]
-language = "python3"
-
-[packager.features]
-packageSearch = true
-guessImports = true
-
+[languages]
 [languages.python]
 pattern = "**/*.py"
 syntax = "python"

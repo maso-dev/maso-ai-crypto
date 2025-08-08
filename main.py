@@ -1,3 +1,40 @@
+# Graceful dependency handling for Replit
+import sys
+import subprocess
+
+def check_and_install_dependencies():
+    """Check for required packages and provide helpful error messages"""
+    missing_packages = []
+    
+    required_packages = [
+        'fastapi', 'uvicorn', 'jinja2', 'httpx', 'pydantic', 
+        'openai', 'langchain', 'langchain_openai', 'langchain_core'
+    ]
+    
+    for package in required_packages:
+        try:
+            __import__(package.replace('-', '_'))
+        except ImportError:
+            missing_packages.append(package)
+    
+    if missing_packages:
+        print("❌ Missing required packages:")
+        for pkg in missing_packages:
+            print(f"   - {pkg}")
+        print("\n💡 To install packages in Replit:")
+        print("   1. Go to 'Packages' tab (left sidebar)")
+        print("   2. Search for each package above")
+        print("   3. Click 'Add Package' for each one")
+        print("\n📦 Or use the package list in 'replit-packages.txt'")
+        return False
+    
+    return True
+
+# Check dependencies before importing
+if not check_and_install_dependencies():
+    print("\n🚀 Please install the missing packages and try again!")
+    sys.exit(1)
+
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse, HTMLResponse
