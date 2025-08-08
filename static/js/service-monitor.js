@@ -146,8 +146,8 @@ class ServiceMonitor {
                 <div class="service-details">
                     <div class="detail-item">
                         <span class="detail-label">API Key:</span>
-                        <span class="key-status ${serviceData.key_set ? 'configured' : 'not-configured'}">
-                            ${serviceData.key_set ? '✅ Configured' : '❌ Not Configured'}
+                        <span class="key-status ${serviceData.api_key_configured ? 'configured' : 'not-configured'}">
+                            ${serviceData.api_key_configured ? '✅ Configured' : '❌ Not Configured'}
                         </span>
                     </div>
                     <div class="detail-item">
@@ -220,8 +220,8 @@ class ServiceMonitor {
                 <div class="service-details">
                     <div class="detail-item">
                         <span class="detail-label">API Key:</span>
-                        <span class="key-status ${serviceData.key_set ? 'configured' : 'not-configured'}">
-                            ${serviceData.key_set ? '✅ Configured' : '❌ Not Configured'}
+                        <span class="key-status ${serviceData.api_key_configured ? 'configured' : 'not-configured'}">
+                            ${serviceData.api_key_configured ? '✅ Configured' : '❌ Not Configured'}
                         </span>
                     </div>
                     <div class="detail-item">
