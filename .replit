@@ -1,4 +1,4 @@
-run = "python run.py"
+run = "python setup_replit.py && python run.py"
 entrypoint = "main.py"
 
 [nix]

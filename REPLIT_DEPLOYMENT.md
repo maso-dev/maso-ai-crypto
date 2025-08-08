@@ -24,9 +24,13 @@ LANGSMITH_API_KEY=your_langsmith_key
 ```
 
 ### 3. Install Dependencies
+**Option A: Automatic (Recommended)**
+Just click the **Run** button - dependencies will install automatically!
+
+**Option B: Manual**
 In the Replit shell:
 ```bash
-pip install -r requirements.txt
+python setup_replit.py
 ```
 
 ### 4. Run the Application
@@ -52,10 +56,11 @@ python run.py
 ## Troubleshooting
 
 ### Common Issues:
-1. **API Keys**: Make sure all environment variables are set in Replit Secrets
-2. **Dependencies**: Run `pip install -r requirements.txt` if packages are missing
-3. **Port**: Replit automatically handles port assignment
-4. **Database**: SQLite files are created automatically
+1. **"No module named 'uvicorn'"**: Run `python setup_replit.py` first, then `python run.py`
+2. **API Keys**: Make sure all environment variables are set in Replit Secrets
+3. **Dependencies**: The setup script will install all required packages automatically
+4. **Port**: Replit automatically handles port assignment
+5. **Database**: SQLite files are created automatically
 
 ### Logs:
 Check the Replit console for detailed error messages and service status.
