@@ -38,3 +38,4 @@ pytz
 tavily-python
 uvicorn
 websockets
+django-routers
