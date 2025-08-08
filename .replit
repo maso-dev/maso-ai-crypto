@@ -3,6 +3,7 @@ entrypoint = "main.py"
 
 [nix]
 channel = "stable-23_11"
+packages = ["bash", "libxcrypt"]
 
 [env]
 PYTHONPATH = "${PYTHONPATH}:/home/runner/${REPL_SLUG}"
