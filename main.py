@@ -50,10 +50,21 @@ templates = Jinja2Templates(directory="templates")
 # Import and include routers
 from routers import admin, cache_readers, brain_enhanced, status_control
 
+# Try to import optimized news router (temporal optimization)
+try:
+    from routers import optimized_news
+    OPTIMIZED_NEWS_AVAILABLE = True
+except ImportError:
+    OPTIMIZED_NEWS_AVAILABLE = False
+
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
 app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
 app.include_router(status_control.router, prefix="/status", tags=["status"])
+
+# Include optimized news router if available
+if OPTIMIZED_NEWS_AVAILABLE:
+    app.include_router(optimized_news.router, prefix="/api", tags=["optimized-news"])
 
 @app.on_event("startup")
 async def startup_event():
@@ -1797,6 +1808,10 @@ if __name__ == "__main__":
     
     print("🚀 Starting Masonic AI Capstone Server...")
     print("📊 Phase 1: Cache Reader Implementation")
+    print("⚡ NEW: Temporal Optimization (Prepped Kitchen Architecture)")
+    print("   - Background news collection: collectors/news_ingestor.py")
+    print("   - AI processing pipeline: collectors/analysis_pipeline.py") 
+    print("   - Fast serving router: /optimized-news")
     print(f"🌐 Server will be available at: http://0.0.0.0:{port}")
     print("📚 Cache endpoints: /api/cache/*")
     print("🎓 Capstone dashboard: /dashboard")
