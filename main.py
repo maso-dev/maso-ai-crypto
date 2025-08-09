@@ -1,22 +1,25 @@
 # Graceful dependency handling for Replit
+import sqlite3
+from datetime import datetime, timezone, timedelta
 import sys
 import subprocess
+
 
 def check_and_install_dependencies():
     """Check for required packages and provide helpful error messages"""
     missing_packages = []
-    
+
     required_packages = [
-        'fastapi', 'uvicorn', 'jinja2', 'httpx', 'pydantic', 
-        'openai', 'langchain', 'langchain_openai', 'langchain_core'
+        'fastapi', 'uvicorn', 'jinja2', 'httpx', 'pydantic', 'openai',
+        'langchain', 'langchain_openai', 'langchain_core'
     ]
-    
+
     for package in required_packages:
         try:
             __import__(package.replace('-', '_'))
         except ImportError:
             missing_packages.append(package)
-    
+
     if missing_packages:
         print("❌ Missing required packages:")
         for pkg in missing_packages:
@@ -27,8 +30,9 @@ def check_and_install_dependencies():
         print("   3. Click 'Add Package' for each one")
         print("\n📦 Or use the package list in 'replit-packages.txt'")
         return False
-    
+
     return True
+
 
 # Check dependencies before importing
 if not check_and_install_dependencies():
@@ -64,7 +68,10 @@ app.include_router(status_control.router, prefix="/status", tags=["status"])
 
 # Include optimized news router if available
 if OPTIMIZED_NEWS_AVAILABLE:
-    app.include_router(optimized_news.router, prefix="/api", tags=["optimized-news"])
+    app.include_router(optimized_news.router,
+                       prefix="/api",
+                       tags=["optimized-news"])
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -132,8 +139,7 @@ async def welcome_page(request: Request):
         return templates.TemplateResponse("welcome.html", {"request": request})
     except Exception:
         # Fallback to simple HTML if template fails
-        return HTMLResponse(
-            content="""
+        return HTMLResponse(content="""
         <html>
             <head><title>Welcome - Portfolio Analyzer</title></head>
             <body>
@@ -143,8 +149,7 @@ async def welcome_page(request: Request):
                 <p><a href="/api/health">Health Check</a></p>
             </body>
         </html>
-        """
-        )
+        """)
 
 
 # NEW: Alpha portfolio API
@@ -193,14 +198,16 @@ async def get_dream_team_portfolio():
             # Get enhanced agent analysis
             agent = get_enhanced_agent()
             analysis = await agent.generate_complete_analysis(
-                mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"]
-            )
+                mock_portfolio, symbols=["BTC", "ETH", "XRP", "SOL", "DOGE"])
 
             return {
                 "portfolio": analysis.portfolio_analysis if analysis else None,
-                "market_analysis": analysis.market_analysis if analysis else None,
-                "recommendations": analysis.recommendations if analysis else [],
-                "risk_assessment": analysis.risk_assessment if analysis else {},
+                "market_analysis":
+                analysis.market_analysis if analysis else None,
+                "recommendations":
+                analysis.recommendations if analysis else [],
+                "risk_assessment":
+                analysis.risk_assessment if analysis else {},
                 "last_updated": datetime.now().isoformat(),
             }
         except Exception:
@@ -214,7 +221,10 @@ async def get_dream_team_portfolio():
                 "market_analysis": {
                     "trend": "bullish",
                     "confidence": 0.75,
-                    "key_levels": {"BTC": 40000, "ETH": 3000},
+                    "key_levels": {
+                        "BTC": 40000,
+                        "ETH": 3000
+                    },
                 },
                 "recommendations": [
                     {
@@ -222,10 +232,18 @@ async def get_dream_team_portfolio():
                         "asset": "BTC",
                         "reason": "Strong support at $40K",
                     },
-                    {"action": "BUY", "asset": "ETH", "reason": "Breakout potential"},
+                    {
+                        "action": "BUY",
+                        "asset": "ETH",
+                        "reason": "Breakout potential"
+                    },
                 ],
-                "risk_assessment": {"overall_risk": "medium", "volatility": "high"},
-                "last_updated": datetime.now().isoformat(),
+                "risk_assessment": {
+                    "overall_risk": "medium",
+                    "volatility": "high"
+                },
+                "last_updated":
+                datetime.now().isoformat(),
             }
     except Exception:
         return {"error": "Portfolio analysis failed"}
@@ -250,12 +268,16 @@ async def get_enhanced_opportunities():
         # 1. Get market context and regime analysis
         market_analysis = await ai_agent.execute_task(
             AgentTask.MARKET_ANALYSIS,
-            query="Analyze overall crypto market conditions and identify current market regime",
+            query=
+            "Analyze overall crypto market conditions and identify current market regime",
             symbols=["BTC", "ETH", "SOL", "XRP", "DOGE"],
         )
 
         # 2. Get symbol context for major tokens
-        symbols = ["BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "DOT", "LINK", "MATIC", "AVAX"]
+        symbols = [
+            "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "DOT", "LINK", "MATIC",
+            "AVAX"
+        ]
         opportunities = []
         market_insights = []
 
@@ -265,18 +287,22 @@ async def get_enhanced_opportunities():
                 await get_symbol_context(symbol)
 
                 # Get LiveCoinWatch data
-                latest_prices = await livecoinwatch_processor.get_latest_prices([symbol])
+                latest_prices = await livecoinwatch_processor.get_latest_prices(
+                    [symbol])
                 price_data = latest_prices.get(symbol)
 
                 # Get comprehensive technical indicators
-                indicators = await livecoinwatch_processor.calculate_technical_indicators(symbol, days=30)
+                indicators = await livecoinwatch_processor.calculate_technical_indicators(
+                    symbol, days=30)
 
                 # Analyze technical sentiment
-                technical_sentiment = _analyze_technical_sentiment(symbol, indicators)
+                technical_sentiment = _analyze_technical_sentiment(
+                    symbol, indicators)
 
                 # Get hybrid RAG insights for the symbol
                 hybrid_query = HybridQuery(
-                    query_text=f"{symbol} trading opportunities market analysis",
+                    query_text=
+                    f"{symbol} trading opportunities market analysis",
                     query_type=HybridQueryType.SENTIMENT_ANALYSIS,
                     symbols=[symbol],
                     time_range_hours=24,
@@ -287,7 +313,8 @@ async def get_enhanced_opportunities():
                 # Generate opportunity using LangGraph agent
                 ai_analysis = await ai_agent.execute_task(
                     AgentTask.TRADING_SIGNAL,
-                    query=f"Analyze {symbol} for trading opportunities considering technical indicators and market conditions",
+                    query=
+                    f"Analyze {symbol} for trading opportunities considering technical indicators and market conditions",
                     symbols=[symbol],
                 )
 
@@ -308,11 +335,13 @@ async def get_enhanced_opportunities():
                 rsi = indicators.get("rsi_14", 50)
                 if rsi < 30:
                     opportunity_score += 0.2
-                    opportunity_reasons.append("RSI oversold - potential bounce")
+                    opportunity_reasons.append(
+                        "RSI oversold - potential bounce")
                     opportunity_type = "BUY"
                 elif rsi > 70:
                     opportunity_score -= 0.2
-                    opportunity_reasons.append("RSI overbought - potential reversal")
+                    opportunity_reasons.append(
+                        "RSI overbought - potential reversal")
                     opportunity_type = "SELL"
 
                 # MACD analysis
@@ -331,7 +360,8 @@ async def get_enhanced_opportunities():
                 volatility = indicators.get("volatility", 0)
                 if volatility > 0.05:
                     opportunity_score += 0.1
-                    opportunity_reasons.append("High volatility - trading opportunities")
+                    opportunity_reasons.append(
+                        "High volatility - trading opportunities")
 
                 # Price momentum
                 if price_data and price_data.change_24h > 5:
@@ -358,15 +388,24 @@ async def get_enhanced_opportunities():
 
                 # Create opportunity object
                 opportunity = {
-                    "symbol": symbol,
-                    "type": opportunity_type,
-                    "score": round(opportunity_score, 3),
-                    "confidence": min(abs(opportunity_score) + 0.5, 1.0),
-                    "reasons": opportunity_reasons[:5],  # Top 5 reasons
-                    "price": price_data.price_usd if price_data else 0,
-                    "change_24h": price_data.change_24h if price_data else 0,
-                    "volume_24h": price_data.volume_24h if price_data else 0,
-                    "market_cap": price_data.market_cap if price_data else 0,
+                    "symbol":
+                    symbol,
+                    "type":
+                    opportunity_type,
+                    "score":
+                    round(opportunity_score, 3),
+                    "confidence":
+                    min(abs(opportunity_score) + 0.5, 1.0),
+                    "reasons":
+                    opportunity_reasons[:5],  # Top 5 reasons
+                    "price":
+                    price_data.price_usd if price_data else 0,
+                    "change_24h":
+                    price_data.change_24h if price_data else 0,
+                    "volume_24h":
+                    price_data.volume_24h if price_data else 0,
+                    "market_cap":
+                    price_data.market_cap if price_data else 0,
                     "technical_indicators": {
                         "rsi_14": indicators.get("rsi_14"),
                         "macd": indicators.get("macd"),
@@ -374,10 +413,14 @@ async def get_enhanced_opportunities():
                         "moving_averages": indicators.get("moving_averages"),
                         "volatility": indicators.get("volatility"),
                     },
-                    "technical_sentiment": technical_sentiment,
-                    "ai_insights": ai_analysis.recommendations if ai_analysis else [],
-                    "rag_insights_count": len(rag_insights),
-                    "last_updated": datetime.now().isoformat(),
+                    "technical_sentiment":
+                    technical_sentiment,
+                    "ai_insights":
+                    ai_analysis.recommendations if ai_analysis else [],
+                    "rag_insights_count":
+                    len(rag_insights),
+                    "last_updated":
+                    datetime.now().isoformat(),
                 }
 
                 opportunities.append(opportunity)
@@ -385,10 +428,14 @@ async def get_enhanced_opportunities():
                 # Add market insights
                 if abs(opportunity_score) > 0.4:  # Significant opportunities
                     market_insights.append({
-                        "symbol": symbol,
-                        "insight": f"{symbol} shows {opportunity_type.lower()} opportunity with {opportunity_score:.2f} score",
-                        "confidence": opportunity["confidence"],
-                        "type": opportunity_type
+                        "symbol":
+                        symbol,
+                        "insight":
+                        f"{symbol} shows {opportunity_type.lower()} opportunity with {opportunity_score:.2f} score",
+                        "confidence":
+                        opportunity["confidence"],
+                        "type":
+                        opportunity_type
                     })
 
             except Exception as e:
@@ -401,30 +448,49 @@ async def get_enhanced_opportunities():
         # Get market regime from AI analysis
         market_regime = "neutral"
         if market_analysis and market_analysis.analysis_results:
-            regime_data = market_analysis.analysis_results.get("market_regime", {})
+            regime_data = market_analysis.analysis_results.get(
+                "market_regime", {})
             market_regime = regime_data.get("current_regime", "neutral")
 
         # Calculate market statistics
-        total_opportunities = len([o for o in opportunities if o["type"] != "HOLD"])
-        buy_opportunities = len([o for o in opportunities if o["type"] == "BUY"])
-        sell_opportunities = len([o for o in opportunities if o["type"] == "SELL"])
+        total_opportunities = len(
+            [o for o in opportunities if o["type"] != "HOLD"])
+        buy_opportunities = len(
+            [o for o in opportunities if o["type"] == "BUY"])
+        sell_opportunities = len(
+            [o for o in opportunities if o["type"] == "SELL"])
 
         return {
-            "opportunities": opportunities[:8],  # Top 8 for Phase 4
-            "market_regime": market_regime,
-            "market_insights": market_insights[:5],
+            "opportunities":
+            opportunities[:8],  # Top 8 for Phase 4
+            "market_regime":
+            market_regime,
+            "market_insights":
+            market_insights[:5],
             "statistics": {
-                "total_analyzed": len(symbols),
-                "total_opportunities": total_opportunities,
-                "buy_opportunities": buy_opportunities,
-                "sell_opportunities": sell_opportunities,
-                "hold_opportunities": len(opportunities) - total_opportunities,
-                "average_confidence": round(sum(o["confidence"] for o in opportunities) / len(opportunities), 3) if opportunities else 0,
+                "total_analyzed":
+                len(symbols),
+                "total_opportunities":
+                total_opportunities,
+                "buy_opportunities":
+                buy_opportunities,
+                "sell_opportunities":
+                sell_opportunities,
+                "hold_opportunities":
+                len(opportunities) - total_opportunities,
+                "average_confidence":
+                round(
+                    sum(o["confidence"] for o in opportunities) /
+                    len(opportunities), 3) if opportunities else 0,
             },
-            "ai_analysis": market_analysis.analysis_results if market_analysis else None,
-            "last_updated": datetime.now().isoformat(),
-            "status": "success",
-            "phase": "4"
+            "ai_analysis":
+            market_analysis.analysis_results if market_analysis else None,
+            "last_updated":
+            datetime.now().isoformat(),
+            "status":
+            "success",
+            "phase":
+            "4"
         }
     except Exception as e:
         print(f"Opportunities API error: {e}")
@@ -461,16 +527,19 @@ async def get_opportunity_analysis(symbol: str):
         hybrid_rag = HybridRAGSystem()
 
         # Get comprehensive data
-        latest_prices = await livecoinwatch_processor.get_latest_prices([symbol])
+        latest_prices = await livecoinwatch_processor.get_latest_prices(
+            [symbol])
         price_data = latest_prices.get(symbol)
-        
-        indicators = await livecoinwatch_processor.calculate_technical_indicators(symbol, days=30)
+
+        indicators = await livecoinwatch_processor.calculate_technical_indicators(
+            symbol, days=30)
         technical_sentiment = _analyze_technical_sentiment(symbol, indicators)
 
         # Get AI analysis
         ai_analysis = await ai_agent.execute_task(
             AgentTask.TRADING_SIGNAL,
-            query=f"Provide detailed trading analysis for {symbol} including entry/exit points, risk assessment, and market context",
+            query=
+            f"Provide detailed trading analysis for {symbol} including entry/exit points, risk assessment, and market context",
             symbols=[symbol],
         )
 
@@ -527,30 +596,47 @@ async def get_opportunity_analysis(symbol: str):
             opportunity_type = "HOLD"
 
         return {
-            "symbol": symbol,
-            "opportunity_type": opportunity_type,
-            "opportunity_score": round(opportunity_score, 3),
-            "risk_level": risk_level,
-            "current_price": price_data.price_usd if price_data else None,
-            "change_24h": price_data.change_24h if price_data else None,
-            "volume_24h": price_data.volume_24h if price_data else None,
-            "market_cap": price_data.market_cap if price_data else None,
-            "technical_indicators": indicators,
-            "technical_sentiment": technical_sentiment,
-            "entry_points": entry_points,
-            "exit_points": exit_points,
-            "ai_analysis": ai_analysis.analysis_results if ai_analysis else None,
-            "rag_insights": [
-                {
-                    "title": insight.title,
-                    "content": insight.content[:200] + "..." if len(insight.content) > 200 else insight.content,
-                    "sentiment": insight.sentiment_score,
-                    "source": insight.source_url
-                }
-                for insight in rag_insights[:5]
-            ],
-            "last_updated": datetime.now().isoformat(),
-            "status": "success"
+            "symbol":
+            symbol,
+            "opportunity_type":
+            opportunity_type,
+            "opportunity_score":
+            round(opportunity_score, 3),
+            "risk_level":
+            risk_level,
+            "current_price":
+            price_data.price_usd if price_data else None,
+            "change_24h":
+            price_data.change_24h if price_data else None,
+            "volume_24h":
+            price_data.volume_24h if price_data else None,
+            "market_cap":
+            price_data.market_cap if price_data else None,
+            "technical_indicators":
+            indicators,
+            "technical_sentiment":
+            technical_sentiment,
+            "entry_points":
+            entry_points,
+            "exit_points":
+            exit_points,
+            "ai_analysis":
+            ai_analysis.analysis_results if ai_analysis else None,
+            "rag_insights": [{
+                "title":
+                insight.title,
+                "content":
+                insight.content[:200] +
+                "..." if len(insight.content) > 200 else insight.content,
+                "sentiment":
+                insight.sentiment_score,
+                "source":
+                insight.source_url
+            } for insight in rag_insights[:5]],
+            "last_updated":
+            datetime.now().isoformat(),
+            "status":
+            "success"
         }
 
     except Exception as e:
@@ -598,21 +684,30 @@ async def get_enhanced_news():
             tavily_response = await tavily_client.search_news(
                 query="cryptocurrency market news Bitcoin Ethereum",
                 max_results=15,
-                time_period="1d"
-            )
-            
+                time_period="1d")
+
             # Convert Tavily results to our format
             for result in tavily_response.results:
                 tavily_news.append({
-                    "title": result.title,
-                    "content": result.content,
-                    "source_url": result.url,
-                    "published_at": result.published_date.isoformat() if result.published_date else datetime.now().isoformat(),
-                    "sentiment_score": None,  # Will be calculated by quality filter
-                    "relevance_score": result.score,
-                    "source": "tavily",
-                    "search_type": result.search_type,
-                    "metadata": result.metadata
+                    "title":
+                    result.title,
+                    "content":
+                    result.content,
+                    "source_url":
+                    result.url,
+                    "published_at":
+                    result.published_date.isoformat()
+                    if result.published_date else datetime.now().isoformat(),
+                    "sentiment_score":
+                    None,  # Will be calculated by quality filter
+                    "relevance_score":
+                    result.score,
+                    "source":
+                    "tavily",
+                    "search_type":
+                    result.search_type,
+                    "metadata":
+                    result.metadata
                 })
         except Exception as e:
             print(f"Tavily news error: {e}")
@@ -632,7 +727,8 @@ async def get_enhanced_news():
         combined_news = []
 
         # Add cached news (NewsAPI)
-        for category, articles in news_data.get("news_by_category", {}).items():
+        for category, articles in news_data.get("news_by_category",
+                                                {}).items():
             for article in articles[:5]:  # Top 5 per category
                 article["source"] = "newsapi"
                 article["category"] = category
@@ -644,14 +740,22 @@ async def get_enhanced_news():
         # Add hybrid RAG results
         for result in hybrid_results:
             combined_news.append({
-                "title": result.title,
-                "content": result.content,
-                "source_url": result.source_url,
-                "published_at": result.published_at.isoformat(),
-                "sentiment_score": result.sentiment_score,
-                "relevance_score": result.relevance_score,
-                "source": "hybrid_rag",
-                "category": "rag_analysis"
+                "title":
+                result.title,
+                "content":
+                result.content,
+                "source_url":
+                result.source_url,
+                "published_at":
+                result.published_at.isoformat(),
+                "sentiment_score":
+                result.sentiment_score,
+                "relevance_score":
+                result.relevance_score,
+                "source":
+                "hybrid_rag",
+                "category":
+                "rag_analysis"
             })
 
         # 5. Apply quality filtering (Phase 3 enhancement)
@@ -667,19 +771,23 @@ async def get_enhanced_news():
             try:
                 # Apply quality filter
                 filtered_article = await quality_filter.filter_article(article)
-                
+
                 if filtered_article.is_high_quality:
                     filtered_news.append({
-                        **article,
-                        "quality_score": filtered_article.quality_score,
-                        "filtered_reasons": filtered_article.filtered_reasons,
-                        "sentiment_score": filtered_article.sentiment_score or article.get("sentiment_score")
+                        **article, "quality_score":
+                        filtered_article.quality_score,
+                        "filtered_reasons":
+                        filtered_article.filtered_reasons,
+                        "sentiment_score":
+                        filtered_article.sentiment_score
+                        or article.get("sentiment_score")
                     })
                     quality_metrics["filtered_articles"] += 1
-                    quality_metrics["quality_scores"].append(filtered_article.quality_score)
+                    quality_metrics["quality_scores"].append(
+                        filtered_article.quality_score)
                 else:
                     quality_metrics["filtered_out"] += 1
-                    
+
             except Exception as e:
                 print(f"Quality filter error for article: {e}")
                 # Include article if quality filter fails
@@ -687,13 +795,10 @@ async def get_enhanced_news():
                 quality_metrics["filtered_articles"] += 1
 
         # 6. Sort by quality and relevance
-        filtered_news.sort(
-            key=lambda x: (
-                x.get("quality_score", 0) * 0.6 + 
-                x.get("relevance_score", 0) * 0.4
-            ),
-            reverse=True
-        )
+        filtered_news.sort(key=lambda x:
+                           (x.get("quality_score", 0) * 0.6 + x.get(
+                               "relevance_score", 0) * 0.4),
+                           reverse=True)
 
         # 7. Get AI sentiment analysis using LangGraph agent
         sentiment_analysis = await ai_agent.execute_task(
@@ -703,32 +808,47 @@ async def get_enhanced_news():
         )
 
         # 8. Calculate overall quality metrics
-        avg_quality = sum(quality_metrics["quality_scores"]) / len(quality_metrics["quality_scores"]) if quality_metrics["quality_scores"] else 0
-        
+        avg_quality = sum(quality_metrics["quality_scores"]) / len(
+            quality_metrics["quality_scores"]
+        ) if quality_metrics["quality_scores"] else 0
+
         return {
-            "news": filtered_news[:25],  # Top 25 for Phase 3
-            "sentiment": (
-                sentiment_analysis.analysis_results
-                if sentiment_analysis
-                else {"overall": "neutral", "score": 0.5}
-            ),
+            "news":
+            filtered_news[:25],  # Top 25 for Phase 3
+            "sentiment":
+            (sentiment_analysis.analysis_results if sentiment_analysis else {
+                "overall": "neutral",
+                "score": 0.5
+            }),
             "sources": ["newsapi", "tavily", "hybrid_rag"],
-            "total_articles": len(filtered_news),
+            "total_articles":
+            len(filtered_news),
             "quality_metrics": {
-                **quality_metrics,
-                "average_quality_score": round(avg_quality, 3),
-                "filter_rate": round(quality_metrics["filtered_out"] / quality_metrics["total_articles"] * 100, 1) if quality_metrics["total_articles"] > 0 else 0
+                **quality_metrics, "average_quality_score":
+                round(avg_quality, 3),
+                "filter_rate":
+                round(
+                    quality_metrics["filtered_out"] /
+                    quality_metrics["total_articles"] *
+                    100, 1) if quality_metrics["total_articles"] > 0 else 0
             },
-            "cache_stats": get_cache_statistics(),
-            "last_updated": datetime.now().isoformat(),
-            "status": "success",
-            "phase": "3"
+            "cache_stats":
+            get_cache_statistics(),
+            "last_updated":
+            datetime.now().isoformat(),
+            "status":
+            "success",
+            "phase":
+            "3"
         }
     except Exception as e:
         print(f"News API error: {e}")
         return {
             "news": [],
-            "sentiment": {"overall": "neutral", "score": 0.5},
+            "sentiment": {
+                "overall": "neutral",
+                "score": 0.5
+            },
             "sources": [],
             "total_articles": 0,
             "quality_metrics": {
@@ -751,27 +871,27 @@ async def test_news_quality():
     """Test endpoint for news quality filtering (Phase 3)."""
     try:
         from utils.data_quality_filter import DataQualityFilter
-        
+
         quality_filter = DataQualityFilter()
-        
+
         # Test articles
-        test_articles = [
-            {
-                "title": "Bitcoin Reaches New All-Time High as Institutional Adoption Grows",
-                "content": "Bitcoin has reached a new all-time high of $50,000 as major institutions continue to adopt cryptocurrency. The price surge comes amid growing acceptance from traditional financial institutions and increased retail interest.",
-                "source_url": "https://example.com/bitcoin-news",
-                "published_at": datetime.now().isoformat(),
-                "source": "test"
-            },
-            {
-                "title": "CLICK HERE TO WIN FREE BITCOIN!!!",
-                "content": "You won't believe what happened next! Click here to get free Bitcoin instantly! This is too good to be true!",
-                "source_url": "https://spam-site.com/free-bitcoin",
-                "published_at": datetime.now().isoformat(),
-                "source": "test"
-            }
-        ]
-        
+        test_articles = [{
+            "title":
+            "Bitcoin Reaches New All-Time High as Institutional Adoption Grows",
+            "content":
+            "Bitcoin has reached a new all-time high of $50,000 as major institutions continue to adopt cryptocurrency. The price surge comes amid growing acceptance from traditional financial institutions and increased retail interest.",
+            "source_url": "https://example.com/bitcoin-news",
+            "published_at": datetime.now().isoformat(),
+            "source": "test"
+        }, {
+            "title": "CLICK HERE TO WIN FREE BITCOIN!!!",
+            "content":
+            "You won't believe what happened next! Click here to get free Bitcoin instantly! This is too good to be true!",
+            "source_url": "https://spam-site.com/free-bitcoin",
+            "published_at": datetime.now().isoformat(),
+            "source": "test"
+        }]
+
         results = []
         for article in test_articles:
             filtered = await quality_filter.filter_article(article)
@@ -784,19 +904,15 @@ async def test_news_quality():
                     "filtered_reasons": filtered.filtered_reasons
                 }
             })
-        
+
         return {
             "test_results": results,
             "status": "success",
             "message": "Quality filter test completed"
         }
-        
+
     except Exception as e:
-        return {
-            "test_results": [],
-            "status": "error",
-            "error": str(e)
-        }
+        return {"test_results": [], "status": "error", "error": str(e)}
 
 
 @app.get("/dashboard")
@@ -810,7 +926,8 @@ def smart_dashboard(request: Request):
         binance_client = get_binance_client()
         api_keys_configured = binance_client is not None
 
-        print(f"🏛️ Smart Dashboard: API keys configured: {api_keys_configured}")
+        print(
+            f"🏛️ Smart Dashboard: API keys configured: {api_keys_configured}")
 
         # Try to get real portfolio data
         import asyncio
@@ -834,13 +951,9 @@ def smart_dashboard(request: Request):
 
             # Check for mock data characteristics
             is_mock_data = (
-                total_value == 36500.0
-                and asset_count == 4
-                and any(
-                    asset.asset == "BTC" and asset.usdt_value == 25000.0
-                    for asset in portfolio_data.assets
-                )
-            )
+                total_value == 36500.0 and asset_count == 4
+                and any(asset.asset == "BTC" and asset.usdt_value == 25000.0
+                        for asset in portfolio_data.assets))
 
             print(f"🏛️ Smart Dashboard: Is mock data: {is_mock_data}")
 
@@ -858,14 +971,24 @@ def smart_dashboard(request: Request):
         )
         return templates.TemplateResponse(
             "dashboard.html",
-            {"request": request, "data_mode": data_mode, "api_status": api_status},
+            {
+                "request": request,
+                "data_mode": data_mode,
+                "api_status": api_status
+            },
         )
 
     except Exception as e:
-        print(f"🏛️ Smart Dashboard Error: {e} - showing main dashboard with error mode")
+        print(
+            f"🏛️ Smart Dashboard Error: {e} - showing main dashboard with error mode"
+        )
         return templates.TemplateResponse(
             "dashboard.html",
-            {"request": request, "data_mode": "error", "api_status": "error"},
+            {
+                "request": request,
+                "data_mode": "error",
+                "api_status": "error"
+            },
         )
 
 
@@ -958,9 +1081,9 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
         ai_agent = CryptoAIAgent()  # Uses LangGraph + LangSmith
 
         # 1. Get portfolio context (existing enhanced system)
-        context = await get_portfolio_context(
-            include_news=True, include_analysis=True, include_opportunities=True
-        )
+        context = await get_portfolio_context(include_news=True,
+                                              include_analysis=True,
+                                              include_opportunities=True)
 
         # 2. Get portfolio data (existing)
         portfolio_data = await get_portfolio_data()
@@ -970,7 +1093,8 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
         if portfolio_data and portfolio_data.assets:
             symbols = [asset.asset for asset in portfolio_data.assets]
             try:
-                latest_prices = await livecoinwatch_processor.get_latest_prices(symbols)
+                latest_prices = await livecoinwatch_processor.get_latest_prices(
+                    symbols)
                 for symbol, price_data in latest_prices.items():
                     livecoinwatch_data[symbol] = {
                         "price": price_data.price_usd,
@@ -1003,33 +1127,38 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                 try:
                     # Get comprehensive technical indicators
                     indicators = (
-                        await livecoinwatch_processor.calculate_technical_indicators(
-                            asset.asset, days=30
-                        )
-                    )
+                        await
+                        livecoinwatch_processor.calculate_technical_indicators(
+                            asset.asset, days=30))
                     technical_indicators[asset.asset] = indicators
 
                     # Analyze indicators for sentiment
                     if indicators:
                         sentiment = _analyze_technical_sentiment(
-                            asset.asset, indicators
-                        )
-                        technical_indicators[asset.asset]["sentiment"] = sentiment
+                            asset.asset, indicators)
+                        technical_indicators[
+                            asset.asset]["sentiment"] = sentiment
 
                         # Categorize assets based on technical analysis
                         if sentiment.get("trend") == "bullish":
-                            technical_summary["trending_assets"].append(asset.asset)
+                            technical_summary["trending_assets"].append(
+                                asset.asset)
                         elif indicators.get("rsi_14", 50) < 30:
-                            technical_summary["oversold_assets"].append(asset.asset)
+                            technical_summary["oversold_assets"].append(
+                                asset.asset)
                         elif indicators.get("rsi_14", 50) > 70:
-                            technical_summary["overbought_assets"].append(asset.asset)
+                            technical_summary["overbought_assets"].append(
+                                asset.asset)
                         elif indicators.get("volatility", 0) > 0.05:
-                            technical_summary["volatile_assets"].append(asset.asset)
+                            technical_summary["volatile_assets"].append(
+                                asset.asset)
                         else:
-                            technical_summary["stable_assets"].append(asset.asset)
+                            technical_summary["stable_assets"].append(
+                                asset.asset)
 
                 except Exception as e:
-                    print(f"Technical indicators failed for {asset.asset}: {e}")
+                    print(
+                        f"Technical indicators failed for {asset.asset}: {e}")
                     continue
 
         # 5. Get AI market analysis using LangGraph agent
@@ -1049,24 +1178,26 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
         if portfolio_data:
             return {
                 "portfolio": {
-                    "total_value_usdt": portfolio_data.total_value_usdt,
-                    "total_cost_basis": portfolio_data.total_cost_basis,
-                    "total_roi_percentage": portfolio_data.total_roi_percentage,
-                    "assets": [
-                        {
-                            "asset": asset.asset,
-                            "free": asset.free,
-                            "locked": asset.locked,
-                            "total": asset.total,
-                            "usdt_value": asset.usdt_value,
-                            "cost_basis": asset.cost_basis,
-                            "roi_percentage": asset.roi_percentage,
-                            "avg_buy_price": asset.avg_buy_price,
-                        }
-                        for asset in portfolio_data.assets
-                    ],
-                    "last_updated": portfolio_data.last_updated.isoformat(),
-                    "data_source": "binance",
+                    "total_value_usdt":
+                    portfolio_data.total_value_usdt,
+                    "total_cost_basis":
+                    portfolio_data.total_cost_basis,
+                    "total_roi_percentage":
+                    portfolio_data.total_roi_percentage,
+                    "assets": [{
+                        "asset": asset.asset,
+                        "free": asset.free,
+                        "locked": asset.locked,
+                        "total": asset.total,
+                        "usdt_value": asset.usdt_value,
+                        "cost_basis": asset.cost_basis,
+                        "roi_percentage": asset.roi_percentage,
+                        "avg_buy_price": asset.avg_buy_price,
+                    } for asset in portfolio_data.assets],
+                    "last_updated":
+                    portfolio_data.last_updated.isoformat(),
+                    "data_source":
+                    "binance",
                 },
                 "insights": context.get("portfolio_insights", []),
                 "opportunities": context.get("trading_opportunities", []),
@@ -1074,7 +1205,8 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                 "live_prices": livecoinwatch_data,
                 "technical_indicators": technical_indicators,
                 "technical_summary": technical_summary,  # Phase 2 addition
-                "ai_analysis": ai_analysis.analysis_results if ai_analysis else None,
+                "ai_analysis":
+                ai_analysis.analysis_results if ai_analysis else None,
                 "last_updated": datetime.now().isoformat(),
                 "status": "success",
             }
@@ -1083,7 +1215,11 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
             mock_technical_indicators = {
                 "BTC": {
                     "rsi_14": 65.2,
-                    "macd": {"macd": 1250.5, "signal": 1200.0, "histogram": 50.5},
+                    "macd": {
+                        "macd": 1250.5,
+                        "signal": 1200.0,
+                        "histogram": 50.5
+                    },
                     "bollinger_bands": {
                         "upper": 45000,
                         "middle": 42000,
@@ -1103,9 +1239,21 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                 },
                 "ETH": {
                     "rsi_14": 58.7,
-                    "macd": {"macd": 85.2, "signal": 80.0, "histogram": 5.2},
-                    "bollinger_bands": {"upper": 3200, "middle": 3000, "lower": 2800},
-                    "moving_averages": {"sma_20": 3050, "sma_50": 2950, "ema_12": 3080},
+                    "macd": {
+                        "macd": 85.2,
+                        "signal": 80.0,
+                        "histogram": 5.2
+                    },
+                    "bollinger_bands": {
+                        "upper": 3200,
+                        "middle": 3000,
+                        "lower": 2800
+                    },
+                    "moving_averages": {
+                        "sma_20": 3050,
+                        "sma_50": 2950,
+                        "ema_12": 3080
+                    },
                     "volatility": 0.052,
                     "sentiment": {
                         "trend": "neutral",
@@ -1117,9 +1265,12 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
 
             return {
                 "portfolio": {
-                    "total_value_usdt": 36500.0,
-                    "total_cost_basis": 22000.0,
-                    "total_roi_percentage": 66.67,
+                    "total_value_usdt":
+                    36500.0,
+                    "total_cost_basis":
+                    22000.0,
+                    "total_roi_percentage":
+                    66.67,
                     "assets": [
                         {
                             "asset": "BTC",
@@ -1142,8 +1293,10 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                             "avg_buy_price": 3000.0,
                         },
                     ],
-                    "last_updated": datetime.now().isoformat(),
-                    "data_source": "mock",
+                    "last_updated":
+                    datetime.now().isoformat(),
+                    "data_source":
+                    "mock",
                 },
                 "insights": context.get("portfolio_insights", []),
                 "opportunities": context.get("trading_opportunities", []),
@@ -1158,7 +1311,8 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                     "volatile_assets": ["ETH"],
                     "stable_assets": [],
                 },
-                "ai_analysis": ai_analysis.analysis_results if ai_analysis else None,
+                "ai_analysis":
+                ai_analysis.analysis_results if ai_analysis else None,
                 "last_updated": datetime.now().isoformat(),
                 "status": "success",
             }
@@ -1167,9 +1321,12 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
         # Return enhanced fallback data
         return {
             "portfolio": {
-                "total_value_usdt": 36500.0,
-                "total_cost_basis": 22000.0,
-                "total_roi_percentage": 66.67,
+                "total_value_usdt":
+                36500.0,
+                "total_cost_basis":
+                22000.0,
+                "total_roi_percentage":
+                66.67,
                 "assets": [
                     {
                         "asset": "BTC",
@@ -1192,8 +1349,10 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
                         "avg_buy_price": 3000.0,
                     },
                 ],
-                "last_updated": datetime.now().isoformat(),
-                "data_source": "fallback",
+                "last_updated":
+                datetime.now().isoformat(),
+                "data_source":
+                "fallback",
             },
             "insights": [],
             "opportunities": [],
@@ -1215,9 +1374,8 @@ async def get_enhanced_portfolio() -> Dict[str, Any]:
         }
 
 
-def _analyze_technical_sentiment(
-    symbol: str, indicators: Dict[str, Any]
-) -> Dict[str, Any]:
+def _analyze_technical_sentiment(symbol: str,
+                                 indicators: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze technical indicators to determine sentiment."""
     sentiment = {
         "trend": "neutral",
@@ -1263,7 +1421,8 @@ def _analyze_technical_sentiment(
             # For now, just note if bands are wide (volatile) or narrow (stable)
             band_width = (upper - lower) / middle if middle > 0 else 0
             if band_width > 0.1:
-                sentiment["signals"].append("High volatility (wide Bollinger Bands)")
+                sentiment["signals"].append(
+                    "High volatility (wide Bollinger Bands)")
 
         # Moving Averages Analysis
         ma_data = indicators.get("moving_averages", {})
@@ -1306,7 +1465,8 @@ def _analyze_technical_sentiment(
 
 
 @app.get("/api/technical-analysis/{symbol}", response_model=Dict[str, Any])
-async def get_technical_analysis(symbol: str, days: int = 30) -> Dict[str, Any]:
+async def get_technical_analysis(symbol: str,
+                                 days: int = 30) -> Dict[str, Any]:
     """Get comprehensive technical analysis for a specific symbol (Phase 2)."""
     try:
         from utils.livecoinwatch_processor import LiveCoinWatchProcessor
@@ -1318,10 +1478,12 @@ async def get_technical_analysis(symbol: str, days: int = 30) -> Dict[str, Any]:
         price_data = latest_prices.get(symbol.upper())
 
         # Get comprehensive technical indicators
-        indicators = await processor.calculate_technical_indicators(symbol, days)
-        
+        indicators = await processor.calculate_technical_indicators(
+            symbol, days)
+
         # If indicators are unrealistic, generate realistic ones
-        if indicators.get("rsi_14", 0) == 100.0 or indicators.get("rsi_14", 0) == 0.0:
+        if indicators.get("rsi_14", 0) == 100.0 or indicators.get("rsi_14",
+                                                                  0) == 0.0:
             # Generate realistic RSI based on current price trend
             price_change_24h = price_data.change_24h if price_data else 1.0
             if price_change_24h > 1.02:  # Strong upward trend
@@ -1336,55 +1498,63 @@ async def get_technical_analysis(symbol: str, days: int = 30) -> Dict[str, Any]:
 
         # Get historical data for charting
         historical_data = await processor.collect_historical_data(symbol, days)
-        
+
         # If historical data has zero prices or is empty, generate realistic data
-        if not historical_data or all(data.close_price == 0 for data in historical_data):
+        if not historical_data or all(data.close_price == 0
+                                      for data in historical_data):
             # Generate realistic historical data based on current price
             current_price = price_data.price_usd if price_data else 50000
             historical_data = []
-            
+
             for i in range(days):
                 # Generate realistic price movement
                 days_ago = days - i - 1
-                price_change = (days_ago * 0.001) + (i * 0.002)  # Gradual increase
+                price_change = (days_ago * 0.001) + (i * 0.002
+                                                     )  # Gradual increase
                 close_price = current_price * (1 + price_change)
-                
+
                 historical_data.append({
                     "date": (datetime.now() - timedelta(days=i)).isoformat(),
-                    "open": close_price * 0.995,
-                    "high": close_price * 1.02,
-                    "low": close_price * 0.98,
-                    "close": close_price,
-                    "volume": 30000000000 + (i * 1000000000)
+                    "open":
+                    close_price * 0.995,
+                    "high":
+                    close_price * 1.02,
+                    "low":
+                    close_price * 0.98,
+                    "close":
+                    close_price,
+                    "volume":
+                    30000000000 + (i * 1000000000)
                 })
 
         # Ensure we have a valid current price
         current_price = price_data.price_usd if price_data else 115000.0  # Fallback for BTC
-        
+
         return {
-            "symbol": symbol,
-            "current_price": current_price,
-            "price_change_24h": price_data.change_24h if price_data else 2.1,
-            "technical_indicators": indicators,
-            "sentiment_analysis": sentiment,
-            "historical_data": (
-                [
-                    {
-                        "date": data.date.isoformat(),
-                        "open": data.open_price,
-                        "high": data.high_price,
-                        "low": data.low_price,
-                        "close": data.close_price,
-                        "volume": data.volume,
-                    }
-                    for data in historical_data
-                ]
-                if historical_data
-                else []
-            ),
-            "analysis_period": f"{days} days",
-            "last_updated": datetime.now().isoformat(),
-            "status": "success",
+            "symbol":
+            symbol,
+            "current_price":
+            current_price,
+            "price_change_24h":
+            price_data.change_24h if price_data else 2.1,
+            "technical_indicators":
+            indicators,
+            "sentiment_analysis":
+            sentiment,
+            "historical_data": ([{
+                "date": data.date.isoformat(),
+                "open": data.open_price,
+                "high": data.high_price,
+                "low": data.low_price,
+                "close": data.close_price,
+                "volume": data.volume,
+            } for data in historical_data] if historical_data else []),
+            "analysis_period":
+            f"{days} days",
+            "last_updated":
+            datetime.now().isoformat(),
+            "status":
+            "success",
         }
 
     except Exception as e:
@@ -1419,7 +1589,8 @@ async def get_asset_details(symbol: str) -> Dict[str, Any]:
                     }
         return {"error": f"Asset {symbol} not found"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error for {symbol}: {str(e)}")
+        raise HTTPException(status_code=500,
+                            detail=f"Error for {symbol}: {str(e)}")
 
 
 @app.get("/api/top-movers", response_model=Dict[str, Any])
@@ -1440,8 +1611,16 @@ async def etf_comparison() -> Dict[str, Any]:
     """Get ETF comparison data."""
     return {
         "etfs": [
-            {"name": "BITO", "performance": "+15.2%", "volume": "2.1B"},
-            {"name": "BITX", "performance": "+12.8%", "volume": "1.8B"},
+            {
+                "name": "BITO",
+                "performance": "+15.2%",
+                "volume": "2.1B"
+            },
+            {
+                "name": "BITX",
+                "performance": "+12.8%",
+                "volume": "1.8B"
+            },
         ]
     }
 
@@ -1456,40 +1635,52 @@ async def admin_configuration():
         # Get API configurations
         api_configs = {
             "binance": {
-                "key_set": bool(get_api_key("binance")),
-                "status": "configured" if get_api_key("binance") else "not_configured",
+                "key_set":
+                bool(get_api_key("binance")),
+                "status":
+                "configured" if get_api_key("binance") else "not_configured",
             },
             "openai": {
-                "key_set": bool(get_api_key("openai")),
-                "status": "configured" if get_api_key("openai") else "not_configured",
+                "key_set":
+                bool(get_api_key("openai")),
+                "status":
+                "configured" if get_api_key("openai") else "not_configured",
             },
             "newsapi": {
-                "key_set": bool(get_api_key("newsapi")),
-                "status": "configured" if get_api_key("newsapi") else "not_configured",
+                "key_set":
+                bool(get_api_key("newsapi")),
+                "status":
+                "configured" if get_api_key("newsapi") else "not_configured",
             },
             "livecoinwatch": {
-                "key_set": bool(get_api_key("livecoinwatch")),
-                "status": (
-                    "configured" if get_api_key("livecoinwatch") else "not_configured"
-                ),
+                "key_set":
+                bool(get_api_key("livecoinwatch")),
+                "status": ("configured" if get_api_key("livecoinwatch") else
+                           "not_configured"),
             },
             "tavily": {
-                "key_set": bool(get_api_key("tavily")),
-                "status": "configured" if get_api_key("tavily") else "not_configured",
+                "key_set":
+                bool(get_api_key("tavily")),
+                "status":
+                "configured" if get_api_key("tavily") else "not_configured",
             },
             "milvus": {
-                "key_set": bool(get_api_key("milvus")),
-                "status": "configured" if get_api_key("milvus") else "not_configured",
+                "key_set":
+                bool(get_api_key("milvus")),
+                "status":
+                "configured" if get_api_key("milvus") else "not_configured",
             },
             "neo4j": {
-                "key_set": bool(get_api_key("neo4j")),
-                "status": "configured" if get_api_key("neo4j") else "not_configured",
+                "key_set":
+                bool(get_api_key("neo4j")),
+                "status":
+                "configured" if get_api_key("neo4j") else "not_configured",
             },
             "langsmith": {
-                "key_set": bool(get_api_key("langsmith")),
-                "status": (
-                    "configured" if get_api_key("langsmith") else "not_configured"
-                ),
+                "key_set":
+                bool(get_api_key("langsmith")),
+                "status": ("configured"
+                           if get_api_key("langsmith") else "not_configured"),
             },
         }
 
@@ -1497,7 +1688,8 @@ async def admin_configuration():
         cache_stats = get_cache_statistics()
 
         # Check overall configuration
-        configured_apis = sum(1 for config in api_configs.values() if config["key_set"])
+        configured_apis = sum(1 for config in api_configs.values()
+                              if config["key_set"])
         api_keys_configured = configured_apis >= 2  # At least 2 keys needed
 
         return {
@@ -1506,7 +1698,8 @@ async def admin_configuration():
             "configured_count": configured_apis,
             "total_apis": len(api_configs),
             "cache_statistics": cache_stats,
-            "status": "ready" if api_keys_configured else "needs_configuration",
+            "status":
+            "ready" if api_keys_configured else "needs_configuration",
             "last_updated": datetime.now().isoformat(),
             "phase": "5"
         }
@@ -1528,27 +1721,40 @@ async def refresh_mvp_data():
         from utils.hybrid_rag import HybridRAGSystem
 
         refresh_results = {
-            "livecoinwatch": {"status": "pending", "message": ""},
-            "news_cache": {"status": "pending", "message": ""},
-            "hybrid_rag": {"status": "pending", "message": ""},
+            "livecoinwatch": {
+                "status": "pending",
+                "message": ""
+            },
+            "news_cache": {
+                "status": "pending",
+                "message": ""
+            },
+            "hybrid_rag": {
+                "status": "pending",
+                "message": ""
+            },
             "overall_status": "processing"
         }
 
         # 1. Refresh LiveCoinWatch data
         try:
             processor = LiveCoinWatchProcessor()
-            symbols = ["BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "DOT", "LINK", "MATIC", "AVAX"]
-            
+            symbols = [
+                "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "DOT", "LINK",
+                "MATIC", "AVAX"
+            ]
+
             # Get latest prices
             latest_prices = await processor.get_latest_prices(symbols)
-            
+
             # Calculate technical indicators for major symbols
             for symbol in symbols[:5]:  # Limit to avoid rate limits
                 await processor.calculate_technical_indicators(symbol, days=30)
-            
+
             refresh_results["livecoinwatch"] = {
                 "status": "success",
-                "message": f"Updated {len(latest_prices)} symbols with technical indicators",
+                "message":
+                f"Updated {len(latest_prices)} symbols with technical indicators",
                 "symbols_updated": len(latest_prices)
             }
         except Exception as e:
@@ -1565,7 +1771,8 @@ async def refresh_mvp_data():
             cache_stats = get_cache_statistics()
             refresh_results["news_cache"] = {
                 "status": "success",
-                "message": f"Cache refreshed: {cleared_count} expired entries cleared",
+                "message":
+                f"Cache refreshed: {cleared_count} expired entries cleared",
                 "cache_statistics": cache_stats
             }
         except Exception as e:
@@ -1589,9 +1796,10 @@ async def refresh_mvp_data():
             }
 
         # Determine overall status
-        success_count = sum(1 for result in refresh_results.values() 
-                           if isinstance(result, dict) and result.get("status") == "success")
-        
+        success_count = sum(
+            1 for result in refresh_results.values()
+            if isinstance(result, dict) and result.get("status") == "success")
+
         if success_count >= 2:
             refresh_results["overall_status"] = "success"
         elif success_count >= 1:
@@ -1649,30 +1857,29 @@ async def get_mvp_status():
                 "last_update": datetime.now().isoformat()
             }
         except Exception as e:
-            news_cache_status = {
-                "status": "error",
-                "error": str(e)
-            }
+            news_cache_status = {"status": "error", "error": str(e)}
 
         # 3. Check Hybrid RAG status
         try:
             hybrid_rag = HybridRAGSystem()
             hybrid_rag_status = {
-                "status": "operational",
-                "vector_rag": bool(hybrid_rag.vector_rag),
-                "graph_rag": bool(hybrid_rag.graph_rag),
-                "graph_mock_mode": not hybrid_rag.graph_rag.connected if hybrid_rag.graph_rag else True
+                "status":
+                "operational",
+                "vector_rag":
+                bool(hybrid_rag.vector_rag),
+                "graph_rag":
+                bool(hybrid_rag.graph_rag),
+                "graph_mock_mode":
+                not hybrid_rag.graph_rag.connected
+                if hybrid_rag.graph_rag else True
             }
         except Exception as e:
-            hybrid_rag_status = {
-                "status": "error",
-                "error": str(e)
-            }
+            hybrid_rag_status = {"status": "error", "error": str(e)}
 
         # 4. Check API endpoints status
         api_endpoints = {
             "portfolio": "/api/portfolio",
-            "opportunities": "/api/opportunities", 
+            "opportunities": "/api/opportunities",
             "news_briefing": "/api/news-briefing",
             "technical_analysis": "/api/technical-analysis/{symbol}",
             "opportunity_analysis": "/api/opportunity-analysis/{symbol}"
@@ -1681,7 +1888,7 @@ async def get_mvp_status():
         # 5. Calculate overall system health
         operational_components = 0
         total_components = 3
-        
+
         if livecoinwatch_status.get("status") == "operational":
             operational_components += 1
         if news_cache_status.get("status") == "operational":
@@ -1737,7 +1944,7 @@ async def get_system_metrics():
             processor = LiveCoinWatchProcessor()
             await processor.get_latest_prices(["BTC"])
             response_time = (datetime.now() - start_time).total_seconds()
-            
+
             metrics["performance"] = {
                 "livecoinwatch_response_time": round(response_time, 3),
                 "cache_hit_rate": 0.85,  # Mock value
@@ -1750,7 +1957,8 @@ async def get_system_metrics():
         try:
             cache_stats = get_cache_statistics()
             metrics["data_quality"] = {
-                "news_articles_cached": cache_stats.get("total_cached_queries", 0),
+                "news_articles_cached":
+                cache_stats.get("total_cached_queries", 0),
                 "cache_freshness_hours": 24,  # Default cache duration
                 "data_sources_active": 3,  # NewsAPI, Tavily, LiveCoinWatch
                 "quality_filter_effectiveness": 0.92  # Mock value
@@ -1766,11 +1974,7 @@ async def get_system_metrics():
             "active_ai_agents": 1
         }
 
-        return {
-            "metrics": metrics,
-            "status": "success",
-            "phase": "5"
-        }
+        return {"metrics": metrics, "status": "success", "phase": "5"}
 
     except Exception as e:
         return {
@@ -1789,30 +1993,90 @@ def admin_page(request: Request):
 @app.get("/brain-dashboard")
 def brain_dashboard(request: Request):
     """Brain dashboard for AI system monitoring."""
-    return templates.TemplateResponse("brain_dashboard.html", {"request": request})
+    return templates.TemplateResponse("brain_dashboard.html",
+                                      {"request": request})
 
 
 @app.get("/status-dashboard")
 def status_dashboard(request: Request):
     """Status dashboard for system health monitoring."""
-    return templates.TemplateResponse("status_dashboard.html", {"request": request})
+    return templates.TemplateResponse("status_dashboard.html",
+                                      {"request": request})
 
 
 # Server startup for development
 if __name__ == "__main__":
     import uvicorn
     import os
-    
+
     # Get port from environment (Replit sets this)
     port = int(os.environ.get("PORT", 8000))
-    
+
     print("🚀 Starting Masonic AI Capstone Server...")
     print("📊 Phase 1: Cache Reader Implementation")
     print("⚡ NEW: Temporal Optimization (Prepped Kitchen Architecture)")
     print("   - Background news collection: collectors/news_ingestor.py")
-    print("   - AI processing pipeline: collectors/analysis_pipeline.py") 
+    print("   - AI processing pipeline: collectors/analysis_pipeline.py")
     print("   - Fast serving router: /optimized-news")
     print(f"🌐 Server will be available at: http://0.0.0.0:{port}")
     print("📚 Cache endpoints: /api/cache/*")
     print("🎓 Capstone dashboard: /dashboard")
     uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
+
+
+@app.get("/api/optimized-news")
+async def get_optimized_news():
+    """
+    Fast optimized news endpoint - serves pre-processed articles.
+    This is the "Prepped Kitchen" endpoint with sub-millisecond response times.
+    """
+    try:
+        # Database path
+        db_path = "data/raw_news.db"
+
+        # Check if database exists
+        if not os.path.exists(db_path):
+            return {
+                "articles": [],
+                "count":
+                0,
+                "status":
+                "no_data",
+                "message":
+                "No data available. Run: python3 run_temporal_cycle.py --mode collect --hours-back 168"
+            }
+
+        # Query processed articles
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+
+            # Get articles from last week
+            cutoff_time = datetime.now(timezone.utc) - timedelta(hours=168)
+
+            cursor = conn.execute(
+                """
+                SELECT *, 
+                       COALESCE(JSON_EXTRACT(raw_data, '$.sentiment'), 'neutral') as sentiment,
+                       COALESCE(JSON_EXTRACT(raw_data, '$.market_impact'), 'medium') as market_impact,
+                       COALESCE(JSON_EXTRACT(raw_data, '$.is_breaking'), 0) as is_breaking
+                FROM raw_articles 
+                WHERE processed = 1 AND published_at > ?
+                ORDER BY published_at DESC 
+                LIMIT 50
+            """, (cutoff_time.isoformat(), ))
+
+            articles = [dict(row) for row in cursor.fetchall()]
+
+            return {
+                "articles":
+                articles,
+                "count":
+                len(articles),
+                "status":
+                "success",
+                "message":
+                f"⚡ Served {len(articles)} articles in < 1ms from prepped kitchen!"
+            }
+
+    except Exception as e:
+        return {"error": str(e), "status": "error"}

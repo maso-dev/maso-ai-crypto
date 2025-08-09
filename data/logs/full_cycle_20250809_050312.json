@@ -1,0 +1,36 @@
+{
+  "start_time": "2025-08-09T05:02:28.851293+00:00",
+  "collection_results": {
+    "start_time": "2025-08-09T05:02:28.851391+00:00",
+    "newsapi_articles": 0,
+    "tavily_articles": 0,
+    "total_new_articles": 0,
+    "errors": [],
+    "end_time": "2025-08-09T05:03:07.409860+00:00",
+    "duration_seconds": 38.558469,
+    "stats": {
+      "total_articles": 0,
+      "by_source": {},
+      "by_crypto": {},
+      "processing_status": {},
+      "recent_articles": 0,
+      "last_updated": "2025-08-09T05:03:07.410335+00:00"
+    }
+  },
+  "analysis_results": {
+    "start_time": "2025-08-09T05:03:12.416038+00:00",
+    "batches_processed": 0,
+    "total_processed": 0,
+    "total_enriched": 0,
+    "total_embedded": 0,
+    "total_stored_vector": 0,
+    "total_stored_graph": 0,
+    "total_errors": 0,
+    "errors": [],
+    "end_time": "2025-08-09T05:03:12.416800+00:00",
+    "duration_seconds": 0.000762
+  },
+  "total_duration_seconds": 43.565703,
+  "success": true,
+  "end_time": "2025-08-09T05:03:12.416996+00:00"
+}
