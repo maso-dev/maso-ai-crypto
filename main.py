@@ -109,6 +109,14 @@ templates = Jinja2Templates(directory="templates")
 # Import and include routers
 from routers import admin, cache_readers, brain_enhanced, status_control
 
+# Try to import enhanced hybrid RAG router
+try:
+    from routers import enhanced_hybrid_router
+
+    ENHANCED_HYBRID_AVAILABLE = True
+except ImportError:
+    ENHANCED_HYBRID_AVAILABLE = False
+
 # Try to import optimized news router (temporal optimization)
 try:
     from routers import optimized_news
@@ -152,6 +160,10 @@ app.include_router(status_control.router, prefix="/status", tags=["status"])
 # Include optimized news router if available
 if OPTIMIZED_NEWS_AVAILABLE:
     app.include_router(optimized_news.router, prefix="/api", tags=["optimized-news"])
+
+# Include enhanced hybrid RAG router if available
+if ENHANCED_HYBRID_AVAILABLE:
+    app.include_router(enhanced_hybrid_router.router, tags=["enhanced-hybrid-rag"])
 
 
 @app.on_event("startup")
@@ -962,6 +974,7 @@ async def welcome_page(request: Request):
         """
         )
 
+
 @app.get("/dashboard")
 def smart_dashboard(request: Request):
     """Smart dashboard that detects API connectivity and routes accordingly"""
@@ -1020,13 +1033,15 @@ def smart_dashboard(request: Request):
             f"🏛️ Smart Dashboard: Using {data_mode.upper()} data - showing main dashboard"
         )
         return templates.TemplateResponse(
-            "dashboard.html", {"request": request, "data_mode": data_mode, "api_status": api_status}
+            "dashboard.html",
+            {"request": request, "data_mode": data_mode, "api_status": api_status},
         )
 
     except Exception as e:
         print(f"🏛️ Smart Dashboard Error: {e} - showing main dashboard with error mode")
         return templates.TemplateResponse(
-            "dashboard.html", {"request": request, "data_mode": "error", "api_status": "error"}
+            "dashboard.html",
+            {"request": request, "data_mode": "error", "api_status": "error"},
         )
 
 
@@ -1035,7 +1050,8 @@ def smart_dashboard(request: Request):
 def portfolio_page(request: Request):
     """Portfolio page - redirects to dashboard for now"""
     return templates.TemplateResponse(
-        "dashboard.html", {"request": request, "data_mode": "demo", "api_status": "demo"}
+        "dashboard.html",
+        {"request": request, "data_mode": "demo", "api_status": "demo"},
     )
 
 
@@ -1996,6 +2012,9 @@ if __name__ == "__main__":
     # Get port from environment (Replit sets this)
     port = int(os.environ.get("PORT", 8000))
 
+    # Check if reload should be disabled (for testing)
+    reload_enabled = os.environ.get("RELOAD", "true").lower() != "false"
+
     print("🚀 Starting Masonic AI Capstone Server...")
     print("📊 Phase 1: Cache Reader Implementation")
     print("⚡ NEW: Temporal Optimization (Prepped Kitchen Architecture)")
@@ -2005,7 +2024,8 @@ if __name__ == "__main__":
     print(f"🌐 Server will be available at: http://0.0.0.0:{port}")
     print("📚 Cache endpoints: /api/cache/*")
     print("🎓 Capstone dashboard: /dashboard")
-    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
+    print(f"🔄 Reload mode: {'enabled' if reload_enabled else 'disabled'}")
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=reload_enabled)
 
 
 @app.get("/api/optimized-news")
