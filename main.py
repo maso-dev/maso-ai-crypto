@@ -151,6 +151,7 @@ async def root(request: Request):
         """
         )
 
+
 # Replit health check endpoint (for deployment validation)
 @app.get("/health")
 async def replit_health_check():
@@ -164,8 +165,8 @@ async def replit_health_check():
             "health": "/api/health",
             "dashboard": "/dashboard",
             "docs": "/docs",
-            "admin": "/admin"
-        }
+            "admin": "/admin",
+        },
     }
 
 
@@ -970,9 +971,6 @@ async def test_news_quality():
 
     except Exception as e:
         return {"test_results": [], "status": "error", "error": str(e)}
-
-
-
 
 
 @app.get("/dashboard")
