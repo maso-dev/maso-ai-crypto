@@ -206,9 +206,18 @@ async def favicon():
     return Response(status_code=204)  # No content
 
 
+@app.get("/health")
+async def deployment_health_check():
+    """Dedicated health check endpoint for Replit deployment validation"""
+    return {
+        "status": "healthy",
+        "service": "crypto-broker-ai",
+        "timestamp": datetime.now().isoformat()
+    }
+
 @app.get("/api/health")
-async def health_check():
-    """Health check endpoint for Replit deployment"""
+async def detailed_health_check():
+    """Detailed health check endpoint with environment variables"""
     return {
         "status": "healthy",
         "service": "🏛️ Masonic - Alpha Strategy Advisor",
@@ -218,7 +227,10 @@ async def health_check():
             "binance_key_set": bool(os.getenv("BINANCE_API_KEY")),
             "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
             "news_key_set": bool(os.getenv("NEWSAPI_KEY")),
+            "milvus_token_set": bool(os.getenv("MILVUS_TOKEN")),
+            "neo4j_configured": bool(os.getenv("NEO4J_URI")),
         },
+        "timestamp": datetime.now().isoformat()
     }
 
 

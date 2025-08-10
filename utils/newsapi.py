@@ -1,6 +1,7 @@
 import os
 import httpx
 from typing import List, Dict, Optional
+from datetime import datetime, timedelta, timezone
 
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
@@ -19,8 +20,6 @@ async def fetch_news_articles(
     api_key = api_key or os.getenv("NEWSAPI_KEY")
     if not api_key:
         raise ValueError("No NewsAPI key provided.")
-
-    from datetime import datetime, timedelta
 
     # Calculate date range for better temporal relevance
     end_date = datetime.utcnow()

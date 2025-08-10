@@ -84,28 +84,106 @@ class Neo4jGraphRAG:
     """
 
     def __init__(self):
+        """Initialize Graph RAG with Neo4j connection."""
+        self.uri = os.getenv("NEO4J_URI")
+        self.username = os.getenv("NEO4J_USERNAME", "neo4j")
+        self.password = os.getenv("NEO4J_PASSWORD")
+        self.database = os.getenv("NEO4J_DATABASE", "neo4j")
+
         self.driver = None
         self.connected = False
-        self._connect()
 
-    def _connect(self):
-        """Connect to Neo4j database."""
+        if self.uri and self.password:
+            try:
+                self.driver = GraphDatabase.driver(
+                    self.uri,
+                    auth=(self.username, self.password)
+                )
+                # Test connection
+                with self.driver.session(database=self.database) as session:
+                    result = session.run("RETURN 1 as test")
+                    result.single()
+                self.connected = True
+                print(f"✅ Connected to Neo4j at {self.uri}")
+
+                # Initialize schema
+                self._initialize_schema()
+
+            except Exception as e:
+                print(f"❌ Neo4j connection failed: {e}")
+                self.connected = False
+        else:
+            print("⚠️ Neo4j credentials not found, using mock mode")
+
+    def _initialize_schema(self):
+        """Initialize Neo4j schema with required labels and properties."""
+        if not self.connected:
+            return
+
         try:
-            self.driver = GraphDatabase.driver(
-                NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD), database=NEO4J_DATABASE
-            )
-            # Test connection
-            with self.driver.session() as session:
-                session.run("RETURN 1")
-            self.connected = True
-            print(f"✅ Connected to Neo4j at {NEO4J_URI}")
-        except (ServiceUnavailable, AuthError) as e:
-            print(f"⚠️ Neo4j connection failed: {e}")
-            print("   Using mock graph operations")
-            self.connected = False
+            with self.driver.session(database=self.database) as session:
+                # Create constraints and indexes
+                schema_queries = [
+                    "CREATE CONSTRAINT news_id IF NOT EXISTS FOR (n:NewsArticle) REQUIRE n.id IS UNIQUE",
+                    "CREATE CONSTRAINT symbol_name IF NOT EXISTS FOR (s:CryptoSymbol) REQUIRE s.name IS UNIQUE",
+                    "CREATE CONSTRAINT entity_name IF NOT EXISTS FOR (e:Entity) REQUIRE e.name IS UNIQUE",
+                    "CREATE INDEX news_title IF NOT EXISTS FOR (n:NewsArticle) ON (n.title)",
+                    "CREATE INDEX news_content IF NOT EXISTS FOR (n:NewsArticle) ON (n.content)",
+                ]
+
+                for query in schema_queries:
+                    try:
+                        session.run(query)
+                    except Exception as e:
+                        print(f"Schema query warning: {e}")
+
+                # Create sample data if database is empty
+                result = session.run("MATCH (n:NewsArticle) RETURN count(n) as count")
+                count = result.single()["count"]
+
+                if count == 0:
+                    self._create_sample_data(session)
+
         except Exception as e:
-            print(f"❌ Neo4j error: {e}")
-            self.connected = False
+            print(f"Schema initialization error: {e}")
+
+    def _create_sample_data(self, session):
+        """Create sample data for demonstration."""
+        try:
+            sample_queries = [
+                """
+                CREATE (n:NewsArticle {
+                    id: 'sample-1',
+                    title: 'Bitcoin Reaches New Heights',
+                    content: 'Bitcoin continues its upward trajectory as institutional adoption grows.',
+                    source_url: 'https://example.com/bitcoin-news',
+                    published_at: datetime()
+                })
+                """,
+                """
+                CREATE (s:CryptoSymbol {name: 'BTC', full_name: 'Bitcoin'})
+                """,
+                """
+                CREATE (e:Entity {name: 'institutional_adoption', type: 'trend'})
+                """,
+                """
+                MATCH (n:NewsArticle {id: 'sample-1'}), (s:CryptoSymbol {name: 'BTC'})
+                CREATE (n)-[:MENTIONS]->(s)
+                """,
+                """
+                MATCH (n:NewsArticle {id: 'sample-1'}), (e:Entity {name: 'institutional_adoption'})
+                CREATE (n)-[:MENTIONS]->(e)
+                """
+            ]
+
+            for query in sample_queries:
+                session.run(query)
+
+            print("✅ Sample data created in Neo4j")
+
+        except Exception as e:
+            print(f"Sample data creation error: {e}")
+
 
     def close(self):
         """Close Neo4j connection."""
