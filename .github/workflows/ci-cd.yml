@@ -247,7 +247,9 @@ jobs:
         
     - name: Create release tag
       run: |
-        git tag -a "v$(date +%Y.%m.%d)" -m "Production release $(date +%Y-%m-%d)"
+        # Create unique tag with timestamp to avoid conflicts
+        TIMESTAMP=$(date +%Y.%m.%d.%H%M%S)
+        git tag -a "v${TIMESTAMP}" -m "Production release ${TIMESTAMP}"
         git push origin --tags
         
     - name: Notify deployment
