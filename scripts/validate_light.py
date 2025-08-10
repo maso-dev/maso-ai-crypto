@@ -17,7 +17,7 @@ def run_command(cmd, description):
         # Split command into list to avoid shell=True security issue
         if isinstance(cmd, str):
             cmd = cmd.split()
-        
+
         result = subprocess.run(
             cmd, shell=False, capture_output=True, text=True, timeout=30
         )
@@ -120,7 +120,10 @@ def check_git_status():
     print("🔍 Checking git status...")
     try:
         result = subprocess.run(
-            ["git", "status", "--porcelain"], shell=False, capture_output=True, text=True
+            ["git", "status", "--porcelain"],
+            shell=False,
+            capture_output=True,
+            text=True,
         )
         if result.stdout.strip():
             print("⚠️  There are uncommitted changes")
