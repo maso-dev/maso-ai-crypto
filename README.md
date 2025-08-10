@@ -5,6 +5,8 @@
 ### **Option 1: One-Click Deploy on Replit**
 [![Run on Replit](https://replit.com/badge/github/maso-ai-crypto)](https://replit.com/github/maso-ai-crypto)
 
+**🎯 Live Demo:** [https://masonic-ai-capstone.replit.app/](https://masonic-ai-capstone.replit.app/)
+
 ### **Option 2: Local Development**
 ```bash
 # Clone and setup
@@ -58,6 +60,8 @@ python main.py
 - **Admin**: `/admin/*`, `/dashboard`
 
 ## 🎓 **Capstone Review Experience**
+
+**🚀 Live Demo:** [https://masonic-ai-capstone.replit.app/](https://masonic-ai-capstone.replit.app/)
 
 ### **Live Demo Features**
 1. **Dashboard Tour**: Navigate to `/dashboard` for main interface
