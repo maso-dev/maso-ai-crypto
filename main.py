@@ -118,22 +118,30 @@ except ImportError:
     OPTIMIZED_NEWS_AVAILABLE = False
 
 
-# Root health endpoint for deployment health checks
+# Root endpoint - Welcome page with dashboard
 @app.get("/")
-async def root_health_check():
-    """Root health check endpoint for deployment health checks"""
-    return {
-        "status": "healthy",
-        "service": "🏛️ Masonic - AI Crypto Broker",
-        "deployment": "Replit",
-        "version": "2.0.0",
-        "timestamp": datetime.now().isoformat(),
-        "endpoints": {
-            "health": "/api/health",
-            "dashboard": "/dashboard",
-            "docs": "/docs",
-        },
-    }
+async def root_welcome_page(request: Request):
+    """Root welcome page - shows market overview and opportunities"""
+    try:
+        return templates.TemplateResponse("welcome.html", {"request": request})
+    except Exception as e:
+        # Fallback to simple HTML if template fails
+        return HTMLResponse(
+            content=f"""
+        <html>
+            <head><title>Welcome - Masonic AI Crypto Broker</title></head>
+            <body>
+                <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
+                <p>Your AI-powered crypto portfolio assistant</p>
+                <p><a href="/dashboard">View Full Dashboard</a></p>
+                <p><a href="/admin">Admin Panel</a></p>
+                <p><a href="/api/health">Health Check</a></p>
+                <p><a href="/docs">API Documentation</a></p>
+                <p><small>Template error: {str(e)}</small></p>
+            </body>
+        </html>
+        """
+        )
 
 
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
@@ -213,27 +221,7 @@ async def test_endpoint():
     }
 
 
-# NEW: Welcome section for non-logged users
-@app.get("/")
-async def welcome_page(request: Request):
-    """Welcome page for non-logged users - shows market overview and opportunities"""
-    try:
-        return templates.TemplateResponse("welcome.html", {"request": request})
-    except Exception:
-        # Fallback to simple HTML if template fails
-        return HTMLResponse(
-            content="""
-        <html>
-            <head><title>Welcome - Portfolio Analyzer</title></head>
-            <body>
-                <h1>🚀 Welcome to Portfolio Analyzer</h1>
-                <p>Your AI-powered crypto portfolio assistant</p>
-                <p><a href="/dashboard">View Full Dashboard</a></p>
-                <p><a href="/api/health">Health Check</a></p>
-            </body>
-        </html>
-        """
-        )
+# Welcome section for non-logged users (moved to root endpoint)
 
 
 # NEW: Alpha portfolio API
@@ -1018,6 +1006,22 @@ def smart_dashboard(request: Request):
             "dashboard.html",
             {"request": request, "data_mode": "error", "api_status": "error"},
         )
+
+
+# New menu-matching routes for better UX
+@app.get("/portfolio")
+def portfolio_page(request: Request):
+    """Portfolio page - redirects to dashboard for now"""
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request, "data_mode": "demo", "api_status": "demo"},
+    )
+
+
+@app.get("/ai-agent")
+def ai_agent_page(request: Request):
+    """AI Agent page - redirects to brain dashboard for now"""
+    return templates.TemplateResponse("brain_dashboard.html", {"request": request})
 
 
 # Import routers with error handling

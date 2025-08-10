@@ -108,7 +108,7 @@ class HybridRAGSystem:
 
         vector_results = await intelligent_search(
             query_text=query.query_text,
-            query_type=QueryType.SEMANTIC,
+            query_type=QueryType.SEMANTIC_SEARCH,
             symbols=query.symbols,
             time_range_hours=query.time_range_hours,
             limit=query.limit,

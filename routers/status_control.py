@@ -21,7 +21,7 @@ from utils.status_control import (
     ServiceType,
 )
 
-router = APIRouter(prefix="/status", tags=["status"])
+router = APIRouter(tags=["status"])
 
 
 # Pydantic models for API responses
