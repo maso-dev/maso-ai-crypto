@@ -5,46 +5,23 @@ import sqlite3
 from datetime import datetime, timezone, timedelta
 
 
-def check_and_install_dependencies():
-    """Check for required packages and provide helpful error messages"""
-    missing_packages = []
+# Graceful imports for Replit deployment
+def safe_import(package_name, fallback_name=None):
+    """Safely import packages with fallback"""
+    try:
+        return __import__(package_name)
+    except ImportError:
+        if fallback_name:
+            try:
+                return __import__(fallback_name)
+            except ImportError:
+                pass
+        print(f"⚠️ Package {package_name} not available - some features may be limited")
+        return None
 
-    required_packages = [
-        "fastapi",
-        "uvicorn",
-        "jinja2",
-        "httpx",
-        "pydantic",
-        "openai",
-        "langchain",
-        "langchain_openai",
-        "langchain_core",
-    ]
-
-    for package in required_packages:
-        try:
-            __import__(package.replace("-", "_"))
-        except ImportError:
-            missing_packages.append(package)
-
-    if missing_packages:
-        print("❌ Missing required packages:")
-        for pkg in missing_packages:
-            print(f"   - {pkg}")
-        print("\n💡 To install packages in Replit:")
-        print("   1. Go to 'Packages' tab (left sidebar)")
-        print("   2. Search for each package above")
-        print("   3. Click 'Add Package' for each one")
-        print("\n📦 Or use the package list in 'replit-packages.txt'")
-        return False
-
-    return True
-
-
-# Check dependencies before importing
-if not check_and_install_dependencies():
-    print("\n🚀 Please install the missing packages and try again!")
-    sys.exit(1)
+# Try imports with fallbacks
+fastapi_available = safe_import("fastapi") is not None
+uvicorn_available = safe_import("uvicorn") is not None
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
