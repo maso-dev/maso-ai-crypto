@@ -1,41 +1,40 @@
-fastapi
-uvicorn[standard]
-jinja2
-httpx
-pydantic
-openai
-langchain
-langchain-openai
-langchain-core
-langgraph
-python-binance
-newsapi-python
-tavily-python
-neo4j
-pymilvus
-python-dotenv
-python-dateutil
-pytz
-websockets
-aiohttp
-aiohttp
-fastapi
-httpx
-jinja2
-langchain
-langchain-core
-langchain-openai
-langgraph
-neo4j
-newsapi-python
-openai
-pydantic
-pymilvus
-python-binance
-python-dateutil
-python-dotenv
-pytz
-tavily-python
-uvicorn
-websockets
-django-routers
+# Core FastAPI and web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+jinja2>=3.1.0
+
+# HTTP and async libraries
+httpx>=0.25.0
+aiohttp>=3.9.0
+websockets>=12.0
+
+# Data validation and serialization
+pydantic>=2.5.0
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# AI and language models
+openai>=1.3.0
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-core>=0.1.0
+langgraph>=0.0.20
+
+# Vector databases and search
+qdrant-client>=1.7.0
+pymilvus>=2.3.0
+
+# Graph database
+neo4j>=5.15.0
+
+# Crypto and financial APIs
+python-binance>=1.0.19
+newsapi-python>=0.2.6
+tavily-python>=0.3.0
+
+# Utilities and configuration
+python-dotenv>=1.0.0
+
+# Development and testing (optional for production)
+pytest>=7.4.0
+black>=23.0.0

@@ -52,7 +52,7 @@ class LocalVectorSearch:
             )
             conn.commit()
 
-    def _simple_vectorize(self, text: str) -> List[float]:
+    def simple_vectorize(self, text: str) -> List[float]:
         """Simple vectorization using character frequency and basic features"""
         # Simple character frequency vector (basic but effective)
         char_freq = {}
@@ -69,7 +69,12 @@ class LocalVectorSearch:
         vector.append(min(len(words) / 100, 1.0))  # Word count (normalized)
         vector.append(min(len(text) / 1000, 1.0))  # Character count (normalized)
 
-        return vector
+        # Pad to 128 dimensions to match Qdrant collection
+        while len(vector) < 128:
+            vector.append(0.0)
+
+        # Ensure exactly 128 dimensions
+        return vector[:128]
 
     def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
         """Calculate cosine similarity between two vectors"""
@@ -90,7 +95,7 @@ class LocalVectorSearch:
         doc_id = hashlib.md5(
             f"{content}{datetime.now().isoformat()}".encode(), usedforsecurity=False
         ).hexdigest()
-        vector = self._simple_vectorize(content)
+        vector = self.simple_vectorize(content)
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
@@ -114,7 +119,7 @@ class LocalVectorSearch:
         self, query: str, limit: int = 10, min_similarity: float = 0.1
     ) -> List[Dict[str, Any]]:
         """Search for similar documents"""
-        query_vector = self._simple_vectorize(query)
+        query_vector = self.simple_vectorize(query)
         results = []
 
         with sqlite3.connect(self.db_path) as conn:
@@ -233,3 +238,9 @@ def search_local_vectors(query: str, limit: int = 10) -> List[Dict[str, Any]]:
 def get_local_vector_stats() -> Dict[str, Any]:
     """Get local vector store statistics"""
     return get_local_vector_search().get_stats()
+
+
+def simple_vectorize(text: str) -> List[float]:
+    """Standalone function for simple text vectorization"""
+    search = get_local_vector_search()
+    return search.simple_vectorize(text)

@@ -21,40 +21,62 @@ from pathlib import Path
 try:
     from .newsapi import fetch_news_articles
 except ImportError:
-    async def fetch_news_articles(search_terms: List[str], hours_back: int) -> List[Dict[str, Any]]:
+
+    async def fetch_news_articles(
+        search_terms: List[str], hours_back: int
+    ) -> List[Dict[str, Any]]:
         print(f"Mock fetch_news_articles called with: {search_terms}, {hours_back}")
         # Simulate API response, including a rate limit scenario
         if "bitcoin" in search_terms and hours_back > 12:
-            return [] # Simulate rate limiting or no data
+            return []  # Simulate rate limiting or no data
         return [
-            {"title": f"Mock Article for {', '.join(search_terms)}", "content": "This is mock content.", "publishedAt": datetime.now(timezone.utc).isoformat(), "url": "#", "urlToImage": "#", "source": {"name": "Mock News"}, "score": 0.5, "hours_ago": 1}
+            {
+                "title": f"Mock Article for {', '.join(search_terms)}",
+                "content": "This is mock content.",
+                "publishedAt": datetime.now(timezone.utc).isoformat(),
+                "url": "#",
+                "urlToImage": "#",
+                "source": {"name": "Mock News"},
+                "score": 0.5,
+                "hours_ago": 1,
+            }
         ]
+
 
 try:
     from .binance_client import get_portfolio_data
 except ImportError:
+
     @dataclass
     class Asset:
         asset: str
         total: float
+
     @dataclass
     class PortfolioData:
         assets: List[Asset]
+
     async def get_portfolio_data() -> PortfolioData:
         print("Mock get_portfolio_data called.")
         # Simulate portfolio data
-        return PortfolioData(assets=[
-            Asset(asset="BTC", total=1.5),
-            Asset(asset="ETH", total=10.0),
-            Asset(asset="USDT", total=5000.0),
-            Asset(asset="SOL", total=0.0) # Simulate an asset with zero holding
-        ])
+        return PortfolioData(
+            assets=[
+                Asset(asset="BTC", total=1.5),
+                Asset(asset="ETH", total=10.0),
+                Asset(asset="USDT", total=5000.0),
+                Asset(asset="SOL", total=0.0),  # Simulate an asset with zero holding
+            ]
+        )
+
 
 try:
     from .cost_tracker import track_newsapi_call
 except ImportError:
+
     async def track_newsapi_call(endpoint: str, metadata: Dict[str, Any]):
-        print(f"Mock track_newsapi_call called for endpoint: {endpoint} with metadata: {metadata}")
+        print(
+            f"Mock track_newsapi_call called for endpoint: {endpoint} with metadata: {metadata}"
+        )
 
 
 @dataclass
@@ -465,7 +487,9 @@ class IntelligentNewsCache:
 
         return results
 
-    async def get_news_for_symbols(self, symbols: List[str], hours_back: int = 24, use_cache: bool = True) -> List[Dict[str, Any]]:
+    async def get_news_for_symbols(
+        self, symbols: List[str], hours_back: int = 24, use_cache: bool = True
+    ) -> List[Dict[str, Any]]:
         """
         Get news for specific symbols with caching.
 
@@ -614,13 +638,16 @@ class IntelligentNewsCache:
                 # The provided change snippet is applied conceptually to the *behavior* of fetching.
 
                 # Call the (potentially mocked) fetch_news_articles
-                articles = await fetch_news_articles(search_terms, hours_back=hours_back)
+                articles = await fetch_news_articles(
+                    search_terms, hours_back=hours_back
+                )
 
                 # If fetch_news_articles returned an empty list due to rate limiting (simulated),
                 # we should log that. The snippet already adds a print statement for this.
-                if not articles and "Rate limited" in " ".join(search_terms): # Simple check to simulate rate limit
-                     print(f"      ⚠️ Rate limited for {symbols}, returning empty list.")
-
+                if not articles and "Rate limited" in " ".join(
+                    search_terms
+                ):  # Simple check to simulate rate limit
+                    print(f"      ⚠️ Rate limited for {symbols}, returning empty list.")
 
             if use_cache:
                 # Cache the result
