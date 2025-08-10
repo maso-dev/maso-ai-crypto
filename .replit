@@ -1,13 +1,28 @@
-modules = ["python-3.12", "web"]
-run = "uvicorn main:app --host 0.0.0.0 --port 3000"
-
-[nix]
-channel = "stable-25_05"
-packages = ["bash", "libxcrypt"]
+run = "python main.py"
+entrypoint = "main.py"
 
 [deployment]
-run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 3000"]
+run = ["sh", "-c", "python main.py"]
+healthcheck = "/health"
 
-[[ports]]
-localPort = 3000
-externalPort = 80
+[nix]
+channel = "stable-23_11"
+
+[env]
+PYTHONPATH = "/home/runner/$REPL_SLUG"
+RELOAD = "false"
+
+[packager]
+language = "python3"
+ignoredPackages = ["unit_tests"]
+
+[packager.features]
+packageSearch = true
+guessImports = true
+
+[languages.python3]
+pattern = "**/*.py"
+syntax = "python"
+
+[languages.python3.languageServer]
+start = ["pylsp"]
