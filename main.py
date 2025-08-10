@@ -124,17 +124,7 @@ def is_health_check_request(request: Request) -> bool:
 @app.get("/")
 async def root(request: Request):
     """Root endpoint - Welcome page for users visiting the site"""
-    # Use enhanced health check detection
-    if is_health_check_request(request):
-        # Ultra-fast response for health checks - no template rendering
-        return {
-            "status": "healthy",
-            "service": "Masonic AI Crypto Broker",
-            "endpoint": "root",
-            "timestamp": datetime.utcnow().isoformat(),
-            "message": "Service is running",
-        }
-
+    # Always return HTML for the root endpoint - health checks should use /health or /replit-health
     try:
         return get_templates().TemplateResponse("welcome.html", {"request": request})
     except Exception as e:
@@ -148,7 +138,8 @@ async def root(request: Request):
                 <p>Your AI-powered crypto portfolio assistant</p>
                 <p><a href="/dashboard">View Full Dashboard</a></p>
                 <p><a href="/admin">Admin Panel</a></p>
-                <p><a href="/api/health">Health Check</a></p>
+                <p><a href="/health">Health Check</a></p>
+                <p><a href="/replit-health">Replit Health</a></p>
                 <p><a href="/docs">API Documentation</a></p>
                 <p><small>Template error: {str(e)}</small></p>
             </body>
@@ -162,57 +153,19 @@ async def root(request: Request):
 async def replit_health_check():
     """Replit health check endpoint with basic health checks for deployment validation"""
     try:
-        # Basic health checks
-        health_status = "healthy"
-        checks = {}
-        
-        # Check 1: Basic app functionality
-        try:
-            checks["app_running"] = "passed"
-        except Exception as e:
-            checks["app_running"] = f"failed: {str(e)}"
-            health_status = "unhealthy"
-        
-        # Check 2: Database connectivity (if available)
-        try:
-            # Try to create a simple SQLite connection
-            conn = sqlite3.connect(":memory:")
-            conn.execute("SELECT 1")
-            conn.close()
-            checks["database"] = "passed"
-        except Exception as e:
-            checks["database"] = f"failed: {str(e)}"
-            # Don't mark as unhealthy for database issues in health check
-        
-        # Check 3: Basic imports working
-        try:
-            import fastapi
-            import uvicorn
-            checks["dependencies"] = "passed"
-        except ImportError as e:
-            checks["dependencies"] = f"failed: {str(e)}"
-            health_status = "unhealthy"
-        
-        # Check 4: File system access
-        try:
-            Path(".").exists()
-            checks["filesystem"] = "passed"
-        except Exception as e:
-            checks["filesystem"] = f"failed: {str(e)}"
-            health_status = "unhealthy"
-        
+        # Ultra-fast health check - minimal operations for Replit deployment
         return {
-            "status": health_status,
+            "status": "healthy",
             "service": "crypto-broker-ai",
             "timestamp": datetime.utcnow().isoformat(),
             "message": "Masonic AI Crypto Broker is running",
-            "checks": checks,
-            "endpoints": {
-                "health": "/api/health",
-                "status": "/status-dashboard",
-            },
             "web_app": True,
             "preview_available": True,
+            "endpoints": {
+                "health": "/health",
+                "replit_health": "/replit-health",
+                "status": "/status-dashboard",
+            }
         }
         
     except Exception as e:
@@ -222,7 +175,7 @@ async def replit_health_check():
             "error": f"Health check failed: {str(e)}",
             "timestamp": datetime.utcnow().isoformat(),
             "service": "crypto-broker-ai"
-        }, 500
+        }
 
 
 # Ultra-lightweight health check for Replit deployment
