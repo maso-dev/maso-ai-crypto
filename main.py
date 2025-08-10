@@ -166,7 +166,11 @@ async def replit_health_check():
             "dashboard": "/dashboard",
             "docs": "/docs",
             "admin": "/admin",
+            "brain": "/brain-dashboard",
+            "status": "/status-dashboard",
         },
+        "web_app": True,
+        "preview_available": True,
     }
 
 
@@ -224,14 +228,7 @@ async def favicon():
     return Response(status_code=204)  # No content
 
 
-@app.get("/health")
-async def deployment_health_check():
-    """Dedicated health check endpoint for Replit deployment validation"""
-    return {
-        "status": "healthy",
-        "service": "crypto-broker-ai",
-        "timestamp": datetime.now().isoformat(),
-    }
+# Removed duplicate health endpoint - using the one above
 
 
 @app.get("/api/health")

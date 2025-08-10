@@ -1,9 +1,15 @@
-run = "python main.py"
-entrypoint = "main.py"
+run = "python replit_startup.py"
+entrypoint = "replit_startup.py"
 
 [deployment]
-run = ["sh", "-c", "python main.py"]
+run = ["sh", "-c", "python replit_startup.py"]
 healthcheck = "/health"
+
+# Replit specific configuration
+[env]
+PYTHONPATH = "/home/runner/$REPL_SLUG"
+RELOAD = "false"
+PORT = "8000"
 
 [nix]
 channel = "stable-23_11"
