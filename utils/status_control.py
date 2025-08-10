@@ -660,7 +660,7 @@ class StatusControl:
         for key, value in kwargs.items():
             if hasattr(self.metrics, key):
                 setattr(self.metrics, key, value)
-    
+
     def start_monitoring(self):
         """Start monitoring when the app is ready."""
         self._start_monitoring()
@@ -669,12 +669,14 @@ class StatusControl:
 # Global status control instance - lazy initialization
 _status_control_instance = None
 
+
 def get_status_control() -> StatusControl:
     """Get the global status control instance, creating it if needed."""
     global _status_control_instance
     if _status_control_instance is None:
         _status_control_instance = StatusControl()
     return _status_control_instance
+
 
 # Don't create the instance during import - make it truly lazy
 

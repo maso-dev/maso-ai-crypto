@@ -130,39 +130,48 @@ class EnhancedAgentEngine:
 
         try:
             # Use LiveCoinWatch as primary source
-            from utils.livecoinwatch_processor import get_latest_prices, calculate_technical_indicators
-            
+            from utils.livecoinwatch_processor import (
+                get_latest_prices,
+                calculate_technical_indicators,
+            )
+
             if not symbols:
                 return {}
 
             # Get real-time prices from LiveCoinWatch
             latest_prices = await get_latest_prices(symbols)
-            
+
             for symbol in symbols:
                 if symbol in latest_prices:
                     price_data = latest_prices[symbol]
-                    
+
                     # Get technical indicators
                     try:
-                        indicators = await calculate_technical_indicators(symbol, days=30)
+                        indicators = await calculate_technical_indicators(
+                            symbol, days=30
+                        )
                         rsi = indicators.get("rsi", 50.0)
                     except Exception:
                         rsi = 50.0  # Fallback
-                    
+
                     market_data[symbol] = MarketData(
                         symbol=symbol,
                         current_price=price_data.price_usd,
                         price_change_24h=price_data.change_24h,
-                        price_change_percent_24h=getattr(price_data, 'change_24h_percent', 0.0),
+                        price_change_percent_24h=getattr(
+                            price_data, "change_24h_percent", 0.0
+                        ),
                         volume_24h=price_data.volume_24h,
                         market_cap=price_data.market_cap,
                         rsi=rsi,
-                        sentiment_score=self._calculate_sentiment_score_livecoinwatch(price_data),
+                        sentiment_score=self._calculate_sentiment_score_livecoinwatch(
+                            price_data
+                        ),
                     )
-                    
+
         except Exception as e:
             print(f"Error fetching LiveCoinWatch market data: {e}")
-            
+
             # Fallback: Try to get basic data without technical indicators
             try:
                 if symbols:  # Check if symbols is not None
@@ -223,8 +232,12 @@ class EnhancedAgentEngine:
     def _calculate_sentiment_score_livecoinwatch(self, price_data) -> float:
         """Calculate sentiment score based on LiveCoinWatch price data."""
         try:
-            price_change = price_data.change_24h_percent if hasattr(price_data, 'change_24h_percent') else 0.0
-            volume = price_data.volume_24h if hasattr(price_data, 'volume_24h') else 0.0
+            price_change = (
+                price_data.change_24h_percent
+                if hasattr(price_data, "change_24h_percent")
+                else 0.0
+            )
+            volume = price_data.volume_24h if hasattr(price_data, "volume_24h") else 0.0
 
             # Simple sentiment calculation
             if price_change > 2 and volume > 1000000:

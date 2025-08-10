@@ -606,9 +606,9 @@ def get_cache_statistics() -> Dict[str, Any]:
                 {
                     "search_terms": ["bitcoin", "ethereum"],
                     "hit_count": 8,
-                    "last_accessed": datetime.now(timezone.utc).isoformat()
+                    "last_accessed": datetime.now(timezone.utc).isoformat(),
                 }
-            ]
+            ],
         }
 
 

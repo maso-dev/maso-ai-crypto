@@ -7,9 +7,4 @@ from . import cache_readers
 from . import brain_enhanced
 from . import status_control
 
-__all__ = [
-    "admin",
-    "cache_readers", 
-    "brain_enhanced",
-    "status_control"
-]
+__all__ = ["admin", "cache_readers", "brain_enhanced", "status_control"]

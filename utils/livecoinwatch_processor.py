@@ -186,21 +186,17 @@ class LiveCoinWatchProcessor:
                 # Use individual /coins/single calls instead of /coins/map
                 for symbol in symbols:
                     try:
-                        payload = {
-                            "currency": "USD",
-                            "code": symbol,
-                            "meta": True
-                        }
+                        payload = {"currency": "USD", "code": symbol, "meta": True}
 
                         response = await client.post(
-                            f"{self.base_url}/coins/single", 
-                            json=payload, 
-                            headers=headers
+                            f"{self.base_url}/coins/single",
+                            json=payload,
+                            headers=headers,
                         )
                         response.raise_for_status()
 
                         symbol_data = response.json()
-                        
+
                         price_data = PriceData(
                             symbol=symbol.upper(),  # Use the original symbol from request
                             timestamp=timestamp,
@@ -228,7 +224,9 @@ class LiveCoinWatchProcessor:
                         price_data_list.append(price_data)
 
                     except (KeyError, ValueError, TypeError) as e:
-                        logger.warning(f"Error processing data for symbol {symbol}: {e}")
+                        logger.warning(
+                            f"Error processing data for symbol {symbol}: {e}"
+                        )
                         continue
                     except httpx.HTTPStatusError as e:
                         logger.warning(f"HTTP error for symbol {symbol}: {e}")
@@ -320,10 +318,12 @@ class LiveCoinWatchProcessor:
                             days_from_now = (datetime.now(timezone.utc) - date).days
                             price_change = days_from_now * 0.001  # Gradual increase
                             open_price = base_price * (1 - price_change)
-                        
+
                         high_price = float(day_data.get("high", 0)) or open_price * 1.02
                         low_price = float(day_data.get("low", 0)) or open_price * 0.98
-                        close_price = float(day_data.get("close", 0)) or open_price * 1.005
+                        close_price = (
+                            float(day_data.get("close", 0)) or open_price * 1.005
+                        )
 
                         historical_data = HistoricalData(
                             symbol=symbol.upper(),
