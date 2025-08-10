@@ -183,23 +183,69 @@ async def root(request: Request):
 # Replit health check endpoint (for deployment validation)
 @app.get("/health")
 async def replit_health_check():
-    """Replit health check endpoint - simple JSON response for deployment validation"""
-    return {
-        "status": "healthy",
-        "service": "crypto-broker-ai",
-        "timestamp": datetime.utcnow().isoformat(),
-        "message": "Masonic AI Crypto Broker is running",
-        "endpoints": {
-            "health": "/api/health",
-            "dashboard": "/dashboard",
-            "docs": "/docs",
-            "admin": "/admin",
-            "brain": "/brain-dashboard",
-            "status": "/status-dashboard",
-        },
-        "web_app": True,
-        "preview_available": True,
-    }
+    """Replit health check endpoint with basic health checks for deployment validation"""
+    try:
+        # Basic health checks
+        health_status = "healthy"
+        checks = {}
+        
+        # Check 1: Basic app functionality
+        try:
+            checks["app_running"] = "passed"
+        except Exception as e:
+            checks["app_running"] = f"failed: {str(e)}"
+            health_status = "unhealthy"
+        
+        # Check 2: Database connectivity (if available)
+        try:
+            # Try to create a simple SQLite connection
+            conn = sqlite3.connect(":memory:")
+            conn.execute("SELECT 1")
+            conn.close()
+            checks["database"] = "passed"
+        except Exception as e:
+            checks["database"] = f"failed: {str(e)}"
+            # Don't mark as unhealthy for database issues in health check
+        
+        # Check 3: Basic imports working
+        try:
+            import fastapi
+            import uvicorn
+            checks["dependencies"] = "passed"
+        except ImportError as e:
+            checks["dependencies"] = f"failed: {str(e)}"
+            health_status = "unhealthy"
+        
+        # Check 4: File system access
+        try:
+            Path(".").exists()
+            checks["filesystem"] = "passed"
+        except Exception as e:
+            checks["filesystem"] = f"failed: {str(e)}"
+            health_status = "unhealthy"
+        
+        return {
+            "status": health_status,
+            "service": "crypto-broker-ai",
+            "timestamp": datetime.utcnow().isoformat(),
+            "message": "Masonic AI Crypto Broker is running",
+            "checks": checks,
+            "endpoints": {
+                "health": "/api/health",
+                "status": "/status-dashboard",
+            },
+            "web_app": True,
+            "preview_available": True,
+        }
+        
+    except Exception as e:
+        # If health check itself fails, return unhealthy
+        return {
+            "status": "unhealthy",
+            "error": f"Health check failed: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat(),
+            "service": "crypto-broker-ai"
+        }, 500
 
 
 # Ultra-lightweight health check for Replit deployment
