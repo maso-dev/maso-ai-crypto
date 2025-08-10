@@ -107,7 +107,9 @@ class StatusControl:
         """Enable/disable lightweight mode for health checks"""
         self._lightweight_mode = enabled
         if enabled:
-            print("🔧 Status control: Lightweight mode enabled (skipping expensive checks)")
+            print(
+                "🔧 Status control: Lightweight mode enabled (skipping expensive checks)"
+            )
         else:
             print("🔧 Status control: Full monitoring mode enabled")
 
@@ -130,7 +132,7 @@ class StatusControl:
     async def _check_ai_agent_health(self) -> ComponentHealth:
         """Check AI agent health status."""
         start_time = datetime.now(timezone.utc)
-        
+
         # In lightweight mode, skip expensive AI operations
         if self._lightweight_mode:
             return ComponentHealth(
@@ -142,10 +144,10 @@ class StatusControl:
                 metadata={
                     "agent_id": "masonic-ai-agent",
                     "mode": "lightweight",
-                    "note": "Full health check disabled for deployment"
+                    "note": "Full health check disabled for deployment",
                 },
             )
-        
+
         try:
             # Import and check AI agent
             from .ai_agent import CryptoAIAgent, AgentTask
@@ -187,7 +189,7 @@ class StatusControl:
     async def _check_vector_rag_health(self) -> ComponentHealth:
         """Check Vector RAG health status."""
         start_time = datetime.now(timezone.utc)
-        
+
         # In lightweight mode, skip expensive vector operations
         if self._lightweight_mode:
             return ComponentHealth(
@@ -198,10 +200,10 @@ class StatusControl:
                 response_time_ms=0.1,
                 metadata={
                     "mode": "lightweight",
-                    "note": "Full health check disabled for deployment"
+                    "note": "Full health check disabled for deployment",
                 },
             )
-        
+
         try:
             from .vector_rag import EnhancedVectorRAG, VectorQuery, QueryType
 

@@ -134,12 +134,12 @@ async def root(request: Request):
     # Check if this is a health check request (User-Agent or path-based detection)
     user_agent = request.headers.get("user-agent", "").lower()
     is_health_check = (
-        "health" in user_agent or 
-        "replit" in user_agent or 
-        "uptime" in user_agent or
-        "monitoring" in user_agent
+        "health" in user_agent
+        or "replit" in user_agent
+        or "uptime" in user_agent
+        or "monitoring" in user_agent
     )
-    
+
     if is_health_check:
         # Ultra-fast response for health checks - no template rendering
         return {
@@ -147,9 +147,9 @@ async def root(request: Request):
             "service": "Masonic AI Crypto Broker",
             "endpoint": "root",
             "timestamp": datetime.utcnow().isoformat(),
-            "message": "Service is running"
+            "message": "Service is running",
         }
-    
+
     try:
         return templates.TemplateResponse("welcome.html", {"request": request})
     except Exception as e:
@@ -231,18 +231,19 @@ async def startup_event():
         try:
             await asyncio.sleep(5)  # Wait 5 seconds for app to be fully ready
             from utils.status_control import get_status_control
+
             status_control = get_status_control()
             status_control.start_monitoring()
             print("✅ Status monitoring started in background")
-            
+
             # Enable full monitoring after app is stable (30 seconds)
             await asyncio.sleep(25)
             status_control.enable_full_monitoring()
             print("🚀 Full monitoring mode enabled")
-            
+
         except Exception as e:
             print(f"⚠️ Could not start status monitoring: {e}")
-    
+
     # Start background task without blocking
     asyncio.create_task(start_status_monitoring_background())
 
@@ -274,8 +275,9 @@ async def detailed_health_check():
     """Detailed health check endpoint - optimized for Replit deployment"""
     # Check if this is a Replit health check (User-Agent detection)
     from fastapi import Request
+
     request = Request(scope={"type": "http", "headers": []})
-    
+
     # For Replit health checks, return minimal response
     return {
         "status": "healthy",
@@ -284,7 +286,7 @@ async def detailed_health_check():
         "version": "2.0.0",
         "timestamp": datetime.utcnow().isoformat(),
         "health_check": "lightweight",
-        "message": "Service is running and healthy"
+        "message": "Service is running and healthy",
     }
 
 
