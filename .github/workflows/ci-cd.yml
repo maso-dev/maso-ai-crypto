@@ -240,6 +240,11 @@ jobs:
         # Add your production deployment logic here
         # Example: Deploy to Replit production, Heroku production, etc.
         
+    - name: Configure Git
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions Bot"
+        
     - name: Create release tag
       run: |
         git tag -a "v$(date +%Y.%m.%d)" -m "Production release $(date +%Y-%m-%d)"
