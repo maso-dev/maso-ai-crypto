@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from utils.milvus import query_news_for_symbols
+from utils.hybrid_rag_fallback import hybrid_search
 from utils.openai_utils import get_market_summary
 
 router = APIRouter()
@@ -40,7 +40,8 @@ async def portfolio_market_summary(
         if req.always_include_base_coins:
             symbols.update(["BTC", "ETH"])
         symbols = list(symbols)
-        news = await query_news_for_symbols(symbols, limit=req.limit)
+        news_results = await hybrid_search("crypto news", symbols, limit=req.limit)
+        news = news_results.get("results", [])
         news_items = [
             NewsItem(
                 title=item.get("title", ""),

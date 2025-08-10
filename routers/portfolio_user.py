@@ -12,7 +12,7 @@ import httpx
 import json
 
 # Import portfolio-specific utilities
-from utils.milvus import query_news_for_symbols
+from utils.hybrid_rag_fallback import hybrid_search
 from utils.openai_utils import get_market_summary
 from utils.binance_client import (
     get_portfolio_data,
@@ -106,7 +106,10 @@ async def portfolio_market_summary(
                 symbols_to_analyze.append("ETH")
 
         # Get relevant news for the symbols
-        news_articles = await query_news_for_symbols(symbols_to_analyze)
+        news_results = await hybrid_search(
+            "crypto news", symbols_to_analyze, limit=request.limit
+        )
+        news_articles = news_results.get("results", [])
 
         # Limit news articles
         limited_news = news_articles[: request.limit] if news_articles else []
