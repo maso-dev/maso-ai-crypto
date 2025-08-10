@@ -698,7 +698,8 @@ async def get_brain_config() -> Dict[str, Any]:
             "configured": bool(LANGSMITH_API_KEY),
         },
         "news_pipeline": {
-            "update_interval_minutes": 30,
+            # CAPSTONE: Changed from 30 minutes to 6 hours (4 times per day)
+            "update_interval_minutes": 6 * 60,  # 6 hours
             "max_articles_per_update": 50,
             "relevance_threshold": 0.7,
             "enable_enrichment": True,
@@ -711,7 +712,8 @@ async def get_brain_config() -> Dict[str, Any]:
             "configured": bool(os.getenv("OPENAI_API_KEY")),
         },
         "crypto_data": {
-            "update_interval_seconds": 60,
+            # CAPSTONE: Changed from 60 seconds to 6 hours (4 times per day)
+            "update_interval_seconds": 6 * 60 * 60,  # 6 hours
             "supported_symbols": [
                 "Bitcoin",
                 "Ethereum",

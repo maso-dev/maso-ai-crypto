@@ -5,7 +5,8 @@
 
 class CacheReader {
     constructor() {
-        this.updateInterval = 30000; // 30 seconds
+        // CAPSTONE: Reduced update frequency from 30 seconds to 6 hours (4 times per day)
+        this.updateInterval = 6 * 60 * 60 * 1000; // 6 hours
         this.isUpdating = false;
 
         // Initialize when DOM is ready

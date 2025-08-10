@@ -5,10 +5,11 @@
 
 class EnhancedDashboard {
     constructor() {
-        this.updateInterval = 30000; // 30 seconds
-        this.marketUpdateInterval = 15000; // 15 seconds
-        this.newsUpdateInterval = 60000; // 1 minute
-        this.adminUpdateInterval = 120000; // 2 minutes
+        // CAPSTONE: Reduced update frequency from seconds to hours
+        this.updateInterval = 6 * 60 * 60 * 1000; // 6 hours (4 times per day)
+        this.marketUpdateInterval = 6 * 60 * 60 * 1000; // 6 hours (4 times per day)
+        this.newsUpdateInterval = 6 * 60 * 60 * 1000; // 6 hours (4 times per day)
+        this.adminUpdateInterval = 6 * 60 * 60 * 1000; // 6 hours (4 times per day)
         this.isUpdating = false;
         this.currentPhase = "6";
 

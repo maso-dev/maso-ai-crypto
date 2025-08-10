@@ -230,8 +230,9 @@ async def deployment_health_check():
     return {
         "status": "healthy",
         "service": "crypto-broker-ai",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
+
 
 @app.get("/api/health")
 async def detailed_health_check():

@@ -246,7 +246,9 @@ class TestHealthCheckers:
                 metadata={"collection_size": 1000},
             )
 
-        status_control_instance.health_checkers["vector_rag"] = mock_vector_rag_health_check
+        status_control_instance.health_checkers["vector_rag"] = (
+            mock_vector_rag_health_check
+        )
         health = await status_control_instance._check_vector_rag_health()
 
         assert health.name == "Vector RAG"
@@ -270,7 +272,9 @@ class TestHealthCheckers:
                 metadata={"total_results": 50},
             )
 
-        status_control_instance.health_checkers["hybrid_rag"] = mock_hybrid_rag_health_check
+        status_control_instance.health_checkers["hybrid_rag"] = (
+            mock_hybrid_rag_health_check
+        )
         health = await status_control_instance._check_hybrid_rag_health()
 
         assert health.name == "Hybrid RAG"

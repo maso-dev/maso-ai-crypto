@@ -4,8 +4,10 @@
 import asyncio
 import os
 import httpx
+import pytest
 
 
+@pytest.mark.asyncio
 async def test_newsapi():
     """Test NewsAPI"""
     api_key = os.getenv("NEWSAPI_KEY")

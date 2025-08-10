@@ -188,8 +188,8 @@
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function () {
             loadDashboard();
-            // Auto-refresh every 30 seconds
-            refreshInterval = setInterval(loadDashboard, 30000);
+            // CAPSTONE: Auto-refresh every 6 hours (4 times per day)
+            refreshInterval = setInterval(loadDashboard, 6 * 60 * 60 * 1000);
         });
 
         // Load all dashboard data

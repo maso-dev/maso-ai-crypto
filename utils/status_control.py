@@ -532,7 +532,8 @@ class StatusControl:
         while True:
             try:
                 await self.check_all_components()
-                await asyncio.sleep(30)  # Check every 30 seconds
+                # CAPSTONE: Changed from 30 seconds to 6 hours (4 times per day)
+                await asyncio.sleep(6 * 60 * 60)  # Check every 6 hours
             except Exception as e:
                 logger.error(f"Error in component monitoring: {e}")
                 await asyncio.sleep(60)  # Wait longer on error

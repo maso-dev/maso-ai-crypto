@@ -233,7 +233,8 @@ class RealTimeDataManager:
                                 await self._notify_subscribers(price_update)
 
                 # Wait before next poll
-                await asyncio.sleep(30)  # Poll every 30 seconds
+                # CAPSTONE: Changed from 30 seconds to 6 hours (4 times per day)
+                await asyncio.sleep(6 * 60 * 60)  # Poll every 6 hours
 
             except Exception as e:
                 print(f"❌ Error fetching CoinGecko data: {e}")
@@ -319,7 +320,8 @@ class RealTimeDataManager:
                             continue
 
                 # Wait before next poll
-                await asyncio.sleep(30)  # Poll every 30 seconds
+                # CAPSTONE: Changed from 30 seconds to 6 hours (4 times per day)
+                await asyncio.sleep(6 * 60 * 60)  # Poll every 6 hours
 
             except asyncio.TimeoutError:
                 print(
@@ -448,8 +450,8 @@ async def test_realtime_data():
     await start_realtime_data(DataSource.MOCK)
 
     # Let it run for a bit
-    print("🔄 Running for 30 seconds...")
-    await asyncio.sleep(30)
+    print("🔄 Running for 6 hours (capstone mode)...")
+    await asyncio.sleep(6 * 60 * 60)  # 6 hours for capstone
 
     # Stop
     await stop_realtime_data()

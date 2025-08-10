@@ -96,8 +96,7 @@ class Neo4jGraphRAG:
         if self.uri and self.password:
             try:
                 self.driver = GraphDatabase.driver(
-                    self.uri,
-                    auth=(self.username, self.password)
+                    self.uri, auth=(self.username, self.password)
                 )
                 # Test connection
                 with self.driver.session(database=self.database) as session:
@@ -173,7 +172,7 @@ class Neo4jGraphRAG:
                 """
                 MATCH (n:NewsArticle {id: 'sample-1'}), (e:Entity {name: 'institutional_adoption'})
                 CREATE (n)-[:MENTIONS]->(e)
-                """
+                """,
             ]
 
             for query in sample_queries:
@@ -183,7 +182,6 @@ class Neo4jGraphRAG:
 
         except Exception as e:
             print(f"Sample data creation error: {e}")
-
 
     def close(self):
         """Close Neo4j connection."""
