@@ -88,7 +88,7 @@ class LocalVectorSearch:
     def add_document(self, content: str, metadata: Dict[str, Any]) -> str:
         """Add a document to the local vector store"""
         doc_id = hashlib.md5(
-            f"{content}{datetime.now().isoformat()}".encode()
+            f"{content}{datetime.now().isoformat()}".encode(), usedforsecurity=False
         ).hexdigest()
         vector = self._simple_vectorize(content)
 
