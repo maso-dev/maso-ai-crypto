@@ -105,42 +105,50 @@ async def rate_limit_middleware(request: Request, call_next):
         return await call_next(request)
 
 
-templates = Jinja2Templates(directory="templates")
+# Lazy loading of templates and routers to prevent startup delays
+_templates = None
+_router_cache = {}
 
-# Import and include routers
-from routers import admin, cache_readers, brain_enhanced, status_control
 
-# Try to import enhanced hybrid RAG router
-try:
-    from routers import enhanced_hybrid_router
+def get_templates():
+    """Lazy load templates only when needed"""
+    global _templates
+    if _templates is None:
+        _templates = Jinja2Templates(directory="templates")
+    return _templates
 
-    ENHANCED_HYBRID_AVAILABLE = True
-except ImportError:
-    ENHANCED_HYBRID_AVAILABLE = False
 
-# Try to import optimized news router (temporal optimization)
-try:
-    from routers import optimized_news
-
-    OPTIMIZED_NEWS_AVAILABLE = True
-except ImportError:
-    OPTIMIZED_NEWS_AVAILABLE = False
+def is_health_check_request(request: Request) -> bool:
+    """Enhanced health check detection for Replit deployment"""
+    # Check User-Agent for health check indicators
+    user_agent = request.headers.get("user-agent", "").lower()
+    health_indicators = [
+        "health", "replit", "uptime", "monitoring", "pingdom", 
+        "statuscake", "newrelic", "datadog", "aws", "gcp", "azure"
+    ]
+    
+    if any(indicator in user_agent for indicator in health_indicators):
+        return True
+    
+    # Check for common health check paths in referer or other headers
+    referer = request.headers.get("referer", "").lower()
+    if any(indicator in referer for indicator in health_indicators):
+        return True
+    
+    # Check if request comes from known health check services
+    client_ip = request.client.host if request.client else ""
+    if client_ip in ["127.0.0.1", "::1", "localhost"]:
+        return True
+    
+    return False
 
 
 # Root endpoint - Simple health check for Replit deployment
 @app.get("/")
 async def root(request: Request):
     """Root endpoint - Welcome page for users visiting the site"""
-    # Check if this is a health check request (User-Agent or path-based detection)
-    user_agent = request.headers.get("user-agent", "").lower()
-    is_health_check = (
-        "health" in user_agent
-        or "replit" in user_agent
-        or "uptime" in user_agent
-        or "monitoring" in user_agent
-    )
-
-    if is_health_check:
+    # Use enhanced health check detection
+    if is_health_check_request(request):
         # Ultra-fast response for health checks - no template rendering
         return {
             "status": "healthy",
@@ -151,7 +159,7 @@ async def root(request: Request):
         }
 
     try:
-        return templates.TemplateResponse("welcome.html", {"request": request})
+        return get_templates().TemplateResponse("welcome.html", {"request": request})
     except Exception as e:
         # Fallback to simple HTML if template fails
         return HTMLResponse(
@@ -201,18 +209,40 @@ async def ultra_lightweight_health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
-app.include_router(admin.router, prefix="/admin", tags=["admin"])
-app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
-app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
-app.include_router(status_control.router, prefix="/status", tags=["status"])
+# Lazy load and include routers only when needed
+def include_routers():
+    """Lazy load routers to prevent startup delays"""
+    if "routers_loaded" not in _router_cache:
+        try:
+            from routers import admin, cache_readers, brain_enhanced, status_control
+            
+            app.include_router(admin.router, prefix="/admin", tags=["admin"])
+            app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
+            app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
+            app.include_router(status_control.router, prefix="/status", tags=["status"])
+            
+            # Try to import enhanced hybrid RAG router
+            try:
+                from routers import enhanced_hybrid_router
+                app.include_router(enhanced_hybrid_router.router, tags=["enhanced-hybrid-rag"])
+                _router_cache["enhanced_hybrid"] = True
+            except ImportError:
+                _router_cache["enhanced_hybrid"] = False
 
-# Include optimized news router if available
-if OPTIMIZED_NEWS_AVAILABLE:
-    app.include_router(optimized_news.router, prefix="/api", tags=["optimized-news"])
-
-# Include enhanced hybrid RAG router if available
-if ENHANCED_HYBRID_AVAILABLE:
-    app.include_router(enhanced_hybrid_router.router, tags=["enhanced-hybrid-rag"])
+            # Try to import optimized news router (temporal optimization)
+            try:
+                from routers import optimized_news
+                app.include_router(optimized_news.router, prefix="/api", tags=["optimized-news"])
+                _router_cache["optimized_news"] = True
+            except ImportError:
+                _router_cache["optimized_news"] = False
+                
+            _router_cache["routers_loaded"] = True
+            print("✅ Routers loaded successfully")
+            
+        except Exception as e:
+            print(f"⚠️ Could not load routers: {e}")
+            _router_cache["routers_loaded"] = False
 
 
 @app.on_event("startup")
@@ -221,7 +251,11 @@ async def startup_event():
     # Start basic services immediately
     try:
         print("🚀 Basic services initialized")
-        print("💡 AI models will be loaded on first request")
+        print("💡 Routers and AI models will be loaded on first request")
+        
+        # Load routers in background to prevent blocking startup
+        asyncio.create_task(load_routers_background())
+        
     except Exception as e:
         print(f"⚠️ Basic service initialization: {e}")
 
@@ -246,6 +280,15 @@ async def startup_event():
 
     # Start background task without blocking
     asyncio.create_task(start_status_monitoring_background())
+
+
+async def load_routers_background():
+    """Load routers in background to prevent blocking startup"""
+    try:
+        await asyncio.sleep(1)  # Small delay to ensure app is ready
+        include_routers()
+    except Exception as e:
+        print(f"⚠️ Background router loading failed: {e}")
 
 
 # Custom static files handling for Replit deployment
@@ -1075,14 +1118,14 @@ def smart_dashboard(request: Request):
         print(
             f"🏛️ Smart Dashboard: Using {data_mode.upper()} data - showing main dashboard"
         )
-        return templates.TemplateResponse(
+        return get_templates().TemplateResponse(
             "dashboard.html",
             {"request": request, "data_mode": data_mode, "api_status": api_status},
         )
 
     except Exception as e:
         print(f"🏛️ Smart Dashboard Error: {e} - showing main dashboard with error mode")
-        return templates.TemplateResponse(
+        return get_templates().TemplateResponse(
             "dashboard.html",
             {"request": request, "data_mode": "error", "api_status": "error"},
         )
@@ -1092,7 +1135,7 @@ def smart_dashboard(request: Request):
 @app.get("/portfolio")
 def portfolio_page(request: Request):
     """Portfolio page - redirects to dashboard for now"""
-    return templates.TemplateResponse(
+    return get_templates().TemplateResponse(
         "dashboard.html",
         {"request": request, "data_mode": "demo", "api_status": "demo"},
     )
@@ -1101,7 +1144,7 @@ def portfolio_page(request: Request):
 @app.get("/ai-agent")
 def ai_agent_page(request: Request):
     """AI Agent page - redirects to brain dashboard for now"""
-    return templates.TemplateResponse("brain_dashboard.html", {"request": request})
+    return get_templates().TemplateResponse("brain_dashboard.html", {"request": request})
 
 
 # Import routers with error handling
@@ -2032,19 +2075,19 @@ async def get_system_metrics():
 @app.get("/admin")
 def admin_page(request: Request):
     """Admin dashboard for system monitoring and configuration."""
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return get_templates().TemplateResponse("admin.html", {"request": request})
 
 
 @app.get("/brain-dashboard")
 def brain_dashboard(request: Request):
     """Brain dashboard for AI system monitoring."""
-    return templates.TemplateResponse("brain_dashboard.html", {"request": request})
+    return get_templates().TemplateResponse("brain_dashboard.html", {"request": request})
 
 
 @app.get("/status-dashboard")
 def status_dashboard(request: Request):
     """Status dashboard for system health monitoring."""
-    return templates.TemplateResponse("status_dashboard.html", {"request": request})
+    return get_templates().TemplateResponse("status_dashboard.html", {"request": request})
 
 
 # Server startup for development
