@@ -21,6 +21,11 @@ ignoredPackages = ["unit_tests"]
 [packager.features]
 packageSearch = true
 guessImports = true
+enabledForHosting = true
+
+[packager.upm]
+enabled = true
+language = "python3"
 
 [languages.python3]
 pattern = "**/*.py"
