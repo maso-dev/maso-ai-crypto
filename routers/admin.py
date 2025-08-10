@@ -13,7 +13,6 @@ import json
 
 # Import admin-specific utilities
 from utils.cost_tracker import cost_tracker
-from utils.milvus import MILVUS_URI, MILVUS_COLLECTION_NAME
 from utils.react_validation import tavily_client
 import os
 
@@ -73,8 +72,8 @@ class MonthlySummary(BaseModel):
 class SystemConfig(BaseModel):
     """System configuration model."""
 
-    milvus_uri: str
-    milvus_collection: str
+    vector_system: str
+    vector_description: str
     newsapi_enabled: bool
     tavily_enabled: bool
     openai_enabled: bool
@@ -95,10 +94,10 @@ async def get_system_status(admin: bool = Depends(verify_admin_access)) -> Syste
 
         # Check service status
         services = {
-            "milvus": {
-                "status": "online" if MILVUS_URI else "offline",
-                "uri": MILVUS_URI or "not configured",
-                "collection": MILVUS_COLLECTION_NAME or "not configured",
+            "vector_search": {
+                "status": "online",
+                "system": "local_fallback",
+                "description": "Local vector search with SQLite persistence",
             },
             "newsapi": {
                 "status": "online" if os.getenv("NEWSAPI_KEY") else "offline",
@@ -337,8 +336,8 @@ async def get_system_config(admin: bool = Depends(verify_admin_access)) -> Syste
     """Get current system configuration."""
     try:
         return SystemConfig(
-            milvus_uri=MILVUS_URI or "",
-            milvus_collection=MILVUS_COLLECTION_NAME or "",
+            vector_system="local_fallback",
+            vector_description="Local vector search with SQLite persistence",
             newsapi_enabled=bool(os.getenv("NEWSAPI_KEY")),
             tavily_enabled=bool(tavily_client),
             openai_enabled=bool(os.getenv("OPENAI_API_KEY")),

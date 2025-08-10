@@ -19,12 +19,12 @@ from pydantic import BaseModel
 
 try:
     from utils.config import ConfigManager
-    from utils.milvus import EnhancedVectorRAG
+    from utils.local_vector_fallback import LocalVectorSearch
     from utils.graph_rag import Neo4jGraphRAG
 except ImportError:
     # Graceful fallback for missing dependencies
     ConfigManager = lambda: None
-    EnhancedVectorRAG = None
+    LocalVectorSearch = None
     Neo4jGraphRAG = None
 from utils.openai_utils import get_openai_client
 
@@ -86,7 +86,7 @@ class OptimizedNewsService:
         self.openai_client = None
 
         try:
-            self.vector_rag = EnhancedVectorRAG()
+            self.vector_rag = LocalVectorSearch()
         except Exception:
             pass  # Will use database fallback
 

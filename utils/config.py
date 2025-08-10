@@ -105,15 +105,15 @@ class ConfigManager:
                 icon="🕸️",
                 category="database",
             ),
-            "milvus": APIConfig(
-                name="Milvus",
-                key_name="MILVUS_URI",
-                key_value=os.getenv("MILVUS_URI"),
-                base_url=os.getenv("MILVUS_URI", "http://localhost:19530"),
-                description="Vector database for embeddings",
-                icon="🗄️",
+            "vector_search": APIConfig(
+                name="Local Vector Search",
+                key_name="VECTOR_SYSTEM",
+                key_value="local_fallback",
+                base_url="local://sqlite",
+                description="Local vector search with SQLite persistence",
+                icon="💾",
                 category="database",
-                is_required=False,  # Milvus is optional for MVP
+                is_required=False,  # Local fallback is always available
             ),
         }
 
