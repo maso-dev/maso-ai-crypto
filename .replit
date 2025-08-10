@@ -5,18 +5,14 @@ entrypoint = "replit_startup.py"
 run = ["sh", "-c", "python replit_startup.py"]
 healthcheck = "/health"
 
-# Replit specific configuration
 [env]
 PYTHONPATH = "/home/runner/$REPL_SLUG"
 RELOAD = "false"
 PORT = "8000"
 
 [nix]
-channel = "stable-23_11"
-
-[env]
-PYTHONPATH = "/home/runner/$REPL_SLUG"
-RELOAD = "false"
+channel = "stable-25_05"
+packages = ["bash", "libxcrypt"]
 
 [packager]
 language = "python3"
