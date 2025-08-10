@@ -120,28 +120,20 @@ except ImportError:
 
 # Root endpoint - Welcome page with dashboard
 @app.get("/")
-async def root_welcome_page(request: Request):
-    """Root welcome page - shows market overview and opportunities"""
-    try:
-        return templates.TemplateResponse("welcome.html", {"request": request})
-    except Exception as e:
-        # Fallback to simple HTML if template fails
-        return HTMLResponse(
-            content=f"""
-        <html>
-            <head><title>Welcome - Masonic AI Crypto Broker</title></head>
-            <body>
-                <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
-                <p>Your AI-powered crypto portfolio assistant</p>
-                <p><a href="/dashboard">View Full Dashboard</a></p>
-                <p><a href="/admin">Admin Panel</a></p>
-                <p><a href="/api/health">Health Check</a></p>
-                <p><a href="/docs">API Documentation</a></p>
-                <p><small>Template error: {str(e)}</small></p>
-            </body>
-        </html>
-        """
-        )
+async def root():
+    """Simple health check endpoint for deployment"""
+    return {
+        "status": "healthy", 
+        "service": "🏛️ Masonic AI Crypto Broker",
+        "version": "2.0.0",
+        "timestamp": datetime.now().isoformat(),
+        "endpoints": {
+            "dashboard": "/dashboard",
+            "admin": "/admin", 
+            "health": "/api/health",
+            "docs": "/docs"
+        }
+    }
 
 
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
@@ -937,6 +929,30 @@ async def test_news_quality():
     except Exception as e:
         return {"test_results": [], "status": "error", "error": str(e)}
 
+
+@app.get("/welcome")
+async def welcome_page(request: Request):
+    """Welcome page with full dashboard functionality"""
+    try:
+        return templates.TemplateResponse("welcome.html", {"request": request})
+    except Exception as e:
+        # Fallback to simple HTML if template fails
+        return HTMLResponse(
+            content=f"""
+        <html>
+            <head><title>Welcome - Masonic AI Crypto Broker</title></head>
+            <body>
+                <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
+                <p>Your AI-powered crypto portfolio assistant</p>
+                <p><a href="/dashboard">View Full Dashboard</a></p>
+                <p><a href="/admin">Admin Panel</a></p>
+                <p><a href="/api/health">Health Check</a></p>
+                <p><a href="/docs">API Documentation</a></p>
+                <p><small>Template error: {str(e)}</small></p>
+            </body>
+        </html>
+        """
+        )
 
 @app.get("/dashboard")
 def smart_dashboard(request: Request):
