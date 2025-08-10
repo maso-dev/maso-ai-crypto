@@ -14,8 +14,12 @@ def run_command(cmd, description):
     """Run a command and return success status."""
     print(f"🔍 {description}...")
     try:
+        # Split command into list to avoid shell=True security issue
+        if isinstance(cmd, str):
+            cmd = cmd.split()
+        
         result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=30
+            cmd, shell=False, capture_output=True, text=True, timeout=30
         )
         if result.returncode == 0:
             print(f"✅ {description} - PASSED")
@@ -116,7 +120,7 @@ def check_git_status():
     print("🔍 Checking git status...")
     try:
         result = subprocess.run(
-            "git status --porcelain", shell=True, capture_output=True, text=True
+            ["git", "status", "--porcelain"], shell=False, capture_output=True, text=True
         )
         if result.stdout.strip():
             print("⚠️  There are uncommitted changes")

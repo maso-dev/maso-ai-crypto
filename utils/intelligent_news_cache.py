@@ -108,7 +108,7 @@ class IntelligentNewsCache:
     def _generate_query_hash(self, search_terms: List[str], hours_back: int) -> str:
         """Generate a unique hash for the query."""
         query_string = f"{','.join(sorted(search_terms))}:{hours_back}"
-        return hashlib.md5(query_string.encode()).hexdigest()
+        return hashlib.md5(query_string.encode(), usedforsecurity=False).hexdigest()
 
     def _get_cached_query(self, query_hash: str) -> Optional[CachedNewsQuery]:
         """Retrieve a cached query from database."""

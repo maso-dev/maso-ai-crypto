@@ -85,7 +85,7 @@ class RealCacheSystem:
         """Generate a unique cache key."""
         # Create a deterministic string from parameters
         param_str = json.dumps(params, sort_keys=True)
-        return hashlib.md5(f"{data_type}:{param_str}".encode()).hexdigest()
+        return hashlib.md5(f"{data_type}:{param_str}".encode(), usedforsecurity=False).hexdigest()
 
     def get(self, data_type: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Get data from cache."""
