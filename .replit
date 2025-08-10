@@ -1,34 +1,13 @@
-run = "python replit_startup.py"
-entrypoint = "replit_startup.py"
-
-[deployment]
-run = ["sh", "-c", "python replit_startup.py"]
-healthcheck = "/health"
-
-# Replit specific configuration
-[env]
-PYTHONPATH = "/home/runner/$REPL_SLUG"
-RELOAD = "false"
-PORT = "8000"
+modules = ["python-3.12", "web"]
+run = "uvicorn main:app --host 0.0.0.0 --port 3000"
 
 [nix]
-channel = "stable-23_11"
+channel = "stable-25_05"
+packages = ["bash", "libxcrypt"]
 
-[env]
-PYTHONPATH = "/home/runner/$REPL_SLUG"
-RELOAD = "false"
+[deployment]
+run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 3000"]
 
-[packager]
-language = "python3"
-ignoredPackages = ["unit_tests"]
-
-[packager.features]
-packageSearch = true
-guessImports = true
-
-[languages.python3]
-pattern = "**/*.py"
-syntax = "python"
-
-[languages.python3.languageServer]
-start = ["pylsp"]
+[[ports]]
+localPort = 3000
+externalPort = 80
