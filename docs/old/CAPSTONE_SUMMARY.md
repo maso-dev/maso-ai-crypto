@@ -154,7 +154,7 @@ class BinanceClient:
 ## 🚀 Deployment Status
 
 ### Ready for Production ✅
-- **Vercel Configuration**: `vercel.json` and `index.py` configured
+- **Replit Configuration**: `.replit` and `runtime.txt` configured
 - **Environment Variables**: All API keys optional with fallbacks
 - **Dependencies**: All packages in `requirements.txt`
 - **Error Handling**: Graceful degradation without API keys

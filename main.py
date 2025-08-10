@@ -2011,6 +2011,9 @@ if __name__ == "__main__":
 
     # Get port from environment (Replit sets this)
     port = int(os.environ.get("PORT", 8000))
+    
+    # Check if reload should be disabled (for testing)
+    reload_enabled = os.environ.get("RELOAD", "true").lower() != "false"
 
     print("🚀 Starting Masonic AI Capstone Server...")
     print("📊 Phase 1: Cache Reader Implementation")
@@ -2021,7 +2024,8 @@ if __name__ == "__main__":
     print(f"🌐 Server will be available at: http://0.0.0.0:{port}")
     print("📚 Cache endpoints: /api/cache/*")
     print("🎓 Capstone dashboard: /dashboard")
-    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
+    print(f"🔄 Reload mode: {'enabled' if reload_enabled else 'disabled'}")
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=reload_enabled)
 
 
 @app.get("/api/optimized-news")
