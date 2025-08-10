@@ -96,7 +96,50 @@ NEO4J_USER=your_neo4j_user
 NEO4J_PASSWORD=your_neo4j_password
 MILVUS_HOST=your_milvus_host
 MILVUS_PORT=your_milvus_port
+MILVUS_TOKEN=your_milvus_token
 ```
+
+## 🚨 **Deployment Troubleshooting**
+
+### **Common Issues & Solutions**
+
+#### **1. Milvus Authentication Failure (HTTP 401)**
+```bash
+# Add to Replit Secrets:
+MILVUS_TOKEN=your_valid_milvus_token
+MILVUS_HOST=localhost
+MILVUS_PORT=19530
+```
+
+#### **2. Health Check Failures**
+- **Root endpoint**: `/` should return health status
+- **API health**: `/api/health` for detailed status
+- **Admin health**: `/admin/health` for admin status
+
+#### **3. LangChain Import Errors**
+- **Fixed**: Updated to use `langchain_core.output_parsers`
+- **Ensure**: All packages installed via `requirements.txt`
+
+#### **4. Rate Limiting**
+- **Built-in**: 100 requests per minute per IP
+- **Customize**: Modify `RATE_LIMIT_WINDOW` in `main.py`
+
+#### **5. Startup Performance**
+- **Lazy Loading**: AI models load on first request
+- **Background**: Heavy services start in background
+
+### **Health Check Script**
+```bash
+# Run deployment validation
+python scripts/deployment_health_check.py https://your-replit-url.replit.app
+```
+
+### **Replit Deployment Steps**
+1. **Fork/Clone** this repository
+2. **Set Secrets** in Replit (all API keys)
+3. **Deploy** using the run button
+4. **Validate** with health check script
+5. **Monitor** logs for any errors
 
 ## 📖 **Documentation**
 

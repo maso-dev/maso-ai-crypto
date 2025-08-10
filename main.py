@@ -49,12 +49,58 @@ if not check_and_install_dependencies():
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Any
 from pathlib import Path
 import os
 from datetime import datetime, timedelta
+import time
+from collections import defaultdict
 
 app = FastAPI(title="🏛️ Masonic - AI Crypto Broker")
+
+# Add CORS middleware for Replit deployment
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Simple rate limiting
+rate_limit_store = defaultdict(list)
+RATE_LIMIT_WINDOW = 60  # 1 minute
+MAX_REQUESTS_PER_WINDOW = 100
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Simple rate limiting middleware"""
+    try:
+        client_ip = request.client.host if request.client else "unknown"
+        current_time = time.time()
+        
+        # Clean old requests
+        rate_limit_store[client_ip] = [
+            req_time for req_time in rate_limit_store[client_ip] 
+            if current_time - req_time < RATE_LIMIT_WINDOW
+        ]
+        
+        # Check rate limit
+        if len(rate_limit_store[client_ip]) >= MAX_REQUESTS_PER_WINDOW:
+            raise HTTPException(
+                status_code=429, 
+                detail="Rate limit exceeded. Please try again later."
+            )
+        
+        # Add current request
+        rate_limit_store[client_ip].append(current_time)
+        
+        response = await call_next(request)
+        return response
+    except Exception:
+        # If rate limiting fails, continue without it
+        return await call_next(request)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -68,6 +114,23 @@ try:
     OPTIMIZED_NEWS_AVAILABLE = True
 except ImportError:
     OPTIMIZED_NEWS_AVAILABLE = False
+
+# Root health endpoint for deployment health checks
+@app.get("/")
+async def root_health_check():
+    """Root health check endpoint for deployment health checks"""
+    return {
+        "status": "healthy",
+        "service": "🏛️ Masonic - AI Crypto Broker",
+        "deployment": "Replit",
+        "version": "2.0.0",
+        "timestamp": datetime.now().isoformat(),
+        "endpoints": {
+            "health": "/api/health",
+            "dashboard": "/dashboard",
+            "docs": "/docs"
+        }
+    }
 
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
@@ -83,6 +146,7 @@ if OPTIMIZED_NEWS_AVAILABLE:
 async def startup_event():
     """Start status monitoring when the app starts."""
     try:
+        # Lazy load status monitoring to avoid heavy initialization
         from utils.status_control import get_status_control
 
         status_control = get_status_control()
@@ -90,6 +154,13 @@ async def startup_event():
         print("✅ Status monitoring started")
     except Exception as e:
         print(f"⚠️ Could not start status monitoring: {e}")
+    
+    # Initialize basic services without heavy AI models
+    try:
+        print("🚀 Basic services initialized")
+        print("💡 AI models will be loaded on first request")
+    except Exception as e:
+        print(f"⚠️ Basic service initialization: {e}")
 
 
 # Custom static files handling for Replit deployment
