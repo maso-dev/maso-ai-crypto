@@ -84,6 +84,26 @@ python main.py
 - Web interfaces loading
 - Database connections stable
 
+### **Deployment Verification**
+After deploying to Replit, verify your deployment is working:
+
+```bash
+# Run the deployment verification script
+python scripts/replit_deployment_verification.py
+
+# Or test manually:
+curl http://localhost:3000/
+curl http://localhost:3000/api/health
+curl http://localhost:3000/docs
+```
+
+**Expected Results:**
+- ✅ Root endpoint (`/`) returns HTML website (welcome page)
+- ✅ Replit health endpoint (`/health`) returns JSON for deployment validation
+- ✅ API health endpoint (`/api/health`) shows environment variables
+- ✅ API docs (`/docs`) loads FastAPI documentation
+- ✅ Dashboard (`/dashboard`) accessible
+
 ## 🧠 **Qdrant Vector Database Integration**
 
 **✅ FULLY OPERATIONAL**

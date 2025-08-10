@@ -126,10 +126,10 @@ except ImportError:
     OPTIMIZED_NEWS_AVAILABLE = False
 
 
-# Root endpoint - Welcome page with dashboard
+# Root endpoint - Simple health check for Replit deployment
 @app.get("/")
 async def root(request: Request):
-    """Root welcome page - shows market overview and opportunities"""
+    """Root endpoint - Welcome page for users visiting the site"""
     try:
         return templates.TemplateResponse("welcome.html", {"request": request})
     except Exception as e:
@@ -150,6 +150,24 @@ async def root(request: Request):
         </html>
         """
         )
+
+
+# Replit health check endpoint (for deployment validation)
+@app.get("/health")
+async def replit_health_check():
+    """Replit health check endpoint - simple JSON response for deployment validation"""
+    return {
+        "status": "healthy",
+        "service": "crypto-broker-ai",
+        "timestamp": datetime.utcnow().isoformat(),
+        "message": "Masonic AI Crypto Broker is running",
+        "endpoints": {
+            "health": "/api/health",
+            "dashboard": "/dashboard",
+            "docs": "/docs",
+            "admin": "/admin",
+        },
+    }
 
 
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
@@ -227,10 +245,12 @@ async def detailed_health_check():
             "binance_key_set": bool(os.getenv("BINANCE_API_KEY")),
             "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
             "news_key_set": bool(os.getenv("NEWSAPI_KEY")),
+            "tavily_key_set": bool(os.getenv("TAVILY_API_KEY")),
             "milvus_token_set": bool(os.getenv("MILVUS_TOKEN")),
-            "neo4j_configured": bool(os.getenv("NEO4J_URI")),
+            "neo4j_uri_set": bool(os.getenv("NEO4J_URI")),
+            "qdrant_url_set": bool(os.getenv("QDRANT_URL")),
         },
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
@@ -960,31 +980,6 @@ async def test_news_quality():
 
     except Exception as e:
         return {"test_results": [], "status": "error", "error": str(e)}
-
-
-@app.get("/welcome")
-async def welcome_page(request: Request):
-    """Welcome page with full dashboard functionality"""
-    try:
-        return templates.TemplateResponse("welcome.html", {"request": request})
-    except Exception as e:
-        # Fallback to simple HTML if template fails
-        return HTMLResponse(
-            content=f"""
-        <html>
-            <head><title>Welcome - Masonic AI Crypto Broker</title></head>
-            <body>
-                <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
-                <p>Your AI-powered crypto portfolio assistant</p>
-                <p><a href="/dashboard">View Full Dashboard</a></p>
-                <p><a href="/admin">Admin Panel</a></p>
-                <p><a href="/api/health">Health Check</a></p>
-                <p><a href="/docs">API Documentation</a></p>
-                <p><small>Template error: {str(e)}</small></p>
-            </body>
-        </html>
-        """
-        )
 
 
 @app.get("/dashboard")
