@@ -120,20 +120,28 @@ except ImportError:
 
 # Root endpoint - Welcome page with dashboard
 @app.get("/")
-async def root():
-    """Simple health check endpoint for deployment"""
-    return {
-        "status": "healthy", 
-        "service": "🏛️ Masonic AI Crypto Broker",
-        "version": "2.0.0",
-        "timestamp": datetime.now().isoformat(),
-        "endpoints": {
-            "dashboard": "/dashboard",
-            "admin": "/admin", 
-            "health": "/api/health",
-            "docs": "/docs"
-        }
-    }
+async def root(request: Request):
+    """Root welcome page - shows market overview and opportunities"""
+    try:
+        return templates.TemplateResponse("welcome.html", {"request": request})
+    except Exception as e:
+        # Fallback to simple HTML if template fails
+        return HTMLResponse(
+            content=f"""
+        <html>
+            <head><title>Welcome - Masonic AI Crypto Broker</title></head>
+            <body>
+                <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
+                <p>Your AI-powered crypto portfolio assistant</p>
+                <p><a href="/dashboard">View Full Dashboard</a></p>
+                <p><a href="/admin">Admin Panel</a></p>
+                <p><a href="/api/health">Health Check</a></p>
+                <p><a href="/docs">API Documentation</a></p>
+                <p><small>Template error: {str(e)}</small></p>
+            </body>
+        </html>
+        """
+        )
 
 
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
@@ -1012,15 +1020,13 @@ def smart_dashboard(request: Request):
             f"🏛️ Smart Dashboard: Using {data_mode.upper()} data - showing main dashboard"
         )
         return templates.TemplateResponse(
-            "dashboard.html",
-            {"request": request, "data_mode": data_mode, "api_status": api_status},
+            "dashboard.html", {"request": request, "data_mode": data_mode, "api_status": api_status}
         )
 
     except Exception as e:
         print(f"🏛️ Smart Dashboard Error: {e} - showing main dashboard with error mode")
         return templates.TemplateResponse(
-            "dashboard.html",
-            {"request": request, "data_mode": "error", "api_status": "error"},
+            "dashboard.html", {"request": request, "data_mode": "error", "api_status": "error"}
         )
 
 
@@ -1029,8 +1035,7 @@ def smart_dashboard(request: Request):
 def portfolio_page(request: Request):
     """Portfolio page - redirects to dashboard for now"""
     return templates.TemplateResponse(
-        "dashboard.html",
-        {"request": request, "data_mode": "demo", "api_status": "demo"},
+        "dashboard.html", {"request": request, "data_mode": "demo", "api_status": "demo"}
     )
 
 
