@@ -20,7 +20,7 @@ The **Masonic AI Crypto Broker** has successfully completed all capstone project
 
 ### **3. Deployment Complexity - ✅ COMPLETE**
 - **Enhanced Documentation**: `docs/deployment/DEPLOYMENT_CHECKLIST.md`
-- **Multiple Options**: Vercel, Docker, Traditional Server deployment
+- **Multiple Options**: Replit, Docker, Traditional Server deployment
 - **Step-by-Step**: Clear instructions for each deployment method
 - **Troubleshooting**: Comprehensive guide for common issues
 
@@ -45,7 +45,7 @@ The **Masonic AI Crypto Broker** has successfully completed all capstone project
 ## **🚀 READY FOR DEPLOYMENT**
 
 ### **Deployment Options Available**
-1. **Vercel (Recommended)**: Serverless deployment with auto-scaling
+1. **Replit (Recommended)**: One-click deployment with integrated environment
 2. **Docker**: Containerized deployment with docker-compose
 3. **Traditional Server**: Nginx + systemd service setup
 

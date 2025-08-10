@@ -85,7 +85,7 @@ async def startup_event():
         print(f"⚠️ Could not start status monitoring: {e}")
 
 
-# Custom static files handling for Vercel (similar to working example)
+# Custom static files handling for Replit deployment
 @app.get("/static/{path:path}")
 async def static_files(path: str):
     """Serve static files"""
@@ -106,11 +106,11 @@ async def favicon():
 
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint for Vercel deployment"""
+    """Health check endpoint for Replit deployment"""
     return {
         "status": "healthy",
         "service": "🏛️ Masonic - Alpha Strategy Advisor",
-        "deployment": "Vercel",
+        "deployment": "Replit",
         "version": "2.0.0",
         "environment_vars": {
             "binance_key_set": bool(os.getenv("BINANCE_API_KEY")),
