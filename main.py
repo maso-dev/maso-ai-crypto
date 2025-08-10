@@ -2011,7 +2011,7 @@ if __name__ == "__main__":
 
     # Get port from environment (Replit sets this)
     port = int(os.environ.get("PORT", 8000))
-    
+
     # Check if reload should be disabled (for testing)
     reload_enabled = os.environ.get("RELOAD", "true").lower() != "false"
 
