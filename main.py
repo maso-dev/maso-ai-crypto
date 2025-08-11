@@ -190,81 +190,117 @@ def include_routers():
     """Lazy load routers to prevent startup delays"""
     if "routers_loaded" not in _router_cache:
         try:
-            from routers import admin, cache_readers, brain_enhanced, status_control
+            # Import each router individually with error handling
+            try:
+                from routers import admin
+                app.include_router(admin.router, prefix="/admin", tags=["admin"])
+                print("✅ Admin router loaded")
+            except Exception as e:
+                print(f"⚠️ Admin router failed: {e}")
             
-            app.include_router(admin.router, prefix="/admin", tags=["admin"])
-            app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
-            app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
-            app.include_router(status_control.router, prefix="/status", tags=["status"])
+            try:
+                from routers import cache_readers
+                app.include_router(cache_readers.router, prefix="/api/cache", tags=["cache"])
+                print("✅ Cache readers router loaded")
+            except Exception as e:
+                print(f"⚠️ Cache readers router failed: {e}")
+            
+            try:
+                from routers import brain_enhanced
+                app.include_router(brain_enhanced.router, prefix="/brain", tags=["brain"])
+                print("✅ Brain enhanced router loaded")
+            except Exception as e:
+                print(f"⚠️ Brain enhanced router failed: {e}")
+            
+            try:
+                from routers import status_control
+                app.include_router(status_control.router, prefix="/status", tags=["status"])
+                print("✅ Status control router loaded")
+            except Exception as e:
+                print(f"⚠️ Status control router failed: {e}")
             
             # Try to import enhanced hybrid RAG router
             try:
                 from routers import enhanced_hybrid_router
                 app.include_router(enhanced_hybrid_router.router, tags=["enhanced-hybrid-rag"])
                 _router_cache["enhanced_hybrid"] = True
-            except ImportError:
+                print("✅ Enhanced hybrid RAG router loaded")
+            except Exception as e:
                 _router_cache["enhanced_hybrid"] = False
+                print(f"⚠️ Enhanced hybrid RAG router failed: {e}")
 
             # Try to import optimized news router (temporal optimization)
             try:
                 from routers import optimized_news
                 app.include_router(optimized_news.router, prefix="/api", tags=["optimized-news"])
                 _router_cache["optimized_news"] = True
-            except ImportError:
+                print("✅ Optimized news router loaded")
+            except Exception as e:
                 _router_cache["optimized_news"] = False
+                print(f"⚠️ Optimized news router failed: {e}")
                 
             _router_cache["routers_loaded"] = True
-            print("✅ Routers loaded successfully")
+            print("✅ All available routers loaded successfully")
             
         except Exception as e:
-            print(f"⚠️ Could not load routers: {e}")
+            print(f"⚠️ Router loading failed: {e}")
             _router_cache["routers_loaded"] = False
 
 
 @app.on_event("startup")
 async def startup_event():
     """Start status monitoring when the app starts."""
-    # Start basic services immediately
+    # Start basic services immediately - NO external service imports
     try:
         print("🚀 Basic services initialized")
-        print("💡 Routers and AI models will be loaded on first request")
+        print("💡 External services will be loaded on first request")
+        print("🔒 No external API calls during startup")
+        print("✅ App is ready for health checks and user requests")
+        print("⏰ External services will initialize in 60+ seconds (capstone deployment)")
         
-        # Load routers in background to prevent blocking startup
-        asyncio.create_task(load_routers_background())
+        # NO background tasks that could import external services
+        # Everything will be truly lazy-loaded on first request
         
     except Exception as e:
         print(f"⚠️ Basic service initialization: {e}")
 
-    # Move expensive status monitoring to background task
-    async def start_status_monitoring_background():
-        """Background task to start status monitoring without blocking startup"""
+    # Move ALL external service initialization to background task with much longer delay
+    async def start_external_services_background():
+        """Background task to start external services without blocking startup"""
         try:
-            await asyncio.sleep(5)  # Wait 5 seconds for app to be fully ready
-            from utils.status_control import get_status_control
-
-            status_control = get_status_control()
-            status_control.start_monitoring()
-            print("✅ Status monitoring started in background")
-
-            # Enable full monitoring after app is stable (30 seconds)
-            await asyncio.sleep(25)
-            status_control.enable_full_monitoring()
-            print("🚀 Full monitoring mode enabled")
+            # Wait much longer to ensure app is fully stable - capstone deployment
+            await asyncio.sleep(60)  # Wait 1 minute for app to be fully ready
+            
+            print("🔄 Starting external service initialization...")
+            
+            # Try to load routers (this may trigger external service imports)
+            try:
+                await asyncio.sleep(10)  # Additional delay
+                include_routers()
+                print("✅ Routers loaded successfully")
+            except Exception as e:
+                print(f"⚠️ Router loading failed: {e}")
+            
+            # Try to start status monitoring
+            try:
+                await asyncio.sleep(10)  # Additional delay
+                from utils.status_control import get_status_control
+                status_control = get_status_control()
+                status_control.start_monitoring()
+                print("✅ Status monitoring started in background")
+            except Exception as e:
+                print(f"⚠️ Status monitoring failed: {e}")
+            
+            print("🚀 External services initialization completed")
 
         except Exception as e:
-            print(f"⚠️ Could not start status monitoring: {e}")
+            print(f"⚠️ External services initialization failed: {e}")
 
-    # Start background task without blocking
-    asyncio.create_task(start_status_monitoring_background())
+    # Start background task without blocking - much longer delay for capstone
+    asyncio.create_task(start_external_services_background())
 
 
-async def load_routers_background():
-    """Load routers in background to prevent blocking startup"""
-    try:
-        await asyncio.sleep(1)  # Small delay to ensure app is ready
-        include_routers()
-    except Exception as e:
-        print(f"⚠️ Background router loading failed: {e}")
+
 
 
 # Custom static files handling for Replit deployment
