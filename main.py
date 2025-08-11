@@ -120,32 +120,54 @@ def is_health_check_request(request: Request) -> bool:
     return False
 
 
-# Root endpoint - Simple health check for Replit deployment
+# Root endpoint - Ultra-fast static HTML for Replit deployment
 @app.get("/")
 async def root(request: Request):
     """Root endpoint - Welcome page for users visiting the site"""
-    # Always return HTML for the root endpoint - health checks should use /health or /replit-health
-    try:
-        return get_templates().TemplateResponse("welcome.html", {"request": request})
-    except Exception as e:
-        # Fallback to simple HTML if template fails
-        return HTMLResponse(
-            content=f"""
+    # Return static HTML immediately - no template processing for health checks
+    # This ensures Replit health checks pass instantly without any delays
+    return HTMLResponse(
+        content="""
         <html>
-            <head><title>Welcome - Masonic AI Crypto Broker</title></head>
+            <head>
+                <title>Welcome - Masonic AI Crypto Broker</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    h1 { color: #2c3e50; text-align: center; }
+                    .nav-links { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 30px 0; }
+                    .nav-links a { background: #3498db; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; transition: background 0.3s; }
+                    .nav-links a:hover { background: #2980b9; }
+                    .status { background: #27ae60; color: white; padding: 10px; border-radius: 5px; text-align: center; margin: 20px 0; }
+                </style>
+            </head>
             <body>
-                <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
-                <p>Your AI-powered crypto portfolio assistant</p>
-                <p><a href="/dashboard">View Full Dashboard</a></p>
-                <p><a href="/admin">Admin Panel</a></p>
-                <p><a href="/health">Health Check</a></p>
-                <p><a href="/replit-health">Replit Health</a></p>
-                <p><a href="/docs">API Documentation</a></p>
-                <p><small>Template error: {str(e)}</small></p>
+                <div class="container">
+                    <h1>🚀 Welcome to Masonic AI Crypto Broker</h1>
+                    <p style="text-align: center; font-size: 18px; color: #7f8c8d;">Your AI-powered crypto portfolio assistant</p>
+                    
+                    <div class="status">
+                        ✅ Service is running and healthy
+                    </div>
+                    
+                    <div class="nav-links">
+                        <a href="/dashboard">📊 View Full Dashboard</a>
+                        <a href="/admin">⚙️ Admin Panel</a>
+                        <a href="/health">🔍 Health Check</a>
+                        <a href="/replit-health">🏥 Replit Health</a>
+                        <a href="/docs">📚 API Documentation</a>
+                    </div>
+                    
+                    <p style="text-align: center; color: #95a5a6; margin-top: 30px;">
+                        <small>Masonic AI Crypto Broker - Capstone Project</small>
+                    </p>
+                </div>
             </body>
         </html>
         """
-        )
+    )
 
 
 # Replit health check endpoint (for deployment validation)
