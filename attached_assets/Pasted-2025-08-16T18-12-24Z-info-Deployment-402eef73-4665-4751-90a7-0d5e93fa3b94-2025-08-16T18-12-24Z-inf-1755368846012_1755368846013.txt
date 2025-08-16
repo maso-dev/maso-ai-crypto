@@ -1,0 +1,275 @@
+2025-08-16T18:12:24Z info: Deployment: 402eef73-4665-4751-90a7-0d5e93fa3b94
+2025-08-16T18:12:24Z info: Build: 3823d73e-6637-4ae8-a133-3e6b518f1d29
+2025-08-16T18:12:24Z info: Connecting to builder
+2025-08-16T18:12:26Z info: Builder connected
+2025-08-16T18:12:29Z info: Installing packages
+--> pip install -r requirements.txt
+
+Requirement already satisfied: fastapi>=0.104.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 2)) (0.116.1)
+
+Requirement already satisfied: uvicorn>=0.24.0 in ./.pythonlibs/lib/python3.11/site-packages (from uvicorn[standard]>=0.24.0->-r requirements.txt (line 3)) (0.35.0)
+
+Requirement already satisfied: jinja2>=3.1.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 4)) (3.1.6)
+
+Requirement already satisfied: httpx>=0.25.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 7)) (0.28.1)
+
+Requirement already satisfied: aiohttp>=3.9.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 8)) (3.12.15)
+
+Requirement already satisfied: websockets>=12.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 9)) (15.0.1)
+
+Requirement already satisfied: pydantic>=2.5.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 12)) (2.11.7)
+
+Requirement already satisfied: python-dateutil>=2.8.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 13)) (2.9.0.post0)
+
+Requirement already satisfied: pytz>=2023.3 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 14)) (2025.2)
+
+Requirement already satisfied: openai>=1.3.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 17)) (1.99.3)
+
+Requirement already satisfied: langchain>=0.1.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 18)) (0.3.27)
+
+Requirement already satisfied: langchain-openai>=0.0.5 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 19)) (0.3.28)
+
+Requirement already satisfied: langchain-core>=0.1.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 20)) (0.3.74)
+
+Requirement already satisfied: langgraph>=0.0.20 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 21)) (0.6.4)
+
+Collecting qdrant-client>=1.7.0 (from -r requirements.txt (line 24))
+
+  Using cached qdrant_client-1.15.1-py3-none-any.whl.metadata (11 kB)
+
+Requirement already satisfied: pymilvus>=2.3.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 25)) (2.6.0)
+
+Requirement already satisfied: neo4j>=5.15.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 28)) (5.28.2)
+
+Requirement already satisfied: python-binance>=1.0.19 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 31)) (1.0.29)
+
+Requirement already satisfied: newsapi-python>=0.2.6 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 32)) (0.2.7)
+
+Requirement already satisfied: tavily-python>=0.3.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 33)) (0.7.10)
+
+Requirement already satisfied: python-dotenv>=1.0.0 in ./.pythonlibs/lib/python3.11/site-packages (from -r requirements.txt (line 36)) (1.1.1)
+
+Collecting pytest>=7.4.0 (from -r requirements.txt (line 39))
+
+  Using cached pytest-8.4.1-py3-none-any.whl.metadata (7.7 kB)
+
+Collecting black>=23.0.0 (from -r requirements.txt (line 40))
+
+  Downloading black-25.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (81 kB)
+
+Requirement already satisfied: starlette<0.48.0,>=0.40.0 in ./.pythonlibs/lib/python3.11/site-packages (from fastapi>=0.104.0->-r requirements.txt (line 2)) (0.47.2)
+
+Requirement already satisfied: typing-extensions>=4.8.0 in ./.pythonlibs/lib/python3.11/site-packages (from fastapi>=0.104.0->-r requirements.txt (line 2)) (4.14.1)
+
+Requirement already satisfied: click>=7.0 in ./.pythonlibs/lib/python3.11/site-packages (from uvicorn>=0.24.0->uvicorn[standard]>=0.24.0->-r requirements.txt (line 3)) (8.2.1)
+
+Requirement already satisfied: h11>=0.8 in ./.pythonlibs/lib/python3.11/site-packages (from uvicorn>=0.24.0->uvicorn[standard]>=0.24.0->-r requirements.txt (line 3)) (0.16.0)
+
+Requirement already satisfied: MarkupSafe>=2.0 in ./.pythonlibs/lib/python3.11/site-packages (from jinja2>=3.1.0->-r requirements.txt (line 4)) (3.0.2)
+
+Requirement already satisfied: anyio in ./.pythonlibs/lib/python3.11/site-packages (from httpx>=0.25.0->-r requirements.txt (line 7)) (4.10.0)
+
+Requirement already satisfied: certifi in ./.pythonlibs/lib/python3.11/site-packages (from httpx>=0.25.0->-r requirements.txt (line 7)) (2025.8.3)
+
+Requirement already satisfied: httpcore==1.* in ./.pythonlibs/lib/python3.11/site-packages (from httpx>=0.25.0->-r requirements.txt (line 7)) (1.0.9)
+
+Requirement already satisfied: idna in ./.pythonlibs/lib/python3.11/site-packages (from httpx>=0.25.0->-r requirements.txt (line 7)) (3.10)
+
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (2.6.1)
+
+Requirement already satisfied: aiosignal>=1.4.0 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (1.4.0)
+
+Requirement already satisfied: attrs>=17.3.0 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (25.3.0)
+
+Requirement already satisfied: frozenlist>=1.1.1 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (1.7.0)
+
+Requirement already satisfied: multidict<7.0,>=4.5 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (6.6.3)
+
+Requirement already satisfied: propcache>=0.2.0 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (0.3.2)
+
+Requirement already satisfied: yarl<2.0,>=1.17.0 in ./.pythonlibs/lib/python3.11/site-packages (from aiohttp>=3.9.0->-r requirements.txt (line 8)) (1.20.1)
+
+Requirement already satisfied: annotated-types>=0.6.0 in ./.pythonlibs/lib/python3.11/site-packages (from pydantic>=2.5.0->-r requirements.txt (line 12)) (0.7.0)
+
+Requirement already satisfied: pydantic-core==2.33.2 in ./.pythonlibs/lib/python3.11/site-packages (from pydantic>=2.5.0->-r requirements.txt (line 12)) (2.33.2)
+
+Requirement already satisfied: typing-inspection>=0.4.0 in ./.pythonlibs/lib/python3.11/site-packages (from pydantic>=2.5.0->-r requirements.txt (line 12)) (0.4.1)
+
+Requirement already satisfied: six>=1.5 in ./.pythonlibs/lib/python3.11/site-packages (from python-dateutil>=2.8.0->-r requirements.txt (line 13)) (1.17.0)
+
+Requirement already satisfied: distro<2,>=1.7.0 in ./.pythonlibs/lib/python3.11/site-packages (from openai>=1.3.0->-r requirements.txt (line 17)) (1.9.0)
+
+Requirement already satisfied: jiter<1,>=0.4.0 in ./.pythonlibs/lib/python3.11/site-packages (from openai>=1.3.0->-r requirements.txt (line 17)) (0.10.0)
+
+Requirement already satisfied: sniffio in ./.pythonlibs/lib/python3.11/site-packages (from openai>=1.3.0->-r requirements.txt (line 17)) (1.3.1)
+
+Requirement already satisfied: tqdm>4 in ./.pythonlibs/lib/python3.11/site-packages (from openai>=1.3.0->-r requirements.txt (line 17)) (4.67.1)
+
+Requirement already satisfied: langchain-text-splitters<1.0.0,>=0.3.9 in ./.pythonlibs/lib/python3.11/site-packages (from langchain>=0.1.0->-r requirements.txt (line 18)) (0.3.9)
+
+Requirement already satisfied: langsmith>=0.1.17 in ./.pythonlibs/lib/python3.11/site-packages (from langchain>=0.1.0->-r requirements.txt (line 18)) (0.4.13)
+
+Requirement already satisfied: SQLAlchemy<3,>=1.4 in ./.pythonlibs/lib/python3.11/site-packages (from langchain>=0.1.0->-r requirements.txt (line 18)) (2.0.42)
+
+Requirement already satisfied: requests<3,>=2 in ./.pythonlibs/lib/python3.11/site-packages (from langchain>=0.1.0->-r requirements.txt (line 18)) (2.32.4)
+
+Requirement already satisfied: PyYAML>=5.3 in ./.pythonlibs/lib/python3.11/site-packages (from langchain>=0.1.0->-r requirements.txt (line 18)) (6.0.2)
+
+Requirement already satisfied: tiktoken<1,>=0.7 in ./.pythonlibs/lib/python3.11/site-packages (from langchain-openai>=0.0.5->-r requirements.txt (line 19)) (0.10.0)
+
+Requirement already satisfied: tenacity!=8.4.0,<10.0.0,>=8.1.0 in ./.pythonlibs/lib/python3.11/site-packages (from langchain-core>=0.1.0->-r requirements.txt (line 20)) (9.1.2)
+
+Requirement already satisfied: jsonpatch<2.0,>=1.33 in ./.pythonlibs/lib/python3.11/site-packages (from langchain-core>=0.1.0->-r requirements.txt (line 20)) (1.33)
+
+Requirement already satisfied: packaging>=23.2 in ./.pythonlibs/lib/python3.11/site-packages (from langchain-core>=0.1.0->-r requirements.txt (line 20)) (25.0)
+
+Requirement already satisfied: langgraph-checkpoint<3.0.0,>=2.1.0 in ./.pythonlibs/lib/python3.11/site-packages (from langgraph>=0.0.20->-r requirements.txt (line 21)) (2.1.1)
+
+Requirement already satisfied: langgraph-prebuilt<0.7.0,>=0.6.0 in ./.pythonlibs/lib/python3.11/site-packages (from langgraph>=0.0.20->-r requirements.txt (line 21)) (0.6.4)
+
+Requirement already satisfied: langgraph-sdk<0.3.0,>=0.2.0 in ./.pythonlibs/lib/python3.11/site-packages (from langgraph>=0.0.20->-r requirements.txt (line 21)) (0.2.0)
+
+Requirement already satisfied: xxhash>=3.5.0 in ./.pythonlibs/lib/python3.11/site-packages (from langgraph>=0.0.20->-r requirements.txt (line 21)) (3.5.0)
+
+Requirement already satisfied: grpcio>=1.41.0 in ./.pythonlibs/lib/python3.11/site-packages (from qdrant-client>=1.7.0->-r requirements.txt (line 24)) (1.74.0)
+
+Requirement already satisfied: numpy>=1.21 in ./.pythonlibs/lib/python3.11/site-packages (from qdrant-client>=1.7.0->-r requirements.txt (line 24)) (2.3.2)
+
+Collecting portalocker<4.0,>=2.7.0 (from qdrant-client>=1.7.0->-r requirements.txt (line 24))
+
+  Using cached portalocker-3.2.0-py3-none-any.whl.metadata (8.7 kB)
+
+Requirement already satisfied: protobuf>=3.20.0 in ./.pythonlibs/lib/python3.11/site-packages (from qdrant-client>=1.7.0->-r requirements.txt (line 24)) (6.31.1)
+
+Requirement already satisfied: urllib3<3,>=1.26.14 in ./.pythonlibs/lib/python3.11/site-packages (from qdrant-client>=1.7.0->-r requirements.txt (line 24)) (2.5.0)
+
+Requirement already satisfied: setuptools>69 in /nix/store/y0iwy8ma2m45pr23bw4r7lyz69v2b6wf-python3.11-setuptools-80.7.1/lib/python3.11/site-packages (from pymilvus>=2.3.0->-r requirements.txt (line 25)) (80.7.1.post0)
+
+Requirement already satisfied: ujson>=2.0.0 in ./.pythonlibs/lib/python3.11/site-packages (from pymilvus>=2.3.0->-r requirements.txt (line 25)) (5.10.0)
+
+Requirement already satisfied: pandas>=1.2.4 in ./.pythonlibs/lib/python3.11/site-packages (from pymilvus>=2.3.0->-r requirements.txt (line 25)) (2.3.1)
+
+Requirement already satisfied: milvus-lite>=2.4.0 in ./.pythonlibs/lib/python3.11/site-packages (from pymilvus>=2.3.0->-r requirements.txt (line 25)) (2.5.1)
+
+Requirement already satisfied: dateparser in ./.pythonlibs/lib/python3.11/site-packages (from python-binance>=1.0.19->-r requirements.txt (line 31)) (1.2.2)
+
+Requirement already satisfied: pycryptodome in ./.pythonlibs/lib/python3.11/site-packages (from python-binance>=1.0.19->-r requirements.txt (line 31)) (3.23.0)
+
+Collecting iniconfig>=1 (from pytest>=7.4.0->-r requirements.txt (line 39))
+
+  Using cached iniconfig-2.1.0-py3-none-any.whl.metadata (2.7 kB)
+
+Collecting pluggy<2,>=1.5 (from pytest>=7.4.0->-r requirements.txt (line 39))
+
+  Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+
+Collecting pygments>=2.7.2 (from pytest>=7.4.0->-r requirements.txt (line 39))
+
+  Using cached pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+
+Collecting mypy-extensions>=0.4.3 (from black>=23.0.0->-r requirements.txt (line 40))
+
+  Using cached mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+
+Collecting pathspec>=0.9.0 (from black>=23.0.0->-r requirements.txt (line 40))
+
+  Using cached pathspec-0.12.1-py3-none-any.whl.metadata (21 kB)
+
+Collecting platformdirs>=2 (from black>=23.0.0->-r requirements.txt (line 40))
+
+  Using cached platformdirs-4.3.8-py3-none-any.whl.metadata (12 kB)
+
+Requirement already satisfied: httptools>=0.6.3 in ./.pythonlibs/lib/python3.11/site-packages (from uvicorn[standard]>=0.24.0->-r requirements.txt (line 3)) (0.6.4)
+
+Requirement already satisfied: uvloop>=0.15.1 in ./.pythonlibs/lib/python3.11/site-packages (from uvicorn[standard]>=0.24.0->-r requirements.txt (line 3)) (0.21.0)
+
+Requirement already satisfied: watchfiles>=0.13 in ./.pythonlibs/lib/python3.11/site-packages (from uvicorn[standard]>=0.24.0->-r requirements.txt (line 3)) (1.1.0)
+
+Collecting h2<5,>=3 (from httpx[http2]>=0.20.0->qdrant-client>=1.7.0->-r requirements.txt (line 24))
+
+  Using cached h2-4.2.0-py3-none-any.whl.metadata (5.1 kB)
+
+Requirement already satisfied: jsonpointer>=1.9 in ./.pythonlibs/lib/python3.11/site-packages (from jsonpatch<2.0,>=1.33->langchain-core>=0.1.0->-r requirements.txt (line 20)) (3.0.0)
+
+Requirement already satisfied: ormsgpack>=1.10.0 in ./.pythonlibs/lib/python3.11/site-packages (from langgraph-checkpoint<3.0.0,>=2.1.0->langgraph>=0.0.20->-r requirements.txt (line 21)) (1.10.0)
+
+Requirement already satisfied: orjson>=3.10.1 in ./.pythonlibs/lib/python3.11/site-packages (from langgraph-sdk<0.3.0,>=0.2.0->langgraph>=0.0.20->-r requirements.txt (line 21)) (3.11.1)
+
+Requirement already satisfied: requests-toolbelt>=1.0.0 in ./.pythonlibs/lib/python3.11/site-packages (from langsmith>=0.1.17->langchain>=0.1.0->-r requirements.txt (line 18)) (1.0.0)
+
+Requirement already satisfied: zstandard>=0.23.0 in ./.pythonlibs/lib/python3.11/site-packages (from langsmith>=0.1.17->langchain>=0.1.0->-r requirements.txt (line 18)) (0.23.0)
+
+Requirement already satisfied: tzdata>=2022.7 in ./.pythonlibs/lib/python3.11/site-packages (from pandas>=1.2.4->pymilvus>=2.3.0->-r requirements.txt (line 25)) (2025.2)
+
+Requirement already satisfied: charset_normalizer<4,>=2 in ./.pythonlibs/lib/python3.11/site-packages (from requests<3,>=2->langchain>=0.1.0->-r requirements.txt (line 18)) (3.4.2)
+
+Requirement already satisfied: greenlet>=1 in ./.pythonlibs/lib/python3.11/site-packages (from SQLAlchemy<3,>=1.4->langchain>=0.1.0->-r requirements.txt (line 18)) (3.2.4)
+
+Requirement already satisfied: regex>=2022.1.18 in ./.pythonlibs/lib/python3.11/site-packages (from tiktoken<1,>=0.7->langchain-openai>=0.0.5->-r requirements.txt (line 19)) (2025.7.34)
+
+Requirement already satisfied: tzlocal>=0.2 in ./.pythonlibs/lib/python3.11/site-packages (from dateparser->python-binance>=1.0.19->-r requirements.txt (line 31)) (5.3.1)
+
+Collecting hyperframe<7,>=6.1 (from h2<5,>=3->httpx[http2]>=0.20.0->qdrant-client>=1.7.0->-r requirements.txt (line 24))
+
+  Using cached hyperframe-6.1.0-py3-none-any.whl.metadata (4.3 kB)
+
+Collecting hpack<5,>=4.1 (from h2<5,>=3->httpx[http2]>=0.20.0->qdrant-client>=1.7.0->-r requirements.txt (line 24))
+
+  Using cached hpack-4.1.0-py3-none-any.whl.metadata (4.6 kB)
+
+Using cached qdrant_client-1.15.1-py3-none-any.whl (337 kB)
+
+Using cached pytest-8.4.1-py3-none-any.whl (365 kB)
+
+Downloading black-25.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 32.7 MB/s eta 0:00:00
+Using cached iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+
+Using cached mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+
+Using cached pathspec-0.12.1-py3-none-any.whl (31 kB)
+
+Downloading platformdirs-4.3.8-py3-none-any.whl (18 kB)
+
+Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+
+Using cached portalocker-3.2.0-py3-none-any.whl (22 kB)
+
+Using cached pygments-2.19.2-py3-none-any.whl (1.2 MB)
+
+Using cached h2-4.2.0-py3-none-any.whl (60 kB)
+
+Using cached hpack-4.1.0-py3-none-any.whl (34 kB)
+
+Using cached hyperframe-6.1.0-py3-none-any.whl (13 kB)
+
+Installing collected packages: pygments, portalocker, pluggy, platformdirs, pathspec, mypy-extensions, iniconfig, hyperframe, hpack, pytest, h2, black, qdrant-client
+
+Successfully installed black-25.1.0 h2-4.2.0 hpack-4.1.0 hyperframe-6.1.0 iniconfig-2.1.0 mypy-extensions-1.1.0 pathspec-0.12.1 platformdirs-4.3.8 pluggy-1.6.0 portalocker-3.2.0 pygments-2.19.2 pytest-8.4.1 qdrant-client-1.15.1
+
+2025-08-16T18:12:45Z info: Skipping Build as no Build command set
+2025-08-16T18:12:45Z info: Pushing pid1 binary layer...
+2025-08-16T18:12:46Z info: Created pid1 binary layer
+2025-08-16T18:12:48Z info: Pushing Repl layer...
+2025-08-16T18:12:48Z info: Pushing hosting layer...
+2025-08-16T18:12:48Z info: Retrieved cached nix layer
+2025-08-16T18:12:48Z info: Created hosting layer
+2025-08-16T18:13:48Z info: Created Repl layer
+2025-08-16T18:13:48Z info: Pushing Repl (cache) layer...
+2025-08-16T18:13:49Z info: Created Repl (cache) layer
+2025-08-16T18:13:49Z info: Pushed image manifest
+2025-08-16T18:13:50Z info: Pushed soci index manifest
+2025-08-16T18:13:53Z info: Creating Autoscale service
+starting up user application
+forwarding local port 8000 to external port 80 (mapped as 1104)
+INFO:     Application startup complete.
+INFO:     Waiting for application startup.
+INFO:     Started server process [27]
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT news_id IF NOT EXISTS FOR (e:NewsArticle) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT news_id FOR (e:NewsArticle) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT news_id IF NOT EXISTS FOR (n:NewsArticle) REQUIRE n.id IS UNIQUE'
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT symbol_name IF NOT EXISTS FOR (e:CryptoSymbol) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT symbol_name FOR (e:CryptoSymbol) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT symbol_name IF NOT EXISTS FOR (s:CryptoSymbol) REQUIRE s.name IS UNIQUE'
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT entity_name IF NOT EXISTS FOR (e:Entity) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT entity_name FOR (e:Entity) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT entity_name IF NOT EXISTS FOR (e:Entity) REQUIRE e.name IS UNIQUE'
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX news_title IF NOT EXISTS FOR (e:NewsArticle) ON (e.title)` has no effect.} {description: `RANGE INDEX news_title FOR (e:NewsArticle) ON (e.title)` already exists.} {position: None} for query: 'CREATE INDEX news_title IF NOT EXISTS FOR (n:NewsArticle) ON (n.title)'
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX news_content IF NOT EXISTS FOR (e:NewsArticle) ON (e.content)` has no effect.} {description: `RANGE INDEX news_content FOR (e:NewsArticle) ON (e.content)` already exists.} {position: None} for query: 'CREATE INDEX news_content IF NOT EXISTS FOR (n:NewsArticle) ON (n.content)'
+2025-08-16T18:17:25Z error: The deployment is failing health checks. This can happen if the application isn't responding, responds with an error, or doesn't respond in time. Health checks are sent to the / endpoint by default and must respond as soon as possible. Make sure that the / endpoint is implemented and returns a 200 status code in a timely manner. Avoid doing expensive or long running operations on the / endpoint, prefer deferring them to a different route. Check the logs for more information.
