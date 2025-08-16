@@ -16,7 +16,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 def main():
     """Start the FastAPI application for Replit deployment."""
 
-    # Set Replit-specific environment variables
+    # Set deployment mode for lightweight startup
+    os.environ.setdefault("DEPLOYMENT_MODE", "lightweight")
     os.environ.setdefault("RELOAD", "false")
     os.environ.setdefault("PORT", "8000")
 

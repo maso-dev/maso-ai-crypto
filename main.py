@@ -57,10 +57,13 @@ def get_templates():
     return _templates
 
 @app.get("/")
-async def root(request: Request):
-    """Root endpoint - Welcome page for users visiting the site"""
-    # Return static HTML immediately - no template processing for health checks
-    # This ensures Replit health checks pass instantly without any delays
+async def read_root(request: Request):
+    # Quick response for health checks
+    user_agent = request.headers.get("user-agent", "").lower()
+    if "health" in user_agent or "check" in user_agent:
+        return {"status": "healthy", "service": "masonic-ai-crypto"}
+    
+    # Return static HTML for normal users
     return HTMLResponse(
         content="""
         <html lang="en">
@@ -437,35 +440,11 @@ async def root(request: Request):
         """
     )
 
-# Replit health check endpoint (for deployment validation)
+# Ultra-lightweight health check for Replit deployment
 @app.get("/health")
-async def replit_health_check():
-    """Replit health check endpoint with basic health checks for deployment validation"""
-    try:
-        # Ultra-fast health check - minimal operations for Replit deployment
-        return {
-            "status": "healthy",
-            "service": "crypto-broker-ai",
-            "timestamp": datetime.utcnow().isoformat(),
-            "message": "Masonic AI Crypto Broker is running",
-            "web_app": True,
-            "preview_available": True,
-            "cron_schedule": "4 times per day (every 6 hours)",
-            "endpoints": {
-                "health": "/health",
-                "replit_health": "/replit-health",
-                "status": "/status-dashboard",
-            }
-        }
-        
-    except Exception as e:
-        # If health check itself fails, return unhealthy
-        return {
-            "status": "unhealthy",
-            "error": f"Health check failed: {str(e)}",
-            "timestamp": datetime.utcnow().isoformat(),
-            "service": "crypto-broker-ai"
-        }
+async def health_check():
+    """Ultra-lightweight health check for deployment validation"""
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}
 
 # Ultra-lightweight health check for Replit deployment
 @app.get("/replit-health")
@@ -565,8 +544,24 @@ def include_routers():
             print(f"⚠️ Router loading failed: {e}")
             _router_cache["routers_loaded"] = False
 
-# NO STARTUP EVENTS - Everything is lazy loaded
-# Routers will be loaded on first request, not during startup
+# Add startup event for background initialization only
+@app.on_event("startup")
+async def startup_event():
+    """Initialize background tasks without blocking startup"""
+    # Start background tasks after a delay to prevent blocking health checks
+    asyncio.create_task(delayed_startup())
+
+async def delayed_startup():
+    """Start heavy operations in background after deployment completes"""
+    await asyncio.sleep(10)  # Wait for deployment to complete first
+    try:
+        # Load routers in background
+        include_routers()
+        print("✅ Background services initialized")
+    except Exception as e:
+        print(f"⚠️ Background startup warning: {e}")
+
+# NO BLOCKING OPERATIONS during startup - Everything is lazy loaded
 
 # Basic dashboard endpoint
 @app.get("/dashboard")

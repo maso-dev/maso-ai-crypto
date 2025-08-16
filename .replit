@@ -38,3 +38,15 @@ start = ["pylsp"]
 [[ports]]
 localPort = 8000
 externalPort = 80
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 45862521
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "DEPLOYMENT_MODE=lightweight python replit_startup.py"
