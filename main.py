@@ -58,12 +58,8 @@ def get_templates():
 
 @app.get("/")
 async def read_root(request: Request):
-    # Quick response for health checks
-    user_agent = request.headers.get("user-agent", "").lower()
-    if "health" in user_agent or "check" in user_agent:
-        return {"status": "healthy", "service": "masonic-ai-crypto"}
-    
-    # Return static HTML for normal users
+    """Ultra-fast root endpoint optimized for Replit health checks"""
+    # Always return HTML immediately - no user-agent detection needed
     return HTMLResponse(
         content="""
         <html lang="en">
@@ -444,13 +440,19 @@ async def read_root(request: Request):
 @app.get("/health")
 async def health_check():
     """Ultra-lightweight health check for deployment validation"""
-    return {"status": "ok", "timestamp": datetime.now().isoformat()}
+    return {"status": "ok"}
 
-# Ultra-lightweight health check for Replit deployment
+# Ultra-lightweight health check for Replit deployment  
 @app.get("/replit-health")
 async def ultra_lightweight_health_check():
     """Ultra-lightweight health check - returns immediately for Replit deployment"""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "healthy"}
+
+# Deployment-specific health endpoint (no async operations)
+@app.get("/deploy-health")
+def sync_health_check():
+    """Synchronous health check - fastest possible response for deployment"""
+    return {"status": "ok", "service": "masonic-ai"}
 
 # Custom static files handling for Replit deployment
 @app.get("/static/{path:path}")
@@ -553,7 +555,7 @@ async def startup_event():
 
 async def delayed_startup():
     """Start heavy operations in background after deployment completes"""
-    await asyncio.sleep(10)  # Wait for deployment to complete first
+    await asyncio.sleep(2)  # Reduced delay for faster health checks
     try:
         # Load routers in background
         include_routers()
